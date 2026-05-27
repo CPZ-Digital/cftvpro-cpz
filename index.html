@@ -6,11 +6,6 @@
 <title>CPZ Orçamento Inteligente</title>
 <style>
 
-/* ============================================================
-   CONFIGURAÇÃO DA FONTE DO GOOGLE SHEETS
-   Para trocar a fonte do banco de dados, edite a URL abaixo
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
 :root {
@@ -50,7 +45,6 @@ body {
     box-shadow: 0 18px 45px rgba(0,0,0,0.35);
 }
 
-/* ── TOPO ── */
 .topo {
     display: flex;
     align-items: center;
@@ -67,8 +61,6 @@ body {
     box-shadow: 0 8px 18px rgba(10,132,255,0.22);
 }
 
-
-/* ── LABELS E SEÇÕES ── */
 .container > label,
 .linha-dupla label,
 .secao-titulo {
@@ -80,7 +72,6 @@ body {
     margin-bottom: 8px;
 }
 
-/* ── INPUTS ── */
 input[type="number"], select {
     width: 100%;
     min-height: 44px;
@@ -97,7 +88,6 @@ input[type="number"]:focus, select:focus {
 }
 select { background: #f4f7fb; color: #12151a; min-width: 0; }
 
-/* ── TIPO DO PROJETO ── */
 .opcoes-projeto {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -122,25 +112,6 @@ select { background: #f4f7fb; color: #12151a; min-width: 0; }
     background: var(--blue-dim);
 }
 
-/* ── APOIO TÉCNICO ── */
-.opcao-checkbox {
-    display: flex; align-items: center; gap: 10px;
-    margin-top: 12px;
-    background: var(--item-bg);
-    padding: 12px; border-radius: 8px;
-    cursor: pointer;
-    border: 1px solid var(--border2);
-}
-.opcao-checkbox input {
-    width: 18px; height: 18px;
-    accent-color: var(--blue);
-}
-.opcao-checkbox:has(input:checked) {
-    border-color: var(--blue);
-    background: var(--blue-dim);
-}
-
-/* ── SEÇÃO ── */
 .secao {
     margin-top: 20px;
     padding-top: 18px;
@@ -148,7 +119,6 @@ select { background: #f4f7fb; color: #12151a; min-width: 0; }
 }
 .secao-titulo { margin-top: 0; }
 
-/* ── PRODUTOS ── */
 .produtos-grid { display: grid; gap: 10px; }
 .produto-linha {
     display: grid;
@@ -156,7 +126,6 @@ select { background: #f4f7fb; color: #12151a; min-width: 0; }
     gap: 10px; align-items: center;
 }
 .produtos-cabecalho { color: #aaa; font-size: 13px; }
-.produto-linha label { color: #ddd; }
 .produto-numero {
     display: flex; align-items: center; justify-content: center;
     width: 34px; height: 34px;
@@ -172,7 +141,6 @@ select { background: #f4f7fb; color: #12151a; min-width: 0; }
 }
 .botao-remover:hover { background: #7f1d1d; color: white; }
 
-/* ── TOTAL CÂMERAS ── */
 .linha-total-cameras {
     display: flex; align-items: center;
     justify-content: space-between;
@@ -195,13 +163,11 @@ select { background: #f4f7fb; color: #12151a; min-width: 0; }
 .campo-automatico.nivel-medio   { background: var(--warn); }
 .campo-automatico.nivel-dificil { background: var(--danger); }
 
-/* ── LINHA DUPLA ── */
 .linha-dupla {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 10px; margin-top: 6px;
 }
 
-/* ── BOTÕES ── */
 button {
     width: 100%; min-height: 44px;
     padding: 12px; margin-top: 16px;
@@ -214,7 +180,6 @@ button {
 button:hover { filter: brightness(1.08); }
 .botao-adicionar { margin-top: 12px; background: #16803a; }
 
-/* ── RESULTADO ── */
 .resultado {
     margin-top: 18px;
     background: var(--blue); color: white;
@@ -235,7 +200,6 @@ button:hover { filter: brightness(1.08); }
 .info-linha:last-child { border-bottom: none; padding-bottom: 0; }
 .botao-pagamento { background: #f4f7fb; color: #151922; margin-top: 12px; }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 420px) {
     body { padding: 10px; }
     .container { padding: 14px; }
@@ -249,7 +213,6 @@ button:hover { filter: brightness(1.08); }
 
 <div class="container">
 
-    <!-- TOPO -->
     <div class="topo">
         <div>
             <h2>Orçamento rápido</h2>
@@ -257,10 +220,7 @@ button:hover { filter: brightness(1.08); }
         </div>
         <img class="logo-empresa" src="cpz-logo.png" alt="CPZ Digital">
     </div>
-        <div class="db-texto" id="dbTexto">Aguardando banco de dados...</div>
-    </div>
 
-    <!-- TIPO DO PROJETO -->
     <label>Tipo do Projeto</label>
     <div class="opcoes-projeto">
         <label class="opcao-projeto">
@@ -283,13 +243,11 @@ button:hover { filter: brightness(1.08); }
         </label>
     </div>
 
-    <!-- TOTAL DE CÂMERAS -->
     <div class="linha-total-cameras">
         <span>Total de câmeras</span>
         <span id="totalCameras" class="campo-automatico">0</span>
     </div>
 
-    <!-- LISTA DE PRODUTOS -->
     <div class="secao">
         <label class="secao-titulo">Itens do projeto</label>
 
@@ -307,7 +265,6 @@ button:hover { filter: brightness(1.08); }
         </button>
     </div>
 
-    <!-- CAMPOS EXTRAS -->
     <label>Infraestrutura (R$)</label>
     <input type="number" id="infra" value="36.97" min="0" step="0.01">
 
@@ -322,7 +279,6 @@ button:hover { filter: brightness(1.08); }
         </div>
     </div>
 
-    <!-- RESULTADO -->
     <div class="resultado" id="resultado">
         <span>Valor final do projeto</span>
         R$ 0,00
@@ -337,9 +293,15 @@ button:hover { filter: brightness(1.08); }
 </div>
 
 <script>
-/* ============================================================
-   UTILITÁRIOS
-   ============================================================ */
+
+const SHEETS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQg5zxUiq6B03q8unGatN0ATJz1aLR89j34Xe3Z0-a8DFQyh3k-HpZsMngRxVTyrK9quopeBKCHTGlw/pub?gid=1778121456&single=true&output=csv";
+
+let produtos = [];
+
+const ordemCategorias = [
+    "Câmeras","Gravadores","Armazenamento","Cabos",
+    "Infraestrutura","Rede","Energia","Automação","Acessórios"
+];
 
 function formatarMoeda(valor) {
     return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -348,8 +310,6 @@ function formatarMoeda(valor) {
 function simplificarNome(nome) {
     return nome.trim().replace(/\s+/g, " ")
         .replace(/CAMERA/gi, "Câmera")
-        .replace(/VÍDEO/gi, "vídeo")
-        .replace(/ANALÓGICA/gi, "analógica")
         .replace(/ANALOGICA/gi, "analógica")
         .replace(/BRANCA/gi, "branca")
         .replace(/PRETA/gi, "preta")
@@ -380,26 +340,15 @@ function simplificarNome(nome) {
         .replace(/\s*-\s*/g, " - ");
 }
 
-/* ============================================================
-   BANCO DE DADOS — estado global
-   ============================================================ */
-
-let produtos = [];   // [{codigo, nome, valor}]
-
-const ordemCategorias = [
-    "Câmeras", "Gravadores", "Armazenamento", "Cabos",
-    "Infraestrutura", "Rede", "Energia", "Automação", "Acessórios"
-];
-
 function categoriaProduto(codigo) {
-    if (codigo.startsWith("CAM-"))                           return "Câmeras";
-    if (codigo.startsWith("DVR") || codigo.startsWith("NVR")) return "Gravadores";
-    if (codigo.startsWith("ARM-"))                           return "Armazenamento";
-    if (codigo.startsWith("CAB-"))                           return "Cabos";
-    if (codigo.startsWith("INF-"))                           return "Infraestrutura";
+    if (codigo.startsWith("CAM-"))                              return "Câmeras";
+    if (codigo.startsWith("DVR") || codigo.startsWith("NVR"))  return "Gravadores";
+    if (codigo.startsWith("ARM-"))                             return "Armazenamento";
+    if (codigo.startsWith("CAB-"))                             return "Cabos";
+    if (codigo.startsWith("INF-"))                             return "Infraestrutura";
     if (codigo.startsWith("SW")  || codigo.startsWith("RED-")) return "Rede";
-    if (codigo.startsWith("ENG-"))                           return "Energia";
-    if (codigo.startsWith("AUT-"))                           return "Automação";
+    if (codigo.startsWith("ENG-"))                             return "Energia";
+    if (codigo.startsWith("AUT-"))                             return "Automação";
     return "Acessórios";
 }
 
@@ -408,202 +357,58 @@ function pegarValorProduto(codigo) {
     return p ? p.valor : 0;
 }
 
-/* ============================================================
-   PARSER CSV
-   Suporta vírgulas dentro de aspas, separador ; ou ,
-   ============================================================ */
-
 function parseCsv(texto) {
     const linhas = texto.trim().split(/\r?\n/);
     if (linhas.length < 2) return [];
-
-    // Detectar separador pela primeira linha
     const sep = linhas[0].includes(";") ? ";" : ",";
-
-    // Pular cabeçalho
     const resultado = [];
     for (let i = 1; i < linhas.length; i++) {
         const linha = linhas[i].trim();
         if (!linha) continue;
-
-        // Separar campos respeitando aspas
         const campos = [];
-        let atual = "";
-        let dentroAspas = false;
+        let atual = "", dentroAspas = false;
         for (let c = 0; c < linha.length; c++) {
-            if (linha[c] === '"') {
-                dentroAspas = !dentroAspas;
-            } else if (linha[c] === sep && !dentroAspas) {
-                campos.push(atual.trim());
-                atual = "";
-            } else {
-                atual += linha[c];
-            }
+            if (linha[c] === '"') { dentroAspas = !dentroAspas; }
+            else if (linha[c] === sep && !dentroAspas) { campos.push(atual.trim()); atual = ""; }
+            else { atual += linha[c]; }
         }
         campos.push(atual.trim());
-
         if (campos.length < 3) continue;
-
         const codigo = campos[0].replace(/^"|"$/g, "").trim();
         const nome   = campos[1].replace(/^"|"$/g, "").trim();
         const valor  = parseFloat(campos[2].replace(/^"|"$/g, "").replace(",", ".").trim());
-
         if (!codigo || !nome || isNaN(valor)) continue;
-
-        resultado.push({
-            codigo,
-            nome: simplificarNome(nome),
-            valor
-        });
+        resultado.push({ codigo, nome: simplificarNome(nome), valor });
     }
     return resultado;
 }
 
-/* ============================================================
-   ATUALIZAR ESTADO DO BANCO
-   ============================================================ */
-
-function setDbStatus() {}
-
-function carregarProdutos(lista) {
-    produtos = lista;
-    // Recarregar todos os selects existentes
-    document.querySelectorAll(".produto-select").forEach(sel => {
-        const valorAtual = sel.value;
-        preencherSelectProduto(sel, valorAtual);
-    });
-    calcular();
-}
-
-/* ============================================================
-   CARREGAR DO GOOGLE SHEETS
-   ============================================================ */
-
-async function carregarDoSheets() {
-    const url = document.getElementById("inputUrl") 
-        ? document.getElementById("inputUrl").value.trim() 
-        : "";
-    const urlFinal = url || "https://docs.google.com/spreadsheets/d/e/2PACX-1vQg5zxUiq6B03q8unGatN0ATJz1aLR89j34Xe3Z0-a8DFQyh3k-HpZsMngRxVTyrK9quopeBKCHTGlw/pub?gid=1778121456&single=true&output=csv";
-
-    setDbStatus("", "Carregando do Google Sheets...");
-
+async function carregarBanco() {
     try {
-        const resp = await fetch(urlFinal);
+        const resp = await fetch(SHEETS_URL);
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         const texto = await resp.text();
         const lista = parseCsv(texto);
-
-        if (lista.length === 0) {
-            throw new Error("Nenhum produto encontrado. Verifique o formato da planilha.");
-        }
-
-        // Salvar URL para uso futuro
-        localStorage.setItem("cpz_sheets_url", url);
-
-        carregarProdutos(lista);
-        setDbStatus("ok", `<strong>Google Sheets</strong> — ${lista.length} produtos carregados`);
-        
-    } catch (e) {
-        setDbStatus("erro", "Erro ao carregar: " + e.message);
+        if (lista.length === 0) throw new Error("Planilha vazia");
+        produtos = lista;
+        document.querySelectorAll(".produto-select").forEach(sel => {
+            const v = sel.value;
+            preencherSelectProduto(sel, v);
+        });
+        calcular();
+    } catch(e) {
+        console.error("Erro ao carregar banco:", e.message);
     }
 }
-
-/* ============================================================
-   IMPORTAR CSV LOCAL
-   ============================================================ */
-
-function importarCsvLocal(event) {
-    const arquivo = event.target.files[0];
-    if (!arquivo) return;
-
-    setDbStatus("", "Lendo arquivo CSV...");
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const lista = parseCsv(e.target.result);
-            if (lista.length === 0) throw new Error("Nenhum produto encontrado.");
-
-            carregarProdutos(lista);
-            setDbStatus("local", `<strong>${arquivo.name}</strong> — ${lista.length} produtos carregados`);
-                    } catch(err) {
-            setDbStatus("erro", "Erro no arquivo: " + err.message);
-        }
-    };
-    reader.readAsText(arquivo, "UTF-8");
-}
-
-/* ============================================================
-   DADOS DE EXEMPLO (embutidos — fallback sem internet)
-   ============================================================ */
-
-const PRODUTOS_EXEMPLO = [
-    ["CAM-IP-001","CAMERA BULLET - IP VIPC 1230 B G2 (FULL HD)",237.20],
-    ["CAM-IP-002","CAMERA DOME - IP VIPC 1230 D G2 (FULL HD)",237.20],
-    ["CAM-AN-001","CAMERA BULLET - ANALOGICA VHL 1120 B G2 (720P)",89.52],
-    ["CAM-AN-002","CAMERA DOME - ANALOGICA VHL 1120 B G2 (720P)",87.22],
-    ["CAM-WF-001","CAMERA WI-FI IMX C - BRANCA",199.92],
-    ["CAM-WF-002","CAMERA WI-FI IMX C - PRETA",199.24],
-    ["CAM-WF-003","CAMERA WI-FI IMX C c/MICROSD 32GB - BRANCA",330.35],
-    ["CAM-WF-007","CAMERA SMART WI-FI/BATERIA IM8",419.90],
-    ["INF-CX-001","VBOX 1000 Mini - CAIXA DE PASSAGEM P - BRANCA",5.18],
-    ["INF-CX-002","VBOX 1100 - CAIXA DE PASSAGEM M - BRANCA",7.59],
-    ["INF-RK-001","MINI RACK - 3U 570MM MRD 357",557.97],
-    ["INF-RK-002","MINI RACK - 5U 570MM MRD 557",641.34],
-    ["CAB-HD-001","CABO HDMI 2.0 - 1,5M",10.93],
-    ["CAB-HD-003","CABO HDMI 2.0 - 3M",16.85],
-    ["CAB-CFTV-001","CABO CFTV CONDUTTI 305M",199.00],
-    ["CAB-CFTV-002","CABO CFTV 4PX24 305M MULTI CAM MC8CBR",236.00],
-    ["SW-001","SWITCH NAO GERENCIAVEL 5 PORTAS 1000MBPS S1105G",87.99],
-    ["SW-004","SWITCH NAO GERENCIAVEL 10 PORTAS 1000MBPS S1110G-PA",672.90],
-    ["NVR-004-001","NVD 1404 - s/HD - 4 CANAIS",434.00],
-    ["NVR-008-001","NVD 1408 - s/HD - 8 CANAIS",590.98],
-    ["NVR-008-002","NVD 1408 - c/HD 2TB - 8 CANAIS",1493.98],
-    ["NVR-016-001","NVD 1416 - s/HD - 16 CANAIS",1117.32],
-    ["DVR-004-001","MHDX 1304 - s/HD - 4 CANAIS",426.74],
-    ["DVR-008-001","MHDX 1308 - s/HD - 8 CANAIS",633.97],
-    ["DVR-016-001","MHDX 1316 - s/HD - 16 CANAIS",856.99],
-    ["ARM-HD-001","HD 1TB - WD11PURZ",1145.75],
-    ["ARM-HD-002","HD 2TB - WD23PURZ",1412.26],
-    ["ARM-HD-004","HD 1TB - ML",502.41],
-    ["ARM-SD-001","CARTAO MICROSD 32GB",199.87],
-    ["ENG-NB-001","NOBREAK ATTIV 600VA-BIVOLT",426.15],
-    ["ENG-FNT-001","CONVERSOR AUTOMATICO AC/DC 12,8V 2A EF 1202",54.85],
-    ["ENG-FNT-002","CONVERSOR AUTOMATICO AC/DC 12,8V 5A EF 1205+",97.07],
-    ["ACE-BAL-001","VB 501 P G2 (1 PAR) - BALUN COM BORNE DE PARAFUSO - ANALOGICO",20.50],
-    ["ACE-CON-001","CONEX 1000 P4 MACHO - PACOTE COM 10 UNIDADES",19.62],
-    ["AUT-INT-001","INTERRUPTOR SMART WI-FI TOUCH BRANCO EWS 1004",152.80],
-    ["AUT-INT-005","INTERRUPTOR SMART WI-FI TOUCH 2 TECLAS BRANCO EWS 1002",105.41],
-    ["AUT-INT-009","INTERRUPTOR SMART WI-FI TOUCH BRANCO EWS 1001",97.01],
-    ["AUT-INT-011","INTERRUPTOR SMART WI-FI TOUCH DIMMER BRANCO EWS 1101",137.51],
-    ["RED-RAD-001","KIT ROTEADOR DIGITAL S/FIO 5GHZ WOM 5A MIMO G2",943.65],
-];
-
-function carregarExemplo() {
-    const lista = PRODUTOS_EXEMPLO.map(i => ({
-        codigo: i[0],
-        nome: simplificarNome(i[1]),
-        valor: i[2]
-    }));
-    carregarProdutos(lista);
-    setDbStatus("local", `<strong>Dados de exemplo</strong> — ${lista.length} produtos (sem internet)`);
-    }
-
-/* ============================================================
-   SELECTS DE PRODUTO
-   ============================================================ */
 
 function preencherSelectProduto(sel, valorSelecionado) {
     sel.innerHTML = "";
     sel.add(new Option("Selecione um produto", ""));
-
     ordemCategorias.forEach(cat => {
         const grupo = produtos.filter(p => categoriaProduto(p.codigo) === cat);
         if (grupo.length === 0) return;
-
         const optgroup = document.createElement("optgroup");
         optgroup.label = cat;
-
         grupo.forEach(p => {
             const texto = `${p.codigo} - ${p.nome} - ${formatarMoeda(p.valor)}`;
             const opt = new Option(texto, p.codigo);
@@ -611,97 +416,76 @@ function preencherSelectProduto(sel, valorSelecionado) {
             opt.dataset.nome = p.nome;
             optgroup.appendChild(opt);
         });
-
         sel.appendChild(optgroup);
     });
-
     sel.value = valorSelecionado || "";
-    esconderCodigoProdutoSelecionado(sel);
+    esconderCodigo(sel);
 }
 
-function mostrarProdutosComCodigo(sel) {
+function mostrarCodigo(sel) {
     Array.from(sel.options).forEach(opt => {
         if (opt.dataset.completo) opt.textContent = opt.dataset.completo;
     });
 }
 
-function esconderCodigoProdutoSelecionado(sel) {
+function esconderCodigo(sel) {
     const opt = sel.options[sel.selectedIndex];
     if (opt && opt.dataset.nome) opt.textContent = opt.dataset.nome;
 }
 
-/* ============================================================
-   ADICIONAR / REMOVER PRODUTOS
-   ============================================================ */
-
-let contadorProdutos = 0;
+let contador = 0;
 
 function adicionarProduto(codigo, quantidade) {
-    if (produtos.length === 0) {
-        alert("Carregue o banco de dados primeiro.");
-        return;
-    }
-
-    contadorProdutos++;
+    if (produtos.length === 0) { alert("Aguarde o banco de dados carregar."); return; }
+    contador++;
     const lista = document.getElementById("listaProdutos");
     const linha = document.createElement("div");
     linha.className = "produto-linha item-produto";
 
     const numero = document.createElement("div");
     numero.className = "produto-numero";
-    numero.textContent = contadorProdutos;
+    numero.textContent = contador;
 
     const sel = document.createElement("select");
     sel.className = "produto-select";
     preencherSelectProduto(sel, codigo);
 
     const qtd = document.createElement("input");
-    qtd.type = "number";
-    qtd.className = "produto-qtd";
-    qtd.min = "0";
-    qtd.value = quantidade || 0;
+    qtd.type = "number"; qtd.className = "produto-qtd";
+    qtd.min = "0"; qtd.value = quantidade || 0;
 
     const remover = document.createElement("button");
-    remover.type = "button";
-    remover.className = "botao-remover";
-    remover.innerHTML = "×";
-    remover.title = "Remover item";
+    remover.type = "button"; remover.className = "botao-remover";
+    remover.innerHTML = "×"; remover.title = "Remover item";
 
-    sel.addEventListener("focus",    () => mostrarProdutosComCodigo(sel));
-    sel.addEventListener("mousedown", () => mostrarProdutosComCodigo(sel));
-    sel.addEventListener("keydown",   () => mostrarProdutosComCodigo(sel));
-    sel.addEventListener("change",    () => { calcular(); setTimeout(() => esconderCodigoProdutoSelecionado(sel), 80); });
-    sel.addEventListener("blur",      () => esconderCodigoProdutoSelecionado(sel));
+    sel.addEventListener("focus",     () => mostrarCodigo(sel));
+    sel.addEventListener("mousedown", () => mostrarCodigo(sel));
+    sel.addEventListener("keydown",   () => mostrarCodigo(sel));
+    sel.addEventListener("change",    () => { calcular(); setTimeout(() => esconderCodigo(sel), 80); });
+    sel.addEventListener("blur",      () => esconderCodigo(sel));
     qtd.addEventListener("input", calcular);
-    remover.addEventListener("click", () => { linha.remove(); renumerarProdutos(); calcular(); });
+    remover.addEventListener("click", () => { linha.remove(); renumerar(); calcular(); });
 
     linha.appendChild(numero);
     linha.appendChild(sel);
     linha.appendChild(qtd);
     linha.appendChild(remover);
     lista.appendChild(linha);
-
-    renumerarProdutos();
+    renumerar();
     calcular();
 }
 
-function renumerarProdutos() {
+function renumerar() {
     document.querySelectorAll(".item-produto .produto-numero").forEach((n, i) => {
         n.textContent = i + 1;
     });
 }
 
-/* ============================================================
-   CÁLCULO
-   ============================================================ */
-
 function calcular() {
     const tipoEl = document.querySelector('input[name="tipo"]:checked');
     const tipo = tipoEl ? tipoEl.value : "analogica";
 
-    let qtdCameras = 0;
-    let totalProdutos = 0;
-
+    let qtdCameras = 0, totalProdutos = 0;
     document.querySelectorAll(".item-produto").forEach(linha => {
         const sel = linha.querySelector(".produto-select");
         const qtd = Number(linha.querySelector(".produto-qtd").value) || 0;
@@ -710,36 +494,28 @@ function calcular() {
     });
 
     document.getElementById("totalCameras").textContent = qtdCameras;
-
-    // Nível
-    let nivel = "facil";
-    if (qtdCameras >= 5 && qtdCameras <= 8) nivel = "medio";
-    if (qtdCameras >= 9) nivel = "dificil";
+    let nivel = qtdCameras >= 9 ? "dificil" : qtdCameras >= 5 ? "medio" : "facil";
     document.getElementById("totalCameras").className = "campo-automatico nivel-" + nivel;
 
-    // Multiplicadores
     const tabela = {
-        analogica: { facil: 1.6, medio: 1.7, dificil: 1.7 },
-        ip:        { facil: 1.7, medio: 1.9, dificil: 2.0 },
-        wifi:      { facil: 2.0, medio: 2.1, dificil: 2.2 },
-        automacao: { facil: 2.2, medio: 2.4, dificil: 2.7 },
-        sensores:  { facil: 2.0, medio: 2.2, dificil: 2.3 },
+        analogica: { facil:1.6, medio:1.7, dificil:1.7 },
+        ip:        { facil:1.7, medio:1.9, dificil:2.0 },
+        wifi:      { facil:2.0, medio:2.1, dificil:2.2 },
+        automacao: { facil:2.2, medio:2.4, dificil:2.7 },
+        sensores:  { facil:2.0, medio:2.2, dificil:2.3 },
     };
-    const multiplicador = (tabela[tipo] || tabela.analogica)[nivel];
+    const mult = (tabela[tipo] || tabela.analogica)[nivel];
 
     const infra        = Number(document.getElementById("infra").value) || 0;
     const diasTrabalho = Number(document.getElementById("diasTrabalho").value) || 0;
     const diasDiarista = Number(document.getElementById("diasDiarista").value) || 0;
     const usarSocio    = document.getElementById("usarSocio").checked;
 
-    const custoDeslocamento = 50 * diasTrabalho;
-    const totalDiarias      = diasTrabalho * 500 * (usarSocio ? 2 : 1);
-    const totalDiarista     = diasDiarista * 120;
-    const despesas          = custoDeslocamento + infra + totalDiarias + totalDiarista;
-
-    const valorFinal = Math.round(
-        (totalProdutos * multiplicador + despesas) / 50
-    ) * 50;
+    const deslocamento = 50 * diasTrabalho;
+    const diarias      = diasTrabalho * 500 * (usarSocio ? 2 : 1);
+    const diarista     = diasDiarista * 120;
+    const despesas     = deslocamento + infra + diarias + diarista;
+    const valorFinal   = Math.round((totalProdutos * mult + despesas) / 50) * 50;
 
     document.getElementById("resultado").innerHTML =
         `<span>Valor final do projeto</span>${formatarMoeda(valorFinal)}`;
@@ -761,11 +537,6 @@ function abrirPagamentos() {
     alert("Próxima etapa: formas de pagamento.");
 }
 
-/* ============================================================
-   EVENTOS GLOBAIS
-   ============================================================ */
-
-// Checkboxes de tipo funcionam como radio
 document.querySelectorAll('input[name="tipo"]').forEach(cb => {
     cb.addEventListener("change", function() {
         document.querySelectorAll('input[name="tipo"]').forEach(o => o.checked = false);
@@ -773,19 +544,10 @@ document.querySelectorAll('input[name="tipo"]').forEach(cb => {
         calcular();
     });
 });
-
 document.querySelectorAll('input[type="number"]').forEach(c => c.addEventListener("input", calcular));
 document.getElementById("usarSocio").addEventListener("change", calcular);
 
-/* ============================================================
-   INICIALIZAÇÃO
-   Tenta restaurar URL salva; caso contrário aguarda o usuário
-   ============================================================ */
-
-(async function init() {
-    setDbStatus("", "Carregando banco de dados...");
-    await carregarDoSheets();
-})();
+carregarBanco();
 
 </script>
 </body>
