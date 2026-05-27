@@ -430,12 +430,9 @@ function parseCsv(texto, temCodigo) {
 
 // ── CARREGAR BANCO ──
 async function carregarBanco() {
+    // Carrega produtos
     try {
-        const [rProd, rInfra] = await Promise.all([
-            fetch(URL_PRODUTOS),
-            fetch(URL_INFRA)
-        ]);
-
+        const rProd = await fetch(URL_PRODUTOS);
         if (rProd.ok) {
             const lista = parseCsv(await rProd.text(), true);
             if (lista.length > 0) {
@@ -445,21 +442,29 @@ async function carregarBanco() {
                 });
             }
         }
-
-        if (rInfra.ok) {
-            const lista = parseCsv(await rInfra.text(), false);
-            if (lista.length > 0) {
-                itensInfra = lista;
-                document.querySelectorAll(".infra-select").forEach(sel => {
-                    preencherSelectInfra(sel, sel.value);
-                });
-            }
-        }
-
-        calcular();
     } catch(e) {
-        console.error("Erro ao carregar banco:", e.message);
+        console.error("Erro ao carregar produtos:", e.message);
     }
+
+    // Carrega infra (só tenta se a URL foi configurada)
+    if (!URL_INFRA.includes("SUBSTITUA")) {
+        try {
+            const rInfra = await fetch(URL_INFRA);
+            if (rInfra.ok) {
+                const lista = parseCsv(await rInfra.text(), false);
+                if (lista.length > 0) {
+                    itensInfra = lista;
+                    document.querySelectorAll(".infra-select").forEach(sel => {
+                        preencherSelectInfra(sel, sel.value);
+                    });
+                }
+            }
+        } catch(e) {
+            console.error("Erro ao carregar infra:", e.message);
+        }
+    }
+
+    calcular();
 }
 
 // ── SELECTS DE PRODUTO ──
