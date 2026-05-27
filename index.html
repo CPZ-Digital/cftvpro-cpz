@@ -666,7 +666,7 @@ function abrirPagamentos() {
 
 // ── EVENTOS ──
 document.querySelectorAll('input[name="tipo"]').forEach(cb => {
-    cb.addEventListener("change", function() {
+    cb.addEventListener("click", function() {
         document.querySelectorAll('input[name="tipo"]').forEach(o => o.checked = false);
         this.checked = true;
         calcular();
