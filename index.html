@@ -72,7 +72,7 @@ body {
     margin-bottom: 8px;
 }
 
-input[type="number"], select {
+input[type="number"] {
     width: 100%;
     min-height: 44px;
     padding: 11px 12px;
@@ -81,13 +81,99 @@ input[type="number"], select {
     font-size: 15px;
     outline: none;
     font-family: 'DM Sans', Arial, sans-serif;
+    background: var(--item-bg);
+    color: var(--text);
 }
-input[type="number"]:focus, select:focus {
+input[type="number"]:focus {
     border-color: var(--blue);
     box-shadow: 0 0 0 3px rgba(10,132,255,0.2);
 }
-select { background: #f4f7fb; color: #12151a; min-width: 0; }
 
+/* ── BUSCA CUSTOMIZADA ── */
+.busca-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+.busca-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 12px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    font-family: 'DM Sans', Arial, sans-serif;
+    background: var(--item-bg);
+    color: var(--text);
+    cursor: pointer;
+}
+.busca-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(10,132,255,0.2);
+    cursor: text;
+}
+.busca-input::placeholder { color: var(--muted); font-size: 13px; }
+.busca-input.selecionado { color: var(--text); }
+
+.busca-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #1e2229;
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.busca-dropdown.aberto { display: block; }
+
+.busca-grupo-label {
+    padding: 6px 12px 3px;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #181b20;
+    position: sticky;
+    top: 0;
+}
+.busca-opcao {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--label);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.3;
+}
+.busca-opcao:last-child { border-bottom: none; }
+.busca-opcao:hover, .busca-opcao.ativo {
+    background: var(--blue-dim);
+    color: white;
+}
+.busca-opcao .opcao-codigo {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+}
+.busca-opcao .opcao-preco {
+    font-size: 11px;
+    color: #4ade80;
+    float: right;
+    margin-left: 8px;
+}
+.busca-vazio {
+    padding: 14px 12px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+/* ── OPCOES PROJETO ── */
 .opcoes-projeto {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -121,7 +207,6 @@ select { background: #f4f7fb; color: #12151a; min-width: 0; }
 
 .produtos-grid { display: grid; gap: 10px; }
 
-/* grade com 3 colunas para infraestrutura (sem número) */
 .produto-linha {
     display: grid;
     grid-template-columns: 34px minmax(0,1fr) 72px 36px;
@@ -146,7 +231,7 @@ select { background: #f4f7fb; color: #12151a; min-width: 0; }
     background: #2b3038; color: #cfd6e3;
     font-size: 20px; line-height: 1;
 }
-.botao-remover:hover { background: #7f1d1d; color: white; }
+.botao-remover:hover { background: #7f1d1d; color: white; filter: none; }
 
 .linha-total-cameras {
     display: flex; align-items: center;
@@ -186,6 +271,9 @@ button {
 }
 button:hover { filter: brightness(1.08); }
 .botao-adicionar { margin-top: 12px; background: #16803a; }
+.botao-pagamento { background: #f4f7fb; color: #151922; margin-top: 12px; }
+.botao-limpar { background: transparent; color: var(--muted); border: 1px solid var(--border2); margin-top: 8px; font-size: 14px; }
+.botao-limpar:hover { border-color: #ef4444; color: #ef4444; filter: none; }
 
 .resultado {
     margin-top: 18px;
@@ -205,7 +293,6 @@ button:hover { filter: brightness(1.08); }
     border-bottom: 1px solid #2f2f2f; padding-bottom: 6px;
 }
 .info-linha:last-child { border-bottom: none; padding-bottom: 0; }
-.botao-pagamento { background: #f4f7fb; color: #151922; margin-top: 12px; }
 
 @media (max-width: 420px) {
     body { padding: 10px; }
@@ -259,36 +346,21 @@ button:hover { filter: brightness(1.08); }
     <!-- PRODUTOS -->
     <div class="secao">
         <label class="secao-titulo">Itens do projeto</label>
-
         <div class="produto-linha produtos-cabecalho">
-            <span>Nº</span>
-            <span>Produto</span>
-            <span>Qtd.</span>
-            <span></span>
+            <span>Nº</span><span>Produto</span><span>Qtd.</span><span></span>
         </div>
-
         <div class="produtos-grid" id="listaProdutos"></div>
-
-        <button type="button" class="botao-adicionar" onclick="adicionarProduto()">
-            + Adicionar item
-        </button>
+        <button type="button" class="botao-adicionar" onclick="adicionarProduto()">+ Adicionar item</button>
     </div>
 
     <!-- INFRAESTRUTURA -->
     <div class="secao">
         <label class="secao-titulo">Infraestrutura</label>
-
         <div class="infra-linha produtos-cabecalho">
-            <span>Item</span>
-            <span>Qtd.</span>
-            <span></span>
+            <span>Item</span><span>Qtd.</span><span></span>
         </div>
-
         <div class="produtos-grid" id="listaInfra"></div>
-
-        <button type="button" class="botao-adicionar" onclick="adicionarInfra()">
-            + Adicionar item
-        </button>
+        <button type="button" class="botao-adicionar" onclick="adicionarInfra()">+ Adicionar item</button>
     </div>
 
     <div class="linha-dupla">
@@ -303,71 +375,53 @@ button:hover { filter: brightness(1.08); }
     </div>
 
     <div class="resultado" id="resultado">
-        <span>Valor final do projeto</span>
-        R$ 0,00
+        <span>Valor final do projeto</span>R$ 0,00
     </div>
 
     <div class="info" id="info"></div>
 
-    <button type="button" class="botao-pagamento" onclick="abrirPagamentos()">
-        Ver formas de pagamento
-    </button>
+    <button type="button" class="botao-pagamento" onclick="abrirPagamentos()">Ver formas de pagamento</button>
+    <button type="button" class="botao-limpar" onclick="limparOrcamento()">🗑 Novo orçamento</button>
 
 </div>
 
 <script>
 
-// ============================================================
-// URLS DAS ABAS DA PLANILHA
-// Produtos:       aba principal (gid=1778121456)
-// Infraestrutura: troque pelo gid da sua nova aba
-// ============================================================
 const URL_PRODUTOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQg5zxUiq6B03q8unGatN0ATJz1aLR89j34Xe3Z0-a8DFQyh3k-HpZsMngRxVTyrK9quopeBKCHTGlw/pub?gid=1778121456&single=true&output=csv";
 const URL_INFRA    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQg5zxUiq6B03q8unGatN0ATJz1aLR89j34Xe3Z0-a8DFQyh3k-HpZsMngRxVTyrK9quopeBKCHTGlw/pub?gid=1725487429&single=true&output=csv";
 
-let produtos = [];
-let itensInfra = [];  // [{nome, valor}]
+let produtos   = [];
+let itensInfra = [];
 
 const ordemCategorias = [
     "Câmeras","Gravadores","Armazenamento","Cabos",
     "Infraestrutura","Rede","Energia","Automação","Acessórios"
 ];
 
-function formatarMoeda(valor) {
-    return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+function formatarMoeda(v) {
+    return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 function simplificarNome(nome) {
     return nome.trim().replace(/\s+/g, " ")
-        .replace(/CAMERA/gi, "Câmera")
-        .replace(/ANALOGICA/gi, "analógica")
-        .replace(/BRANCA/gi, "branca")
-        .replace(/PRETA/gi, "preta")
+        .replace(/CAMERA/gi, "Câmera").replace(/ANALOGICA/gi, "analógica")
+        .replace(/BRANCA/gi, "branca").replace(/PRETA/gi, "preta")
         .replace(/CAIXA DE PASSAGEM/gi, "caixa de passagem")
         .replace(/CONVERSOR AUTOMATICO/gi, "Conversor automático")
         .replace(/PROTETOR ELETRONICO/gi, "Protetor eletrônico")
         .replace(/SWITCH NAO GERENCIAVEL/gi, "Switch não gerenciável")
-        .replace(/INTERRUPTOR/gi, "Interruptor")
-        .replace(/CARTAO/gi, "Cartão")
-        .replace(/CABO/gi, "Cabo")
-        .replace(/MINI RACK/gi, "Mini rack")
-        .replace(/NOBREAK/gi, "Nobreak")
-        .replace(/CANAIS/gi, "canais")
-        .replace(/PORTAS/gi, "portas")
-        .replace(/TOMADAS/gi, "tomadas")
-        .replace(/PACOTE COM/gi, "pacote com")
-        .replace(/UNIDADES/gi, "unidades")
+        .replace(/INTERRUPTOR/gi, "Interruptor").replace(/CARTAO/gi, "Cartão")
+        .replace(/CABO/gi, "Cabo").replace(/MINI RACK/gi, "Mini rack")
+        .replace(/NOBREAK/gi, "Nobreak").replace(/CANAIS/gi, "canais")
+        .replace(/PORTAS/gi, "portas").replace(/TOMADAS/gi, "tomadas")
+        .replace(/PACOTE COM/gi, "pacote com").replace(/UNIDADES/gi, "unidades")
         .replace(/BORNE DE PARAFUSO/gi, "borne de parafuso")
-        .replace(/ALIMENTACAO/gi, "alimentação")
-        .replace(/ALIMENTAÇÃO/gi, "alimentação")
+        .replace(/ALIMENTACAO/gi, "alimentação").replace(/ALIMENTAÇÃO/gi, "alimentação")
         .replace(/p\/SEGURANCA ELETRONICA/gi, "para segurança eletrônica")
         .replace(/SEGURANCA ELETRONICA/gi, "segurança eletrônica")
-        .replace(/P\/RACK/gi, "para rack")
-        .replace(/S\/FIO/gi, "sem fio")
-        .replace(/s\/HD/g, "sem HD")
-        .replace(/c\/HD/g, "com HD")
-        .replace(/c\/MICROSD/gi, "com MicroSD")
-        .replace(/\s*-\s*/g, " - ");
+        .replace(/P\/RACK/gi, "para rack").replace(/S\/FIO/gi, "sem fio")
+        .replace(/s\/HD/g, "sem HD").replace(/c\/HD/g, "com HD")
+        .replace(/c\/MICROSD/gi, "com MicroSD").replace(/\s*-\s*/g, " - ");
 }
 
 function categoriaProduto(codigo) {
@@ -409,7 +463,6 @@ function parseCsv(texto, temCodigo) {
             else { atual += linha[c]; }
         }
         campos.push(atual.trim());
-
         if (temCodigo) {
             if (campos.length < 3) continue;
             const codigo = campos[0].replace(/^"|"$/g, "").trim();
@@ -418,10 +471,9 @@ function parseCsv(texto, temCodigo) {
             if (!codigo || !nome || isNaN(valor)) continue;
             resultado.push({ codigo, nome: simplificarNome(nome), valor });
         } else {
-            // Infra: col A=codigo, B=descricao, C=qtd, D=preco, E=preco_unit, F=link
             if (campos.length < 5) continue;
-            const nome  = campos[1].replace(/^"|"$/g, "").trim(); // coluna B
-            const valor = parseFloat(campos[4].replace(/^"|"$/g, "").replace(",", ".").replace(/[^\d.]/g, "").trim()); // coluna E
+            const nome  = campos[1].replace(/^"|"$/g, "").trim();
+            const valor = parseFloat(campos[4].replace(/^"|"$/g, "").replace(",", ".").replace(/[^\d.]/g, "").trim());
             if (!nome || isNaN(valor)) continue;
             resultado.push({ nome: simplificarNome(nome), valor });
         }
@@ -431,89 +483,220 @@ function parseCsv(texto, temCodigo) {
 
 // ── CARREGAR BANCO ──
 async function carregarBanco() {
-    // Carrega produtos
     try {
         const rProd = await fetch(URL_PRODUTOS);
         if (rProd.ok) {
             const lista = parseCsv(await rProd.text(), true);
-            if (lista.length > 0) {
-                produtos = lista;
-                document.querySelectorAll(".produto-select").forEach(sel => {
-                    preencherSelectProduto(sel, sel.value);
-                });
-            }
+            if (lista.length > 0) produtos = lista;
         }
-    } catch(e) {
-        console.error("Erro ao carregar produtos:", e.message);
-    }
+    } catch(e) { console.error("Erro produtos:", e.message); }
 
-    // Carrega infra (só tenta se a URL foi configurada)
-    if (!URL_INFRA.includes("SUBSTITUA")) {
-        try {
-            const rInfra = await fetch(URL_INFRA);
-            if (rInfra.ok) {
-                const lista = parseCsv(await rInfra.text(), false);
-                if (lista.length > 0) {
-                    itensInfra = lista;
-                    document.querySelectorAll(".infra-select").forEach(sel => {
-                        preencherSelectInfra(sel, sel.value);
-                    });
-                }
-            }
-        } catch(e) {
-            console.error("Erro ao carregar infra:", e.message);
+    try {
+        const rInfra = await fetch(URL_INFRA);
+        if (rInfra.ok) {
+            const lista = parseCsv(await rInfra.text(), false);
+            if (lista.length > 0) itensInfra = lista;
         }
-    }
-
-    calcular();
+    } catch(e) { console.error("Erro infra:", e.message); }
 }
 
-// ── SELECTS DE PRODUTO ──
-function preencherSelectProduto(sel, valorSelecionado) {
-    sel.innerHTML = "";
-    sel.add(new Option("Selecione um produto", ""));
-    ordemCategorias.forEach(cat => {
-        const grupo = produtos.filter(p => categoriaProduto(p.codigo) === cat);
-        if (grupo.length === 0) return;
-        const optgroup = document.createElement("optgroup");
-        optgroup.label = cat;
-        grupo.forEach(p => {
-            const texto = `${p.codigo} - ${p.nome} - ${formatarMoeda(p.valor)}`;
-            const opt = new Option(texto, p.codigo);
-            opt.dataset.completo = texto;
-            opt.dataset.nome = p.nome;
-            optgroup.appendChild(opt);
+// ══════════════════════════════════════════════
+// COMPONENTE DE BUSCA CUSTOMIZADO
+// ══════════════════════════════════════════════
+
+function criarBusca(opcoes, placeholder, valorInicial, onSelect) {
+    // opcoes: [{valor, label, sublabel, grupo}]
+    let valorAtual = valorInicial || "";
+    let dropAberto = false;
+    let idxAtivo   = -1;
+    let opcoesVisiveis = [];
+
+    const wrapper  = document.createElement("div");
+    wrapper.className = "busca-wrapper";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "busca-input";
+    input.placeholder = placeholder;
+    input.autocomplete = "off";
+
+    const dropdown = document.createElement("div");
+    dropdown.className = "busca-dropdown";
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(dropdown);
+
+    // Preenche com o valor inicial
+    if (valorInicial) {
+        const opt = opcoes.find(o => o.valor === valorInicial);
+        if (opt) { input.value = opt.label; input.dataset.valor = opt.valor; }
+    }
+
+    function renderDropdown(filtro) {
+        dropdown.innerHTML = "";
+        opcoesVisiveis = [];
+        idxAtivo = -1;
+
+        const termo = filtro.toLowerCase();
+        let grupoAtual = null;
+
+        opcoes.forEach(opt => {
+            const match = !termo ||
+                opt.label.toLowerCase().includes(termo) ||
+                (opt.sublabel || "").toLowerCase().includes(termo) ||
+                (opt.grupo || "").toLowerCase().includes(termo);
+            if (!match) return;
+
+            if (opt.grupo && opt.grupo !== grupoAtual) {
+                grupoAtual = opt.grupo;
+                const g = document.createElement("div");
+                g.className = "busca-grupo-label";
+                g.textContent = opt.grupo;
+                dropdown.appendChild(g);
+            }
+
+            const el = document.createElement("div");
+            el.className = "busca-opcao";
+            el.innerHTML = `
+                <span class="opcao-preco">${opt.preco || ""}</span>
+                ${opt.sublabel ? `<span class="opcao-codigo">${opt.sublabel}</span>` : ""}
+                ${opt.label}
+            `;
+            el.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                selecionar(opt);
+            });
+            dropdown.appendChild(el);
+            opcoesVisiveis.push({ el, opt });
         });
-        sel.appendChild(optgroup);
+
+        if (opcoesVisiveis.length === 0) {
+            const vazio = document.createElement("div");
+            vazio.className = "busca-vazio";
+            vazio.textContent = termo ? "Nenhum item encontrado" : "Nenhum item disponível";
+            dropdown.appendChild(vazio);
+        }
+    }
+
+    function abrirDropdown() {
+        renderDropdown(input.value === opcoes.find(o => o.valor === input.dataset.valor)?.label ? "" : input.value);
+        // Abre pra cima se o campo estiver no terço inferior da tela
+        const rect = input.getBoundingClientRect();
+        const espacoAbaixo = window.innerHeight - rect.bottom;
+        if (espacoAbaixo < 280) {
+            dropdown.style.top = "auto";
+            dropdown.style.bottom = "calc(100% + 4px)";
+        } else {
+            dropdown.style.top = "calc(100% + 4px)";
+            dropdown.style.bottom = "auto";
+        }
+        dropdown.classList.add("aberto");
+        dropAberto = true;
+    }
+
+    function fecharDropdown() {
+        dropdown.classList.remove("aberto");
+        dropAberto = false;
+        // Restaura o label do item selecionado se o campo estiver vazio ou diferente
+        if (input.dataset.valor) {
+            const opt = opcoes.find(o => o.valor === input.dataset.valor);
+            if (opt) input.value = opt.label;
+        } else {
+            input.value = "";
+        }
+    }
+
+    function selecionar(opt) {
+        valorAtual = opt.valor;
+        input.value = opt.label;
+        input.dataset.valor = opt.valor;
+        input.blur(); // fecha teclado no mobile
+        fecharDropdown();
+        onSelect(opt.valor);
+    }
+
+    input.addEventListener("focus", () => {
+        input.select();
+        abrirDropdown();
     });
-    sel.value = valorSelecionado || "";
-    esconderCodigo(sel);
+
+    input.addEventListener("input", () => {
+        input.dataset.valor = "";
+        valorAtual = "";
+        abrirDropdown();
+        renderDropdown(input.value);
+        onSelect("");
+    });
+
+    input.addEventListener("blur", () => {
+        setTimeout(fecharDropdown, 150);
+    });
+
+    input.addEventListener("keydown", (e) => {
+        if (!dropAberto) return;
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            idxAtivo = Math.min(idxAtivo + 1, opcoesVisiveis.length - 1);
+            atualizarAtivo();
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            idxAtivo = Math.max(idxAtivo - 1, 0);
+            atualizarAtivo();
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            if (idxAtivo >= 0 && opcoesVisiveis[idxAtivo]) {
+                selecionar(opcoesVisiveis[idxAtivo].opt);
+            }
+        } else if (e.key === "Escape") {
+            fecharDropdown();
+        }
+    });
+
+    function atualizarAtivo() {
+        opcoesVisiveis.forEach((o, i) => {
+            o.el.classList.toggle("ativo", i === idxAtivo);
+            if (i === idxAtivo) o.el.scrollIntoView({ block: "nearest" });
+        });
+    }
+
+    // Expõe o valor atual para leitura externa
+    wrapper.getValor = () => input.dataset.valor || "";
+    wrapper.setOpcoes = (novasOpcoes) => {
+        opcoes = novasOpcoes;
+        if (valorInicial) {
+            const opt = opcoes.find(o => o.valor === valorInicial);
+            if (opt) { input.value = opt.label; input.dataset.valor = opt.valor; }
+        }
+    };
+
+    return wrapper;
 }
 
-function mostrarCodigo(sel) {
-    Array.from(sel.options).forEach(opt => {
-        if (opt.dataset.completo) opt.textContent = opt.dataset.completo;
+// ── Converter produtos/infra para formato do componente de busca ──
+function opcoesParaProdutos() {
+    const resultado = [];
+    ordemCategorias.forEach(cat => {
+        produtos.filter(p => categoriaProduto(p.codigo) === cat).forEach(p => {
+            resultado.push({
+                valor: p.codigo,
+                label: p.nome,
+                sublabel: p.codigo,
+                grupo: cat,
+                preco: formatarMoeda(p.valor)
+            });
+        });
     });
+    return resultado;
 }
 
-function esconderCodigo(sel) {
-    const opt = sel.options[sel.selectedIndex];
-    if (opt && opt.dataset.nome) opt.textContent = opt.dataset.nome;
-}
-
-// ── SELECTS DE INFRA ──
-function preencherSelectInfra(sel, valorSelecionado) {
-    sel.innerHTML = "";
-    sel.add(new Option("Selecione um item", ""));
-    itensInfra.forEach(item => {
-        const texto = `${item.nome} - ${formatarMoeda(item.valor)}`;
-        const opt = new Option(texto, item.nome);
-        opt.dataset.completo = texto;
-        opt.dataset.nome = item.nome;
-        sel.appendChild(opt);
-    });
-    sel.value = valorSelecionado || "";
-    esconderCodigo(sel);
+function opcoesParaInfra() {
+    return itensInfra.map(i => ({
+        valor: i.nome,
+        label: i.nome,
+        sublabel: "",
+        grupo: "",
+        preco: formatarMoeda(i.valor)
+    }));
 }
 
 // ── ADICIONAR PRODUTO ──
@@ -529,9 +712,12 @@ function adicionarProduto(codigo, quantidade) {
     numero.className = "produto-numero";
     numero.textContent = contadorProd;
 
-    const sel = document.createElement("select");
-    sel.className = "produto-select";
-    preencherSelectProduto(sel, codigo);
+    const busca = criarBusca(
+        opcoesParaProdutos(),
+        "Buscar produto...",
+        codigo || "",
+        () => calcular()
+    );
 
     const qtd = document.createElement("input");
     qtd.type = "number"; qtd.className = "produto-qtd";
@@ -541,16 +727,11 @@ function adicionarProduto(codigo, quantidade) {
     remover.type = "button"; remover.className = "botao-remover";
     remover.innerHTML = "×";
 
-    sel.addEventListener("focus",     () => mostrarCodigo(sel));
-    sel.addEventListener("mousedown", () => mostrarCodigo(sel));
-    sel.addEventListener("keydown",   () => mostrarCodigo(sel));
-    sel.addEventListener("change",    () => { calcular(); setTimeout(() => esconderCodigo(sel), 80); });
-    sel.addEventListener("blur",      () => esconderCodigo(sel));
     qtd.addEventListener("input", calcular);
     remover.addEventListener("click", () => { linha.remove(); renumerarProd(); calcular(); });
 
     linha.appendChild(numero);
-    linha.appendChild(sel);
+    linha.appendChild(busca);
     linha.appendChild(qtd);
     linha.appendChild(remover);
     lista.appendChild(linha);
@@ -570,9 +751,12 @@ function adicionarInfra(nome, quantidade) {
     const linha = document.createElement("div");
     linha.className = "infra-linha item-infra";
 
-    const sel = document.createElement("select");
-    sel.className = "infra-select";
-    preencherSelectInfra(sel, nome);
+    const busca = criarBusca(
+        opcoesParaInfra(),
+        "Buscar item de infra...",
+        nome || "",
+        () => calcular()
+    );
 
     const qtd = document.createElement("input");
     qtd.type = "number"; qtd.className = "produto-qtd";
@@ -582,15 +766,10 @@ function adicionarInfra(nome, quantidade) {
     remover.type = "button"; remover.className = "botao-remover";
     remover.innerHTML = "×";
 
-    sel.addEventListener("focus",     () => mostrarCodigo(sel));
-    sel.addEventListener("mousedown", () => mostrarCodigo(sel));
-    sel.addEventListener("keydown",   () => mostrarCodigo(sel));
-    sel.addEventListener("change",    () => { calcular(); setTimeout(() => esconderCodigo(sel), 80); });
-    sel.addEventListener("blur",      () => esconderCodigo(sel));
     qtd.addEventListener("input", calcular);
     remover.addEventListener("click", () => { linha.remove(); calcular(); });
 
-    linha.appendChild(sel);
+    linha.appendChild(busca);
     linha.appendChild(qtd);
     linha.appendChild(remover);
     lista.appendChild(linha);
@@ -601,27 +780,29 @@ function adicionarInfra(nome, quantidade) {
 function calcular() {
     const tipoEl = document.querySelector('input[name="tipo"]:checked');
     const tipo = tipoEl ? tipoEl.value : "analogica";
+    const usarSocio = document.getElementById("usarSocio").checked;
 
     let qtdCameras = 0, totalProdutos = 0;
     document.querySelectorAll(".item-produto").forEach(linha => {
-        const sel = linha.querySelector(".produto-select");
+        const busca = linha.querySelector(".busca-wrapper");
+        const codigo = busca ? busca.getValor() : "";
         const qtd = Number(linha.querySelector(".produto-qtd").value) || 0;
-        if (sel.value.startsWith("CAM-")) qtdCameras += qtd;
-        totalProdutos += pegarValorProduto(sel.value) * qtd;
+        if (codigo.startsWith("CAM-")) qtdCameras += qtd;
+        totalProdutos += pegarValorProduto(codigo) * qtd;
     });
 
     let totalInfra = 0;
     document.querySelectorAll(".item-infra").forEach(linha => {
-        const sel = linha.querySelector(".infra-select");
+        const busca = linha.querySelector(".busca-wrapper");
+        const nome = busca ? busca.getValor() : "";
         const qtd = Number(linha.querySelector(".produto-qtd").value) || 0;
-        totalInfra += pegarValorInfra(sel.value) * qtd;
+        totalInfra += pegarValorInfra(nome) * qtd;
     });
 
     document.getElementById("totalCameras").textContent = qtdCameras;
     let nivel = qtdCameras >= 33 ? "dificil" : qtdCameras >= 9 ? "medio" : qtdCameras >= 1 ? "facil" : "";
     document.getElementById("totalCameras").className = "campo-automatico" + (nivel ? " nivel-" + nivel : "");
 
-    const usarSocio    = document.getElementById("usarSocio").checked;
     const tabelaSolo = {
         analogica: { facil:1.6, medio:1.7, dificil:1.7 },
         ip:        { facil:1.7, medio:1.9, dificil:2.0 },
@@ -637,11 +818,11 @@ function calcular() {
         sensores:  { facil:2.8, medio:3.0, dificil:3.2 },
     };
     const tabela = usarSocio ? tabelaSocio : tabelaSolo;
-    const mult = (tabela[tipo] || tabela.analogica)[nivel];
+    const nivelCalc = nivel || "facil";
+    const mult = (tabela[tipo] || tabela.analogica)[nivelCalc];
 
     const diasTrabalho = Number(document.getElementById("diasTrabalho").value) || 0;
     const diasDiarista = Number(document.getElementById("diasDiarista").value) || 0;
-
     const deslocamento = 50 * diasTrabalho;
     const diarias      = diasTrabalho * 500 * (usarSocio ? 2 : 1);
     const diarista     = diasDiarista * 120;
@@ -653,19 +834,83 @@ function calcular() {
 
     document.getElementById("info").innerHTML = `
         <div class="info-resumo">
-            <div class="info-linha">
-                <span>Equipamentos</span>
-                <strong>${formatarMoeda(totalProdutos)}</strong>
-            </div>
-            <div class="info-linha">
-                <span>Infraestrutura</span>
-                <strong>${formatarMoeda(totalInfra)}</strong>
-            </div>
-            <div class="info-linha">
-                <span>Serviço e despesas</span>
-                <strong>${formatarMoeda(despesas - totalInfra)}</strong>
-            </div>
+            <div class="info-linha"><span>Equipamentos</span><strong>${formatarMoeda(totalProdutos)}</strong></div>
+            <div class="info-linha"><span>Infraestrutura</span><strong>${formatarMoeda(totalInfra)}</strong></div>
+            <div class="info-linha"><span>Serviço e despesas</span><strong>${formatarMoeda(despesas - totalInfra)}</strong></div>
         </div>`;
+
+    salvarEstado();
+}
+
+// ── PERSISTÊNCIA ──
+function salvarEstado() {
+    const estado = {
+        tipo: document.querySelector('input[name="tipo"]:checked')?.value || "analogica",
+        socio: document.getElementById("usarSocio").checked,
+        diasTrabalho: document.getElementById("diasTrabalho").value,
+        diasDiarista: document.getElementById("diasDiarista").value,
+        produtos: [],
+        infra: []
+    };
+    document.querySelectorAll(".item-produto").forEach(linha => {
+        const busca = linha.querySelector(".busca-wrapper");
+        estado.produtos.push({
+            codigo: busca ? busca.getValor() : "",
+            qtd: linha.querySelector(".produto-qtd").value
+        });
+    });
+    document.querySelectorAll(".item-infra").forEach(linha => {
+        const busca = linha.querySelector(".busca-wrapper");
+        estado.infra.push({
+            nome: busca ? busca.getValor() : "",
+            qtd: linha.querySelector(".produto-qtd").value
+        });
+    });
+    localStorage.setItem("cpz_estado", JSON.stringify(estado));
+}
+
+function restaurarEstado() {
+    try {
+        const raw = localStorage.getItem("cpz_estado");
+        if (!raw) return false;
+        const estado = JSON.parse(raw);
+
+        document.querySelectorAll('input[name="tipo"]').forEach(cb => {
+            cb.checked = cb.value === estado.tipo;
+        });
+        document.getElementById("usarSocio").checked = estado.socio || false;
+        if (estado.diasTrabalho) document.getElementById("diasTrabalho").value = estado.diasTrabalho;
+        if (estado.diasDiarista) document.getElementById("diasDiarista").value = estado.diasDiarista;
+
+        if (estado.produtos && estado.produtos.length > 0) {
+            estado.produtos.forEach(p => adicionarProduto(p.codigo, p.qtd));
+        } else {
+            adicionarProduto();
+        }
+        if (estado.infra && estado.infra.length > 0) {
+            estado.infra.forEach(i => adicionarInfra(i.nome, i.qtd));
+        } else {
+            adicionarInfra();
+        }
+        return true;
+    } catch(e) {
+        console.error("Erro ao restaurar:", e);
+        return false;
+    }
+}
+
+function limparOrcamento() {
+    if (!confirm("Apagar o orçamento atual e começar do zero?")) return;
+    localStorage.removeItem("cpz_estado");
+    document.getElementById("listaProdutos").innerHTML = "";
+    document.getElementById("listaInfra").innerHTML = "";
+    document.querySelectorAll('input[name="tipo"]').forEach((cb, i) => cb.checked = i === 0);
+    document.getElementById("usarSocio").checked = false;
+    document.getElementById("diasTrabalho").value = 1;
+    document.getElementById("diasDiarista").value = 1;
+    adicionarProduto();
+    adicionarInfra();
+    calcular();
 }
 
 function abrirPagamentos() {
@@ -684,12 +929,17 @@ document.querySelectorAll('input[type="number"]').forEach(c => c.addEventListene
 document.getElementById("usarSocio").addEventListener("change", calcular);
 
 // ── INIT ──
-// Abre uma linha em branco de produto e uma de infra por padrão
-adicionarProduto();
-adicionarInfra();
+async function init() {
+    await carregarBanco();
+    const restaurado = restaurarEstado();
+    if (!restaurado) {
+        adicionarProduto();
+        adicionarInfra();
+    }
+    calcular();
+}
 
-// Carrega os dados da planilha
-carregarBanco();
+init();
 
 </script>
 </body>
