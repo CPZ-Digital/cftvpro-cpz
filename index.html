@@ -618,8 +618,8 @@ function calcular() {
     });
 
     document.getElementById("totalCameras").textContent = qtdCameras;
-    let nivel = qtdCameras >= 33 ? "dificil" : qtdCameras >= 9 ? "medio" : "facil";
-    document.getElementById("totalCameras").className = "campo-automatico nivel-" + nivel;
+    let nivel = qtdCameras >= 33 ? "dificil" : qtdCameras >= 9 ? "medio" : qtdCameras >= 1 ? "facil" : "";
+    document.getElementById("totalCameras").className = "campo-automatico" + (nivel ? " nivel-" + nivel : "");
 
     const usarSocio    = document.getElementById("usarSocio").checked;
     const tabelaSolo = {
