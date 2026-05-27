@@ -418,9 +418,10 @@ function parseCsv(texto, temCodigo) {
             if (!codigo || !nome || isNaN(valor)) continue;
             resultado.push({ codigo, nome: simplificarNome(nome), valor });
         } else {
-            if (campos.length < 2) continue;
-            const nome  = campos[0].replace(/^"|"$/g, "").trim();
-            const valor = parseFloat(campos[1].replace(/^"|"$/g, "").replace(",", ".").trim());
+            // Infra: col A=codigo, B=descricao, C=qtd, D=preco, E=preco_unit, F=link
+            if (campos.length < 5) continue;
+            const nome  = campos[1].replace(/^"|"$/g, "").trim(); // coluna B
+            const valor = parseFloat(campos[4].replace(/^"|"$/g, "").replace(",", ".").replace(/[^\d.]/g, "").trim()); // coluna E
             if (!nome || isNaN(valor)) continue;
             resultado.push({ nome: simplificarNome(nome), valor });
         }
