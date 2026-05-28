@@ -8,6 +8,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
+/* ── TEMA ESCURO (padrão) ── */
 :root {
     --bg:        #0f1115;
     --surface:   #181b20;
@@ -22,6 +23,37 @@
     --ok:        #14532d;
     --warn:      #854d0e;
     --danger:    #7f1d1d;
+    --dropdown-bg:    #1e2229;
+    --dropdown-grupo: #181b20;
+    --input-bg:       #23272f;
+    --input-color:    #ffffff;
+    --select-bg:      #23272f;
+    --select-color:   #ffffff;
+}
+
+/* ── TEMA CLARO ── */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg:        #f0f2f5;
+        --surface:   #ffffff;
+        --border:    #dde1e7;
+        --border2:   #c8cdd6;
+        --blue:      #0A84FF;
+        --blue-dim:  #dbeeff;
+        --text:      #0d1117;
+        --muted:     #6b7585;
+        --label:     #374151;
+        --item-bg:   #f4f6f9;
+        --ok:        #dcfce7;
+        --warn:      #fef9c3;
+        --danger:    #fee2e2;
+        --dropdown-bg:    #ffffff;
+        --dropdown-grupo: #f4f6f9;
+        --input-bg:       #ffffff;
+        --input-color:    #0d1117;
+        --select-bg:      #ffffff;
+        --select-color:   #0d1117;
+    }
 }
 
 * { box-sizing: border-box; }
@@ -81,8 +113,8 @@ input[type="number"] {
     font-size: 15px;
     outline: none;
     font-family: 'DM Sans', Arial, sans-serif;
-    background: var(--item-bg);
-    color: var(--text);
+    background: var(--input-bg);
+    color: var(--input-color);
 }
 input[type="number"]:focus {
     border-color: var(--blue);
@@ -104,8 +136,8 @@ input[type="number"]:focus {
     font-size: 14px;
     outline: none;
     font-family: 'DM Sans', Arial, sans-serif;
-    background: var(--item-bg);
-    color: var(--text);
+    background: var(--input-bg);
+    color: var(--input-color);
     cursor: pointer;
 }
 .busca-input:focus {
@@ -121,7 +153,7 @@ input[type="number"]:focus {
     position: absolute;
     top: calc(100% + 4px);
     left: 0; right: 0;
-    background: #1e2229;
+    background: var(--dropdown-bg);
     border: 1px solid var(--blue);
     border-radius: 8px;
     max-height: 260px;
@@ -138,14 +170,14 @@ input[type="number"]:focus {
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    background: #181b20;
+    background: var(--dropdown-grupo);
     position: sticky;
     top: 0;
 }
 .busca-opcao {
     padding: 10px 12px;
     font-size: 13px;
-    color: var(--label);
+    color: var(--text);
     cursor: pointer;
     border-bottom: 1px solid var(--border);
     line-height: 1.3;
@@ -201,7 +233,7 @@ input[type="number"]:focus {
 .secao {
     margin-top: 20px;
     padding-top: 18px;
-    border-top: 1px solid #2b3038;
+    border-top: 1px solid var(--border);
 }
 .secao-titulo { margin-top: 0; }
 
@@ -217,18 +249,18 @@ input[type="number"]:focus {
     grid-template-columns: minmax(0,1fr) 72px 36px;
     gap: 10px; align-items: center;
 }
-.produtos-cabecalho { color: #aaa; font-size: 13px; }
+.produtos-cabecalho { color: var(--muted); font-size: 13px; }
 .produto-numero {
     display: flex; align-items: center; justify-content: center;
     width: 34px; height: 34px;
-    background: #2b3038; border-radius: 8px;
-    color: #ddd; font-weight: bold;
+    background: var(--item-bg); border-radius: 8px;
+    color: var(--label); font-weight: bold;
 }
 .produto-qtd { text-align: center; }
 .botao-remover {
     width: 36px; height: 36px; min-height: 36px;
     margin: 0; padding: 0;
-    background: #2b3038; color: #cfd6e3;
+    background: var(--item-bg); color: var(--muted);
     font-size: 20px; line-height: 1;
 }
 .botao-remover:hover { background: #7f1d1d; color: white; filter: none; }
@@ -251,9 +283,9 @@ input[type="number"]:focus {
     background: #2a2a2a; color: white;
     font-weight: bold; border-radius: 8px; font-size: 18px;
 }
-.campo-automatico.nivel-facil   { background: var(--ok); }
-.campo-automatico.nivel-medio   { background: var(--warn); }
-.campo-automatico.nivel-dificil { background: var(--danger); }
+.campo-automatico.nivel-facil   { background: var(--ok); color: var(--text); }
+.campo-automatico.nivel-medio   { background: var(--warn); color: var(--text); }
+.campo-automatico.nivel-dificil { background: var(--danger); color: var(--text); }
 
 .linha-dupla {
     display: grid; grid-template-columns: 1fr 1fr;
@@ -272,7 +304,7 @@ button {
 button:hover { filter: brightness(1.08); }
 .botao-adicionar { margin-top: 12px; background: #16803a; }
 .botao-pagamento { background: #f4f7fb; color: #151922; margin-top: 12px; }
-.botao-limpar { background: transparent; color: var(--muted); border: 1px solid var(--border2); margin-top: 8px; font-size: 14px; }
+.botao-limpar { background: transparent; color: var(--muted); border: 1px solid var(--border2); margin-top: 8px; font-size: 14px; font-family: inherit; }
 .botao-limpar:hover { border-color: #ef4444; color: #ef4444; filter: none; }
 
 .resultado {
@@ -286,11 +318,11 @@ button:hover { filter: brightness(1.08); }
     display: block; margin-bottom: 6px;
     color: #dceeff; font-size: 13px; font-weight: bold;
 }
-.info { margin-top: 12px; color: #aaa; line-height: 1.5; }
-.info-resumo { display: grid; gap: 6px; margin-top: 14px; color: #cfcfcf; font-size: 14px; }
+.info { margin-top: 12px; color: var(--muted); line-height: 1.5; }
+.info-resumo { display: grid; gap: 6px; margin-top: 14px; color: var(--label); font-size: 14px; }
 .info-linha {
     display: flex; justify-content: space-between; gap: 12px;
-    border-bottom: 1px solid #2f2f2f; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px;
 }
 .info-linha:last-child { border-bottom: none; padding-bottom: 0; }
 
