@@ -6,55 +6,64 @@
 <title>CPZ Orçamento</title>
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
 
 :root {
-    --bg:             #0f1115;
-    --surface:        #181b20;
-    --border:         #272b33;
-    --border2:        #2f3540;
+    --bg:             #0b0d11;
+    --surface:        #13161c;
+    --surface2:       #1a1e26;
+    --border:         #22272f;
+    --border2:        #2c3340;
     --blue:           #0A84FF;
-    --blue-dim:       #17324f;
-    --text:           #ffffff;
-    --muted:          #8f98a8;
-    --label:          #c7ced8;
-    --item-bg:        #23272f;
-    --ok:             #14532d;
-    --warn:           #854d0e;
-    --danger:         #7f1d1d;
-    --ok-text:        #4ade80;
-    --warn-text:      #facc15;
-    --danger-text:    #f87171;
-    --dropdown-bg:    #1e2229;
-    --dropdown-grupo: #181b20;
-    --input-bg:       #23272f;
-    --input-color:    #ffffff;
-    --green:          #16803a;
+    --blue-dim:       #0a2845;
+    --blue-glow:      rgba(10,132,255,0.18);
+    --text:           #f0f4ff;
+    --muted:          #7c8799;
+    --label:          #b8c2d0;
+    --item-bg:        #1e222a;
+    --ok:             #0d3320;
+    --warn:           #3d2500;
+    --danger:         #3d0f0f;
+    --ok-text:        #3dce74;
+    --warn-text:      #f5c842;
+    --danger-text:    #f47070;
+    --dropdown-bg:    #171b22;
+    --dropdown-grupo: #111418;
+    --input-bg:       #1e222a;
+    --input-color:    #f0f4ff;
+    --green:          #0f6b2e;
+    --green-glow:     rgba(15,107,46,0.3);
+    --shadow-card:    0 2px 12px rgba(0,0,0,0.45);
+    --shadow-drop:    0 12px 32px rgba(0,0,0,0.6);
 }
 
 @media (prefers-color-scheme: light) {
     :root {
-        --bg:             #f0f2f5;
+        --bg:             #eef1f6;
         --surface:        #ffffff;
-        --border:         #dde1e7;
-        --border2:        #c8cdd6;
-        --blue:           #0A84FF;
-        --blue-dim:       #dbeeff;
+        --surface2:       #f5f7fb;
+        --border:         #dce1ea;
+        --border2:        #c8cfdb;
+        --blue-dim:       #e0eeff;
+        --blue-glow:      rgba(10,132,255,0.12);
         --text:           #0d1117;
-        --muted:          #6b7585;
+        --muted:          #62707f;
         --label:          #374151;
-        --item-bg:        #f4f6f9;
-        --ok:             #dcfce7;
-        --warn:           #fef9c3;
+        --item-bg:        #f5f7fb;
+        --ok:             #d4f4e2;
+        --warn:           #fef3c7;
         --danger:         #fee2e2;
-        --ok-text:        #15803d;
-        --warn-text:      #a16207;
-        --danger-text:    #dc2626;
+        --ok-text:        #0f6b2e;
+        --warn-text:      #92600a;
+        --danger-text:    #c92020;
         --dropdown-bg:    #ffffff;
-        --dropdown-grupo: #f4f6f9;
+        --dropdown-grupo: #f0f3f8;
         --input-bg:       #ffffff;
         --input-color:    #0d1117;
-        --green:          #16803a;
+        --green:          #0f6b2e;
+        --green-glow:     rgba(15,107,46,0.15);
+        --shadow-card:    0 2px 10px rgba(0,0,0,0.08);
+        --shadow-drop:    0 8px 24px rgba(0,0,0,0.14);
     }
 }
 
@@ -66,7 +75,7 @@ body {
     background: var(--bg);
     color: var(--text);
     font-family: 'DM Sans', Arial, sans-serif;
-    padding: 12px 12px 100px;
+    padding: 14px 12px 110px;
 }
 
 .container {
@@ -80,134 +89,130 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     background: var(--surface);
-    padding: 14px 16px;
-    border-radius: 14px;
+    padding: 14px 18px;
+    border-radius: 18px;
     border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
 }
-.topo h2 { margin: 0; font-size: 20px; }
-.subtitulo { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+.topo-texto h2 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text);
+}
+.subtitulo {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
 .logo-empresa {
-    width: 130px; height: auto;
-    border-radius: 6px; background: #fff;
-    padding: 4px;
+    height: 34px;
+    width: auto;
+    border-radius: 6px;
+    background: #fff;
+    padding: 4px 8px;
 }
 
 /* ── CARDS ── */
 .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 18px;
+    padding: 16px;
     margin-bottom: 10px;
+    box-shadow: var(--shadow-card);
 }
 .card-titulo {
-    font-size: 13px;
-    font-weight: bold;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
 }
 
 /* ── TIPO PROJETO ── */
 .tipos-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 7px;
 }
 .tipo-btn {
     display: flex; align-items: center; justify-content: center;
-    min-height: 42px;
+    min-height: 44px;
     background: var(--item-bg);
     border: 1.5px solid var(--border2);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 13.5px;
     color: var(--label);
-    transition: all 0.15s;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
     user-select: none;
 }
+.tipo-btn:active { transform: scale(0.97); }
 .tipo-btn.ativo {
     background: var(--blue-dim);
     border-color: var(--blue);
     color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-glow);
 }
 .tipo-btn input { display: none; }
-
-/* ── APOIO TÉCNICO ── */
-.apoio-btn {
-    display: flex; align-items: center; justify-content: center;
-    gap: 8px;
-    width: 100%; min-height: 42px;
-    margin-top: 8px;
-    background: var(--item-bg);
-    border: 1.5px solid var(--border2);
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    color: var(--label);
-    transition: all 0.15s;
-    user-select: none;
-}
-.apoio-btn.ativo {
-    background: var(--blue-dim);
-    border-color: var(--blue);
-    color: var(--blue);
-}
-.apoio-btn input { display: none; }
 
 /* ── TOTAL CÂMERAS ── */
 .cameras-row {
     display: flex; align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
+    padding: 11px 14px;
     background: var(--item-bg);
-    border-radius: 10px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    margin-top: 10px;
+    border: 1px solid var(--border2);
 }
-.cameras-label { font-size: 13px; font-weight: bold; color: var(--muted); }
+.cameras-label { font-size: 13px; font-weight: 600; color: var(--muted); }
 .cameras-badge {
-    min-width: 52px; height: 36px;
+    min-width: 50px; height: 34px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 8px;
-    background: var(--item-bg);
-    font-weight: bold; font-size: 20px;
+    border-radius: 9px;
+    background: var(--surface2);
+    font-weight: 700; font-size: 19px;
     color: var(--text);
     border: 1.5px solid var(--border2);
-    transition: background 0.2s, color 0.2s;
+    transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
-.cameras-badge.facil   { background: var(--ok);    color: var(--ok-text);     border-color: transparent; }
-.cameras-badge.medio   { background: var(--warn);   color: var(--warn-text);   border-color: transparent; }
-.cameras-badge.dificil { background: var(--danger); color: var(--danger-text); border-color: transparent; }
+.cameras-badge.facil   { background: var(--ok);     color: var(--ok-text);     border-color: transparent; }
+.cameras-badge.medio   { background: var(--warn);    color: var(--warn-text);   border-color: transparent; }
+.cameras-badge.dificil { background: var(--danger);  color: var(--danger-text); border-color: transparent; }
 
 /* ── ITENS ── */
 .item-card {
     background: var(--item-bg);
     border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 12px;
+    padding: 11px;
     margin-bottom: 8px;
-    animation: slideIn 0.15s ease;
+    animation: slideIn 0.18s ease;
 }
 @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-6px); }
+    from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 .item-topo {
     display: flex; align-items: center; gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 9px;
 }
 .item-numero {
     min-width: 26px; height: 26px;
     background: var(--border2);
-    border-radius: 6px;
+    border-radius: 7px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: bold; color: var(--muted);
+    font-size: 11px; font-weight: 700; color: var(--muted);
     flex-shrink: 0;
 }
 .item-busca-wrapper { flex: 1; min-width: 0; position: relative; }
@@ -219,19 +224,20 @@ body {
 }
 .item-preco {
     font-size: 13px;
-    color: #4ade80;
-    font-weight: bold;
+    color: var(--ok-text);
+    font-weight: 700;
     flex: 1;
     cursor: pointer;
     user-select: none;
+    padding: 2px 0;
 }
 
 /* controles +/- */
 .qtd-ctrl {
-    display: flex; align-items: center; gap: 0;
+    display: flex; align-items: center;
     background: var(--surface);
     border: 1px solid var(--border2);
-    border-radius: 8px;
+    border-radius: 9px;
     overflow: hidden;
 }
 .qtd-btn {
@@ -241,18 +247,18 @@ body {
     border: none;
     color: var(--blue);
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
-    min-height: unset;
-    margin: 0; padding: 0; width: 36px;
+    padding: 0; margin: 0;
     font-family: inherit;
+    transition: background 0.12s;
 }
-.qtd-btn:hover { background: var(--blue-dim); filter: none; }
+.qtd-btn:active { background: var(--blue-dim); }
 .qtd-num {
     min-width: 34px;
     text-align: center;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 700;
     color: var(--text);
     background: none;
     border: none;
@@ -268,31 +274,35 @@ body {
     display: flex; align-items: center; justify-content: center;
     background: none;
     border: 1px solid var(--border2);
-    border-radius: 8px;
+    border-radius: 9px;
     color: var(--muted);
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
-    min-height: unset;
-    margin: 0; padding: 0;
+    padding: 0; margin: 0;
     font-family: inherit;
     flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.btn-del:hover { background: #7f1d1d; color: white; border-color: #7f1d1d; filter: none; }
+.btn-del:active { background: var(--danger); color: var(--danger-text); border-color: transparent; }
 
 /* ── BUSCA ── */
 .busca-input {
     width: 100%;
-    min-height: 40px;
-    padding: 9px 12px;
-    border: 1px solid var(--border2);
-    border-radius: 8px;
+    min-height: 42px;
+    padding: 10px 13px;
+    border: 1.5px solid var(--border2);
+    border-radius: 9px;
     font-size: 14px;
     outline: none;
     font-family: 'DM Sans', Arial, sans-serif;
     background: var(--input-bg);
     color: var(--input-color);
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
-.busca-input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(10,132,255,0.2); }
+.busca-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-glow);
+}
 .busca-input::placeholder { color: var(--muted); font-size: 13px; }
 
 .busca-dropdown {
@@ -300,139 +310,316 @@ body {
     position: absolute;
     left: 0; right: 0;
     background: var(--dropdown-bg);
-    border: 1px solid var(--blue);
-    border-radius: 10px;
+    border: 1.5px solid var(--blue);
+    border-radius: 12px;
     max-height: 240px;
     overflow-y: auto;
     z-index: 999;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: var(--shadow-drop);
 }
 .busca-dropdown.aberto { display: block; }
 
 .busca-grupo-label {
-    padding: 5px 12px 3px;
+    padding: 6px 13px 3px;
     font-size: 10px;
-    font-weight: bold;
+    font-weight: 700;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.7px;
     background: var(--dropdown-grupo);
     position: sticky; top: 0;
 }
 .busca-opcao {
-    padding: 9px 12px;
+    padding: 10px 13px;
     font-size: 13px;
     color: var(--text);
     cursor: pointer;
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    transition: background 0.1s;
 }
 .busca-opcao:last-child { border-bottom: none; }
 .busca-opcao:active { background: var(--blue-dim); }
-.opcao-nome { flex: 1; line-height: 1.3; }
-.opcao-codigo-txt { font-size: 10px; color: var(--muted); display: block; }
-.opcao-preco-txt { font-size: 12px; color: #4ade80; font-weight: bold; white-space: nowrap; }
-.busca-vazio { padding: 14px 12px; color: var(--muted); font-size: 13px; text-align: center; }
+.opcao-nome { flex: 1; line-height: 1.35; }
+.opcao-codigo-txt { font-size: 10px; color: var(--muted); display: block; margin-bottom: 1px; }
+.opcao-preco-txt { font-size: 12px; color: var(--ok-text); font-weight: 700; white-space: nowrap; }
+.busca-vazio { padding: 16px 13px; color: var(--muted); font-size: 13px; text-align: center; }
 
 /* ── DIAS ── */
 .dias-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
 }
 .dias-item label {
-    display: block; font-size: 12px; font-weight: bold;
-    color: var(--muted); margin-bottom: 6px;
+    display: block; font-size: 12px; font-weight: 700;
+    color: var(--muted); margin-bottom: 6px; letter-spacing: 0.2px;
 }
 .dias-item input {
-    width: 100%; min-height: 44px;
+    width: 100%; min-height: 46px;
     padding: 10px 12px;
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    font-size: 16px; font-weight: bold;
+    border: 1.5px solid var(--border2);
+    border-radius: 10px;
+    font-size: 18px; font-weight: 700;
     text-align: center;
     background: var(--input-bg);
     color: var(--input-color);
     outline: none;
     font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
-.dias-item input:focus { border-color: var(--blue); }
+.dias-item input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-glow);
+}
 
 /* ── RESULTADO ── */
 .resultado-card {
-    background: var(--blue);
-    border-radius: 14px;
-    padding: 16px;
+    background: linear-gradient(135deg, #0a5fd4 0%, #0A84FF 60%, #38a1ff 100%);
+    border-radius: 18px;
+    padding: 18px;
     margin-bottom: 10px;
-    box-shadow: 0 8px 20px rgba(10,132,255,0.3);
+    box-shadow: 0 8px 28px rgba(10,132,255,0.35);
+    border: 1px solid rgba(255,255,255,0.12);
 }
-.resultado-label { font-size: 12px; color: #dceeff; font-weight: bold; margin-bottom: 4px; }
-.resultado-valor { font-size: 34px; font-weight: bold; color: white; line-height: 1; }
+.resultado-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    margin-bottom: 4px;
+}
+.resultado-valor { font-size: 36px; font-weight: 700; color: white; line-height: 1; letter-spacing: -0.5px; }
 
 .resumo-toggle {
     display: flex; align-items: center; justify-content: space-between;
-    margin-top: 12px; cursor: pointer;
-    font-size: 12px; color: #dceeff;
+    margin-top: 14px; cursor: pointer;
+    font-size: 12px; color: rgba(255,255,255,0.7);
     user-select: none;
+    font-weight: 500;
 }
-.resumo-toggle .seta { transition: transform 0.2s; }
+.resumo-toggle .seta { transition: transform 0.2s; font-size: 10px; }
 .resumo-toggle.aberto .seta { transform: rotate(180deg); }
 
 .resumo-itens {
     display: none;
-    margin-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.2);
-    padding-top: 10px;
-    gap: 6px;
+    margin-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    padding-top: 12px;
+    gap: 8px;
     flex-direction: column;
 }
 .resumo-itens.visivel { display: flex; }
 .resumo-linha {
     display: flex; justify-content: space-between; gap: 12px;
-    font-size: 13px; color: #dceeff;
+    font-size: 13px; color: rgba(255,255,255,0.75);
 }
-.resumo-linha strong { color: white; }
+.resumo-linha strong { color: white; font-weight: 700; }
 
 /* ── BOTÕES FIXOS ── */
 .fab-area {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    padding: 10px 12px 16px;
-    background: linear-gradient(to top, var(--bg) 60%, transparent);
-    display: flex; gap: 8px;
+    padding: 10px 14px 20px;
+    background: linear-gradient(to top, var(--bg) 65%, transparent);
+    display: flex; gap: 9px;
     max-width: 504px;
     margin: auto;
     z-index: 100;
 }
 .fab {
-    flex: 1; min-height: 48px;
-    border: none; border-radius: 12px;
-    font-size: 15px; font-weight: bold;
+    flex: 1; min-height: 50px;
+    border: none; border-radius: 14px;
+    font-size: 15px; font-weight: 700;
     cursor: pointer; font-family: inherit;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    letter-spacing: 0.1px;
+    transition: filter 0.15s, transform 0.1s;
 }
-.fab-verde { background: var(--green); color: white; }
-.fab-verde:hover { filter: brightness(1.1); }
-.fab-azul { background: var(--blue); color: white; }
-.fab-azul:hover { filter: brightness(1.1); }
+.fab:active { transform: scale(0.97); filter: brightness(0.9); }
+.fab-azul {
+    background: var(--blue);
+    color: white;
+    box-shadow: 0 4px 16px rgba(10,132,255,0.4);
+}
 .fab-ghost {
-    background: transparent;
-    border: 1px solid var(--border2);
+    background: var(--surface);
+    border: 1.5px solid var(--border2);
     color: var(--muted);
-    flex: 0 0 48px;
-    font-size: 20px;
+    flex: 0 0 50px;
+    font-size: 19px;
 }
-.fab-ghost:hover { border-color: #ef4444; color: #ef4444; filter: none; }
 
-/* ── SECAO ADD INFRA ── */
+/* ── TOAST ── */
+.toast {
+    position: fixed;
+    bottom: 82px; left: 50%;
+    transform: translateX(-50%) translateY(14px);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 50px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    z-index: 9999;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    letter-spacing: 0.1px;
+}
+.toast.visivel {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ── ADD ROW ── */
 .add-row {
-    display: flex; gap: 8px; margin-top: 4px;
+    display: flex; gap: 8px; margin-top: 6px;
 }
 .add-row button {
     flex: 1; min-height: 42px; margin: 0;
-    border-radius: 8px; font-size: 14px;
+    border-radius: 10px; font-size: 14px;
     background: var(--green); color: white;
-    border: none; font-family: inherit; font-weight: bold; cursor: pointer;
+    border: none; font-family: inherit; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.1px;
+    box-shadow: 0 2px 10px var(--green-glow);
+    transition: filter 0.15s, transform 0.1s;
 }
-.add-row button:hover { filter: brightness(1.1); }
+.add-row button:active { filter: brightness(0.9); transform: scale(0.98); }
+
+/* ── MODAL PAGAMENTO ── */
+.pag-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 100;
+    display: flex; align-items: flex-end;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.22s;
+}
+.pag-overlay.aberto { opacity: 1; pointer-events: all; }
+.pag-modal {
+    background: var(--surface);
+    border-radius: 22px 22px 0 0;
+    border-top: 1px solid var(--border);
+    width: 100%; max-height: 88vh;
+    overflow-y: auto;
+    padding: 18px 16px 44px;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(.32,.72,0,1);
+}
+.pag-overlay.aberto .pag-modal { transform: translateY(0); }
+
+.pag-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+}
+.pag-titulo { font-size: 17px; font-weight: 700; color: var(--text); }
+.pag-fechar {
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 10px; font-size: 16px;
+    color: var(--muted); cursor: pointer;
+    font-family: inherit;
+}
+
+.pag-tabs {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 6px; margin-bottom: 14px;
+}
+.pag-tab {
+    padding: 9px 4px; text-align: center;
+    font-size: 12px; font-weight: 600;
+    color: var(--muted);
+    background: var(--item-bg);
+    border: 1.5px solid var(--border2);
+    border-radius: 10px; cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.pag-tab.ativo {
+    background: var(--blue-dim);
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+.pag-total-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+}
+.pag-total-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.pag-total-valor { font-size: 22px; font-weight: 700; color: var(--text); }
+
+.pag-boleto-ctrl {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.pag-boleto-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+.pag-boleto-sel { display: flex; gap: 6px; }
+.pag-boleto-opt {
+    padding: 6px 14px;
+    background: var(--item-bg);
+    border: 1.5px solid var(--border2);
+    border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    color: var(--muted); cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.pag-boleto-opt.ativo {
+    background: var(--blue-dim); border-color: var(--blue); color: var(--blue);
+}
+
+.pag-parc {
+    background: var(--item-bg); border: 1px solid var(--border2);
+    border-left: 3px solid var(--border2);
+    border-radius: 12px; padding: 12px; margin-bottom: 8px;
+    transition: border-left-color 0.2s;
+}
+.pag-parc.acum-pos { border-left-color: var(--ok-text); }
+.pag-parc.acum-neg { border-left-color: var(--danger-text); }
+.pag-parc-titulo {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px;
+}
+.pag-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 2px 0;
+}
+.pag-row-label { font-size: 13px; color: var(--muted); }
+.pag-row-val { font-size: 13px; font-weight: 700; }
+.pag-saidas-label {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin: 4px 0 2px;
+    opacity: 0.7;
+}
+.pag-row-sub { padding: 1px 0; }
+.pag-row-sub .pag-row-label { font-size: 12px; padding-left: 10px; }
+.pag-row-sub .pag-row-val   { font-size: 12px; }
+.pag-row-val.verde  { color: var(--ok-text); }
+.pag-row-val.vermelho { color: var(--danger-text); }
+.pag-row-val.amarelo { color: var(--warn-text); }
+.pag-sep { height: 1px; background: var(--border2); margin: 6px 0; }
+.pag-saldo-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0;
+}
+.pag-saldo-label { font-size: 13px; font-weight: 700; color: var(--label); }
+.pag-saldo-val { font-size: 15px; font-weight: 700; }
+
+.pag-resumo {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-top: 10px;
+}
+.pag-resumo-titulo {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px;
+}
 
 </style>
 </head>
@@ -442,11 +629,11 @@ body {
 
     <!-- TOPO -->
     <div class="topo">
-        <div>
-            <h2>Orçamento</h2>
-            <p class="subtitulo">CPZ Digital</p>
+        <div class="topo-texto">
+            <h2 id="tituloApp" style="cursor:default;user-select:none;">Orçamento</h2>
+            <p class="subtitulo" id="subtituloApp">CPZ Digital</p>
         </div>
-        <img class="logo-empresa" src="cpz-logo.png" alt="CPZ Digital">
+        <img class="logo-empresa" src="cpz-assinatura.png" alt="CPZ Digital">
     </div>
 
     <!-- TIPO -->
@@ -459,11 +646,9 @@ body {
             <label class="tipo-btn"><input type="checkbox" name="tipo" value="automacao">Automação</label>
             <label class="tipo-btn"><input type="checkbox" name="tipo" value="sensores">Sensores</label>
         </div>
-        <label class="apoio-btn" id="apoioBtn">
-            <input type="checkbox" id="usarSocio"> Apoio técnico
-        </label>
+        <input type="checkbox" id="usarSocio" style="display:none;">
 
-        <div class="cameras-row" style="margin-top:10px; margin-bottom:0;">
+        <div class="cameras-row">
             <span class="cameras-label">Total de câmeras</span>
             <span class="cameras-badge" id="totalCameras">0</span>
         </div>
@@ -518,6 +703,24 @@ body {
         </div>
     </div>
 
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL PAGAMENTO -->
+<div class="pag-overlay" id="pagOverlay">
+    <div class="pag-modal" id="pagModal">
+        <div class="pag-header">
+            <span class="pag-titulo">Formas de Pagamento</span>
+            <button class="pag-fechar" onclick="fecharPagamentos()">✕</button>
+        </div>
+        <div class="pag-tabs" id="pagTabs">
+            <button class="pag-tab ativo" onclick="setPagModo('avista')">À vista</button>
+            <button class="pag-tab"       onclick="setPagModo('boleto')">Boleto</button>
+            <button class="pag-tab"       onclick="setPagModo('cartao')">Cartão</button>
+        </div>
+        <div id="pagConteudo"></div>
+    </div>
 </div>
 
 <!-- BOTÕES FIXOS -->
@@ -657,7 +860,10 @@ function criarBusca(listaOpcoes, placeholder, valorInicial, onSelect) {
             const el=document.createElement("div");
             el.className="busca-opcao";
             el.innerHTML=`<div class="opcao-nome">${opt.sublabel?`<span class="opcao-codigo-txt">${opt.sublabel}</span>`:""}<span>${opt.label}</span></div><span class="opcao-preco-txt">${opt.preco||""}</span>`;
-            el.addEventListener("touchstart",e=>{e.preventDefault();selecionar(opt);},{passive:false});
+            let _touchStartY=0, _touchMoved=false;
+            el.addEventListener("touchstart",e=>{ _touchStartY=e.touches[0].clientY; _touchMoved=false; },{passive:true});
+            el.addEventListener("touchmove",e=>{ if(Math.abs(e.touches[0].clientY-_touchStartY)>8) _touchMoved=true; },{passive:true});
+            el.addEventListener("touchend",e=>{ if(!_touchMoved){e.preventDefault();selecionar(opt);} },{passive:false});
             el.addEventListener("mousedown",e=>{e.preventDefault();selecionar(opt);});
             dropdown.appendChild(el);
             count++;
@@ -742,7 +948,7 @@ function adicionarProduto(codigo, quantidade) {
 
     rodape.appendChild(preco); rodape.appendChild(ctrl); rodape.appendChild(btnDel);
     card.appendChild(topo); card.appendChild(rodape);
-    lista.prepend(card); // adiciona no topo
+    lista.appendChild(card);
 
     btnMais.addEventListener("click",()=>{ qtdInput.value=Math.max(0,Number(qtdInput.value)||0)+1; atualizarPrecoItem(card,true); });
     btnMenos.addEventListener("click",()=>{ qtdInput.value=Math.max(0,(Number(qtdInput.value)||0)-1); atualizarPrecoItem(card,true); });
@@ -763,7 +969,6 @@ function atualizarPrecoItem(card, recalcular) {
     const precoEl=card.querySelector(".item-preco");
     const codigo=busca?busca.getValor():"";
     const p=produtos.find(x=>x.codigo===codigo);
-    // só atualiza se não estiver em edição manual
     if (!precoEl.dataset.manual) {
         if (p) {
             precoEl.dataset.valorUnit = p.valor;
@@ -772,16 +977,13 @@ function atualizarPrecoItem(card, recalcular) {
             precoEl.dataset.valorUnit = "";
             precoEl.textContent="—";
         }
-    } else {
-        // já tem valor manual, só recalcula
     }
     if (recalcular) calcular();
 }
 
 function renumerarProd() {
-    // lista está invertida (prepend), então numeramos de baixo pra cima
     const itens=[...document.querySelectorAll(".item-produto")];
-    itens.reverse().forEach((n,i)=>{ n.querySelector(".item-numero").textContent=i+1; });
+    itens.forEach((n,i)=>{ n.querySelector(".item-numero").textContent=i+1; });
 }
 
 // ── ADICIONAR INFRA ──
@@ -807,7 +1009,7 @@ function adicionarInfra(nome, quantidade) {
 
     rodape.appendChild(preco); rodape.appendChild(ctrl); rodape.appendChild(btnDel);
     card.appendChild(topo); card.appendChild(rodape);
-    lista.prepend(card);
+    lista.appendChild(card);
 
     btnMais.addEventListener("click",()=>{ qtdInput.value=Math.max(0,Number(qtdInput.value)||0)+1; atualizarPrecoInfra(card,true); });
     btnMenos.addEventListener("click",()=>{ qtdInput.value=Math.max(0,(Number(qtdInput.value)||0)-1); atualizarPrecoInfra(card,true); });
@@ -839,7 +1041,6 @@ function atualizarPrecoInfra(card, recalcular) {
     if (recalcular) calcular();
 }
 
-
 // ── EDIÇÃO DE PREÇO ──
 function ativarEdicaoPreco(card) {
     const precoEl = card.querySelector(".item-preco");
@@ -852,7 +1053,7 @@ function ativarEdicaoPreco(card) {
     input.min = "0";
     input.value = valorAtual || "";
     input.placeholder = "Valor unit. (R$)";
-    input.style.cssText = "width:110px;height:32px;padding:4px 8px;border-radius:6px;border:1.5px solid var(--blue);background:var(--input-bg);color:var(--input-color);font-size:13px;font-weight:bold;font-family:inherit;outline:none;";
+    input.style.cssText = "width:110px;height:32px;padding:4px 8px;border-radius:7px;border:1.5px solid var(--blue);background:var(--input-bg);color:var(--input-color);font-size:13px;font-weight:700;font-family:inherit;outline:none;";
 
     precoEl.textContent = "";
     precoEl.appendChild(input);
@@ -923,6 +1124,8 @@ function calcular() {
     document.getElementById("rInfra").textContent=fmt(totalInfra);
     document.getElementById("rServico").textContent=fmt(despesas-totalInfra);
 
+    _pag = { valorFinal, totalProd, totalInfra, desl, diarias, diarista };
+
     salvarEstado();
 }
 
@@ -933,19 +1136,40 @@ function toggleResumo() {
     itens.classList.toggle("visivel");
 }
 
-// ── TIPO / APOIO ──
+// ── TIPO ──
 document.querySelectorAll(".tipo-btn input").forEach(cb=>{
     cb.closest(".tipo-btn").addEventListener("click",function(){
         document.querySelectorAll(".tipo-btn input").forEach(o=>{ o.checked=false; o.closest(".tipo-btn").classList.remove("ativo"); });
         cb.checked=true; this.classList.add("ativo"); calcular();
     });
 });
-document.getElementById("apoioBtn").addEventListener("click",function(){
+
+// ── GATILHO 3 CLICKS ──
+let _clickCount=0, _clickTimer=null, _toastTimer=null;
+
+function mostrarToast(msg) {
+    const t=document.getElementById("toast");
+    t.textContent=msg; t.classList.add("visivel");
+    clearTimeout(_toastTimer);
+    _toastTimer=setTimeout(()=>t.classList.remove("visivel"),2500);
+}
+
+function toggleBAVision() {
     const cb=document.getElementById("usarSocio");
     cb.checked=!cb.checked;
-    this.classList.toggle("ativo",cb.checked);
+    const ativo=cb.checked;
+    document.getElementById("subtituloApp").textContent=ativo?"BA Vision":"CPZ Digital";
+    mostrarToast(ativo?"BA Vision ativada":"CPZ Digital ativada");
     calcular();
+}
+
+document.getElementById("tituloApp").addEventListener("click",()=>{
+    _clickCount++;
+    clearTimeout(_clickTimer);
+    if (_clickCount>=3) { _clickCount=0; toggleBAVision(); return; }
+    _clickTimer=setTimeout(()=>{ _clickCount=0; },600);
 });
+
 document.querySelectorAll(".dias-item input").forEach(i=>i.addEventListener("input",calcular));
 document.querySelectorAll(".dias-item input").forEach(i=>{
     i.addEventListener("focus",()=>{ if(i.value==="0") i.value=""; });
@@ -961,13 +1185,12 @@ function salvarEstado() {
         diasDiarista:document.getElementById("diasDiarista").value,
         produtos:[], infra:[]
     };
-    // produtos estão em ordem reversa (prepend), salvar na ordem correta
-    const prods=[...document.querySelectorAll(".item-produto")].reverse();
+    const prods=[...document.querySelectorAll(".item-produto")];
     prods.forEach(card=>{
         const busca=card.querySelector(".item-busca-wrapper");
         estado.produtos.push({codigo:busca?busca.getValor():"", qtd:card.querySelector(".qtd-num").value});
     });
-    const infras=[...document.querySelectorAll(".item-infra")].reverse();
+    const infras=[...document.querySelectorAll(".item-infra")];
     infras.forEach(card=>{
         const busca=card.querySelector(".item-busca-wrapper");
         estado.infra.push({nome:busca?busca.getValor():"", qtd:card.querySelector(".qtd-num").value});
@@ -986,7 +1209,7 @@ function restaurarEstado() {
         });
         const socio=document.getElementById("usarSocio");
         socio.checked=e.socio||false;
-        document.getElementById("apoioBtn").classList.toggle("ativo",socio.checked);
+        document.getElementById("subtituloApp").textContent=socio.checked?"BA Vision":"CPZ Digital";
         if (e.diasTrabalho) document.getElementById("diasTrabalho").value=e.diasTrabalho;
         if (e.diasDiarista) document.getElementById("diasDiarista").value=e.diasDiarista;
         if (e.produtos&&e.produtos.length) e.produtos.forEach(p=>adicionarProduto(p.codigo,p.qtd));
@@ -1006,18 +1229,285 @@ function limparOrcamento() {
         cb.checked=i===0; cb.closest(".tipo-btn").classList.toggle("ativo",i===0);
     });
     document.getElementById("usarSocio").checked=false;
-    document.getElementById("apoioBtn").classList.remove("ativo");
+    document.getElementById("subtituloApp").textContent="CPZ Digital";
     document.getElementById("diasTrabalho").value=1;
     document.getElementById("diasDiarista").value=1;
     adicionarProduto(); adicionarInfra(); calcular();
 }
 
-function abrirPagamentos() { alert("Próxima etapa: formas de pagamento."); }
+// ── PAGAMENTO ──
+let _pag       = { valorFinal:0, totalProd:0, totalInfra:0, desl:0, diarias:0, diarista:0 };
+let _pagModo   = 'avista';  // 'avista' | 'boleto' | 'cartao'
+let _subAvista = '5050';    // '5050'  | '4pix'
+let _nBoleto   = 4;         // 4 ou 6
+let _nCartao   = 4;         // 4 ou 6
+
+function abrirPagamentos() {
+    renderPagamento();
+    document.getElementById('pagOverlay').classList.add('aberto');
+}
+
+function fecharPagamentos() {
+    document.getElementById('pagOverlay').classList.remove('aberto');
+}
+
+document.getElementById('pagOverlay').addEventListener('click', function(e) {
+    if (e.target === this) fecharPagamentos();
+});
+
+function setPagModo(modo) {
+    _pagModo = modo;
+    const modos = ['avista','boleto','cartao'];
+    document.querySelectorAll('.pag-tab').forEach((t,i) => t.classList.toggle('ativo', modos[i] === modo));
+    renderPagamento();
+}
+
+function setSubAvista(sub) { _subAvista = sub; renderPagamento(); }
+function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
+function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
+
+function calcInstallments() {
+    const { valorFinal, totalProd, totalInfra, desl, diarias, diarista } = _pag;
+    const r50 = v => Math.round(v / 50) * 50;
+    const mkParc = (label, recebe, despMat, despInfra, despDesl, despDiar, adriano) => {
+        const desp  = despMat + despInfra + despDesl + despDiar;
+        const saldo = recebe - desp;
+        return { label, recebe, despMat, despInfra, despDesl, despDiar, desp, adriano, saldo, caixa: saldo - adriano };
+    };
+
+    // helper: N parcelas — infra/desl/diarista na P1, material de matStart em diante
+    function gerarParcelas(total, N, matStart) {
+        const parc   = total / N;
+        const adPerc = diarias / N;
+        const matN   = N - matStart + 1;
+        const matPer = matN > 0 ? totalProd / matN : 0;
+        const result = [];
+        for (let i = 1; i <= N; i++) {
+            const isMat = i >= matStart;
+            result.push(mkParc(
+                `${i}ª parcela`, parc,
+                isMat ? matPer : 0,
+                i === 1 ? totalInfra : 0,
+                i === 1 ? desl : 0,
+                i === 1 ? diarista : 0,
+                adPerc
+            ));
+        }
+        return { total, parcelas: result };
+    }
+
+    if (_pagModo === 'avista') {
+        const total = valorFinal;
+        if (_subAvista === '5050') {
+            const meia = total / 2;
+            return { total, parcelas: [
+                mkParc('Sinal (50%)', meia, 0,          totalInfra, desl, 0,        0),
+                mkParc('Final (50%)', meia, totalProd,  0,          0,    diarista,  diarias)
+            ]};
+        }
+        // 4× Pix — material nas parcelas 2-4
+        return gerarParcelas(total, 4, 2);
+    }
+
+    if (_pagModo === 'boleto') {
+        const total = r50(valorFinal * 1.05);
+        return gerarParcelas(total, _nBoleto, 2);
+    }
+
+    if (_pagModo === 'cartao') {
+        // Cartão +10% | material distribuído em todas as N parcelas
+        const N      = _nCartao;
+        const total  = r50(valorFinal * 1.10);
+        const parc   = total / N;
+        const adPerc = diarias / N;
+        const matPer = totalProd / N;
+        const parcelas = [];
+        for (let i = 1; i <= N; i++) {
+            parcelas.push(mkParc(
+                `${i}ª parcela`, parc,
+                matPer,
+                i === 1 ? totalInfra : 0,
+                i === 1 ? desl : 0,
+                i === 1 ? diarista : 0,
+                adPerc
+            ));
+        }
+        return { total, parcelas };
+    }
+}
+
+function renderPagamento() {
+    const data      = calcInstallments();
+    const socio     = document.getElementById('usarSocio').checked;
+    const lblDiaria = socio ? 'Diárias' : 'Adriano';
+    const cor       = v => v >= 0 ? 'verde' : 'vermelho';
+    let html = '';
+
+    const totalDesc = {
+        avista: _subAvista === '5050' ? 'Pix — 50% + 50%' : 'Pix — 4×',
+        boleto: `Boleto — ${_nBoleto}×`,
+        cartao: `Cartão — ${_nCartao}×`
+    }[_pagModo];
+
+    html += `<div class="pag-total-card">
+        <div>
+            <div class="pag-total-label">Total</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">${totalDesc}</div>
+        </div>
+        <span class="pag-total-valor">${fmt(data.total)}</span>
+    </div>`;
+
+    if (_pagModo === 'avista') {
+        html += `<div class="pag-boleto-ctrl">
+            <span class="pag-boleto-label">Forma:</span>
+            <div class="pag-boleto-sel">
+                <button class="pag-boleto-opt ${_subAvista==='5050'?'ativo':''}" onclick="setSubAvista('5050')">50%+50%</button>
+                <button class="pag-boleto-opt ${_subAvista==='4pix'?'ativo':''}" onclick="setSubAvista('4pix')">4× Pix</button>
+            </div>
+        </div>`;
+    }
+
+    if (_pagModo === 'boleto') {
+        html += `<div class="pag-boleto-ctrl">
+            <span class="pag-boleto-label">Parcelas:</span>
+            <div class="pag-boleto-sel">
+                <button class="pag-boleto-opt ${_nBoleto===4?'ativo':''}" onclick="setNBoleto(4)">4×</button>
+                <button class="pag-boleto-opt ${_nBoleto===6?'ativo':''}" onclick="setNBoleto(6)">6×</button>
+            </div>
+        </div>`;
+    }
+
+    if (_pagModo === 'cartao') {
+        html += `<div class="pag-boleto-ctrl">
+            <span class="pag-boleto-label">Parcelas:</span>
+            <div class="pag-boleto-sel">
+                <button class="pag-boleto-opt ${_nCartao===4?'ativo':''}" onclick="setNCartao(4)">4×</button>
+                <button class="pag-boleto-opt ${_nCartao===6?'ativo':''}" onclick="setNCartao(6)">6×</button>
+            </div>
+        </div>`;
+    }
+
+    let acum = 0;
+    data.parcelas.forEach((p, idx) => {
+        const acumBefore = acum;
+        acum += p.caixa;
+
+        // No 50/50, a 2ª parcela usa o saldo do sinal para cobrir as saídas
+        const carry = (_pagModo === 'avista' && _subAvista === '5050' && idx > 0 && acumBefore > 0)
+            ? acumBefore : 0;
+        const totalDisp  = p.recebe + carry;
+        const saldoDisp  = totalDisp - p.desp;
+
+        const saidasRows = [
+            p.despInfra > 0 ? `<div class="pag-row pag-row-sub">
+                <span class="pag-row-label">Infra/equip.</span>
+                <span class="pag-row-val vermelho">−${fmt(p.despInfra)}</span>
+            </div>` : '',
+            p.despDesl > 0 ? `<div class="pag-row pag-row-sub">
+                <span class="pag-row-label">Deslocamento</span>
+                <span class="pag-row-val vermelho">−${fmt(p.despDesl)}</span>
+            </div>` : '',
+            p.despDiar > 0 ? `<div class="pag-row pag-row-sub">
+                <span class="pag-row-label">Diarista</span>
+                <span class="pag-row-val vermelho">−${fmt(p.despDiar)}</span>
+            </div>` : '',
+            p.despMat > 0 ? `<div class="pag-row pag-row-sub">
+                <span class="pag-row-label">Material</span>
+                <span class="pag-row-val vermelho">−${fmt(p.despMat)}</span>
+            </div>` : '',
+        ].join('');
+
+        const cardClass = acum >= 0 ? 'acum-pos' : 'acum-neg';
+        html += `<div class="pag-parc ${cardClass}">
+            <div class="pag-parc-titulo">${p.label}</div>
+            <div class="pag-row">
+                <span class="pag-row-label">Recebe</span>
+                <span class="pag-row-val verde">${fmt(p.recebe)}</span>
+            </div>
+            ${carry > 0 ? `<div class="pag-row">
+                <span class="pag-row-label">+ Saldo do sinal</span>
+                <span class="pag-row-val verde">${fmt(carry)}</span>
+            </div>` : ''}
+            ${p.desp > 0 ? `<div class="pag-saidas-label">Saídas</div>${saidasRows}` : ''}
+            <div class="pag-sep"></div>
+            <div class="pag-row">
+                <span class="pag-row-label">Saldo</span>
+                <span class="pag-row-val ${cor(saldoDisp)}">${fmt(saldoDisp)}</span>
+            </div>
+            ${p.adriano > 0 ? `<div class="pag-row">
+                <span class="pag-row-label">${lblDiaria}</span>
+                <span class="pag-row-val amarelo">−${fmt(p.adriano)}</span>
+            </div>` : ''}
+            <div class="pag-sep"></div>
+            <div class="pag-saldo-row">
+                <span class="pag-saldo-label">Caixa acumulado</span>
+                <span class="pag-saldo-val ${cor(acum)}">${fmt(acum)}</span>
+            </div>
+        </div>`;
+    });
+
+    const totalDiaria  = data.parcelas.reduce((s,p) => s + p.adriano, 0);
+    const totalCaixa   = data.parcelas.reduce((s,p) => s + p.caixa,   0);
+    const adrianoFinal = totalDiaria + totalCaixa * 0.80;
+    const empresaFinal = totalCaixa * 0.20;
+    const lucroAdri = totalCaixa * 0.80;
+    html += `<div class="pag-resumo">
+        <div class="pag-resumo-titulo">Divisão final</div>
+        <div class="pag-row">
+            <span class="pag-row-label">${lblDiaria} — diária</span>
+            <span class="pag-row-val amarelo">${fmt(totalDiaria)}</span>
+        </div>
+        <div class="pag-row">
+            <span class="pag-row-label">${lblDiaria} — lucro (80%)</span>
+            <span class="pag-row-val amarelo">${fmt(lucroAdri)}</span>
+        </div>
+        <div class="pag-sep"></div>
+        <div class="pag-row">
+            <span class="pag-row-label">Empresa (20%)</span>
+            <span class="pag-row-val verde">${fmt(empresaFinal)}</span>
+        </div>
+    </div>`;
+
+    document.getElementById('pagConteudo').innerHTML = html;
+}
+
+// ── ESTADO DE TESTE (orçamento fixo de referência) ──
+const ESTADO_TESTE = {
+    tipo: "ip",
+    socio: false,
+    diasTrabalho: 1,
+    diasDiarista: 1,
+    produtos: [
+        { codigo: "CAM-IP-001", qtd: 3 },
+        { codigo: "CAM-WF-003", qtd: 1 },
+        { codigo: "INF-CX-002", qtd: 3 },
+        { codigo: "CAB-CFTV-002", qtd: 1 },
+        { codigo: "NVR-008-001", qtd: 1 },
+        { codigo: "SW-004",      qtd: 1 }
+    ],
+    infra: [
+        { nome: "Conector RJ45",                          qtd: 10  },
+        { nome: "Abraçadeira de Nylon Preto 2,20mm X 200mm", qtd: 300 },
+        { nome: "Bucha 6 / Parafuso 4",                   qtd: 10  }
+    ]
+};
+
+function carregarTeste() {
+    localStorage.setItem("cpz_estado", JSON.stringify(ESTADO_TESTE));
+    document.getElementById("listaProdutos").innerHTML = "";
+    document.getElementById("listaInfra").innerHTML = "";
+    restaurarEstado();
+    calcular();
+}
 
 // ── INIT ──
 async function init() {
     await carregarBanco();
-    if (!restaurarEstado()) { adicionarProduto(); adicionarInfra(); }
+    if (!restaurarEstado()) {
+        // sem histórico: carrega orçamento de referência para testes
+        ESTADO_TESTE.produtos.forEach(p => adicionarProduto(p.codigo, p.qtd));
+        ESTADO_TESTE.infra.forEach(i => adicionarInfra(i.nome, i.qtd));
+    }
     calcular();
 }
 init();
