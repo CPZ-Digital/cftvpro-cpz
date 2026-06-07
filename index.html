@@ -526,6 +526,34 @@ body {
     color: var(--muted); cursor: pointer;
     font-family: inherit;
 }
+.pag-exportar {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 14px; height: 34px;
+    background: var(--blue); border: none;
+    border-radius: 10px; font-size: 13px; font-weight: 700;
+    color: white; cursor: pointer; font-family: inherit;
+    transition: filter 0.15s;
+}
+.pag-exportar:active { filter: brightness(0.88); }
+.exp-field { display: flex; flex-direction: column; gap: 6px; }
+.exp-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.exp-input {
+    width: 100%; padding: 12px 14px;
+    background: var(--item-bg); border: 1.5px solid var(--border2);
+    border-radius: 12px; font-size: 15px; color: var(--text);
+    font-family: inherit; outline: none; box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+.exp-input:focus { border-color: var(--blue); }
+.exp-btn {
+    width: 100%; min-height: 50px; margin-top: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--blue); border: none; border-radius: 14px;
+    font-size: 15px; font-weight: 700; color: white;
+    cursor: pointer; font-family: inherit;
+    transition: filter 0.15s, transform 0.1s;
+}
+.exp-btn:active { filter: brightness(0.88); transform: scale(0.98); }
 
 .pag-tabs {
     display: grid; grid-template-columns: repeat(3,1fr);
@@ -717,7 +745,13 @@ body {
     <div class="pag-modal" id="pagModal">
         <div class="pag-header">
             <span class="pag-titulo">Formas de Pagamento</span>
-            <button class="pag-fechar" onclick="fecharPagamentos()">✕</button>
+            <div style="display:flex;gap:8px;align-items:center">
+                <button class="pag-exportar" onclick="abrirExportar()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Exportar
+                </button>
+                <button class="pag-fechar" onclick="fecharPagamentos()">✕</button>
+            </div>
         </div>
         <div class="pag-tabs" id="pagTabs">
             <button class="pag-tab ativo" onclick="setPagModo('avista')">À vista</button>
@@ -725,6 +759,41 @@ body {
             <button class="pag-tab"       onclick="setPagModo('cartao')">Cartão</button>
         </div>
         <div id="pagConteudo"></div>
+    </div>
+</div>
+
+<!-- MODAL EXPORTAR -->
+<div class="pag-overlay" id="expOverlay">
+    <div class="pag-modal">
+        <div class="pag-header">
+            <span class="pag-titulo">Dados do Cliente</span>
+            <button class="pag-fechar" onclick="fecharExportar()">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:4px">
+            <div class="exp-field">
+                <label class="exp-label">Nome do cliente</label>
+                <input class="exp-input" id="expNome" type="text" placeholder="Ex: João Silva" autocomplete="off">
+            </div>
+            <div class="exp-field">
+                <label class="exp-label">Telefone</label>
+                <input class="exp-input" id="expTel" type="tel" placeholder="(00) 00000-0000" autocomplete="off">
+            </div>
+            <div class="exp-field">
+                <label class="exp-label">Data do orçamento</label>
+                <input class="exp-input" id="expData" type="date">
+            </div>
+            <div class="exp-field">
+                <label class="exp-label">Validade do orçamento</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input class="exp-input" id="expValidade" type="number" min="1" max="90" value="15" style="width:80px;flex:none">
+                    <span style="color:var(--muted);font-size:14px">dias</span>
+                </div>
+            </div>
+            <button class="exp-btn" onclick="confirmarExportar()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Gerar PDF
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1279,6 +1348,36 @@ function setSubAvista(sub) { _subAvista = sub; renderPagamento(); }
 function setNPix(n)        { _nPix      = n;   renderPagamento(); }
 function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
+
+// ── EXPORTAR ──
+let _clienteInfo = { nome:'', tel:'', data:'', validade:15 };
+
+function abrirExportar() {
+    const overlay = document.getElementById('expOverlay');
+    // preenche data de hoje se vazia
+    const inputData = document.getElementById('expData');
+    if (!inputData.value) {
+        inputData.value = new Date().toISOString().slice(0,10);
+    }
+    overlay.classList.add('aberto');
+}
+
+function fecharExportar() {
+    document.getElementById('expOverlay').classList.remove('aberto');
+}
+
+function confirmarExportar() {
+    const nome     = document.getElementById('expNome').value.trim();
+    const tel      = document.getElementById('expTel').value.trim();
+    const data     = document.getElementById('expData').value;
+    const validade = document.getElementById('expValidade').value;
+    if (!nome) { document.getElementById('expNome').focus(); return; }
+    if (!tel)  { document.getElementById('expTel').focus();  return; }
+    _clienteInfo = { nome, tel, data, validade };
+    fecharExportar();
+    // PDF será gerado aqui na próxima etapa
+    alert(`Orçamento para ${nome} pronto para exportar!\n(PDF em breve)`);
+}
 
 function calcInstallments() {
     const { valorFinal, totalProd, totalInfra, desl, diarias, diarista } = _pag;
