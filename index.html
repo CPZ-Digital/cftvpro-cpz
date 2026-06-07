@@ -1434,10 +1434,19 @@ function renderPagamento() {
                 <span class="pag-row-label">Saldo</span>
                 <span class="pag-row-val ${cor(saldoDisp)}">${fmt(saldoDisp)}</span>
             </div>
-            ${p.adriano > 0 ? `<div class="pag-row">
-                <span class="pag-row-label">${lblDiaria}</span>
+            ${p.adriano > 0 ? (socio ? `
+            <div class="pag-row">
+                <span class="pag-row-label">Adriano — diária</span>
+                <span class="pag-row-val amarelo">−${fmt(p.adriano / 2)}</span>
+            </div>
+            <div class="pag-row">
+                <span class="pag-row-label">Bruno — diária</span>
+                <span class="pag-row-val amarelo">−${fmt(p.adriano / 2)}</span>
+            </div>` : `
+            <div class="pag-row">
+                <span class="pag-row-label">Adriano — diária</span>
                 <span class="pag-row-val amarelo">−${fmt(p.adriano)}</span>
-            </div>` : ''}
+            </div>`) : ''}
             <div class="pag-sep"></div>
             <div class="pag-saldo-row">
                 <span class="pag-saldo-label">Caixa acumulado</span>
@@ -1446,21 +1455,24 @@ function renderPagamento() {
         </div>`;
     });
 
-    const totalDiaria  = data.parcelas.reduce((s,p) => s + p.adriano, 0);
-    const totalCaixa   = data.parcelas.reduce((s,p) => s + p.caixa,   0);
-    const adrianoFinal = totalDiaria + totalCaixa * 0.80;
+    const totalCaixa   = data.parcelas.reduce((s,p) => s + p.caixa, 0);
     const empresaFinal = totalCaixa * 0.20;
-    const lucroAdri = totalCaixa * 0.80;
+    const resumoRows   = socio ? `
+        <div class="pag-row">
+            <span class="pag-row-label">Adriano (40%)</span>
+            <span class="pag-row-val amarelo">${fmt(totalCaixa * 0.40)}</span>
+        </div>
+        <div class="pag-row">
+            <span class="pag-row-label">Bruno (40%)</span>
+            <span class="pag-row-val amarelo">${fmt(totalCaixa * 0.40)}</span>
+        </div>` : `
+        <div class="pag-row">
+            <span class="pag-row-label">Adriano (80%)</span>
+            <span class="pag-row-val amarelo">${fmt(totalCaixa * 0.80)}</span>
+        </div>`;
     html += `<div class="pag-resumo">
         <div class="pag-resumo-titulo">Divisão final</div>
-        <div class="pag-row">
-            <span class="pag-row-label">${lblDiaria} — diária</span>
-            <span class="pag-row-val amarelo">${fmt(totalDiaria)}</span>
-        </div>
-        <div class="pag-row">
-            <span class="pag-row-label">${lblDiaria} — lucro (80%)</span>
-            <span class="pag-row-val amarelo">${fmt(lucroAdri)}</span>
-        </div>
+        ${resumoRows}
         <div class="pag-sep"></div>
         <div class="pag-row">
             <span class="pag-row-label">Empresa (20%)</span>
