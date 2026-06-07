@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>CPZ Orçamento</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0055b3">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CPZ Orçamento">
+<link rel="apple-touch-icon" href="cpz-icon.png">
+<link rel="icon" type="image/png" href="cpz-icon.png">
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
@@ -69,15 +77,19 @@
 
 /* ── B&A Vision palette ── */
 body.ba-vision {
-    --blue:      #10b981;
-    --blue-dim:  #063d28;
-    --blue-glow: rgba(16,185,129,0.40);
+    --blue:           #10b981;
+    --blue-dim:       #063d28;
+    --blue-glow:      rgba(16,185,129,0.40);
+    --resultado-bg:   linear-gradient(135deg, #047857 0%, #059669 60%, #10b981 100%);
+    --resultado-shdw: 0 8px 28px rgba(16,185,129,0.38);
 }
 @media (prefers-color-scheme: light) {
     body.ba-vision {
-        --blue:      #059669;
-        --blue-dim:  #d1fae5;
-        --blue-glow: rgba(5,150,105,0.35);
+        --blue:           #059669;
+        --blue-dim:       #d1fae5;
+        --blue-glow:      rgba(5,150,105,0.35);
+        --resultado-bg:   linear-gradient(135deg, #047857 0%, #059669 100%);
+        --resultado-shdw: 0 8px 28px rgba(5,150,105,0.35);
     }
 }
 
@@ -387,11 +399,11 @@ body {
 
 /* ── RESULTADO ── */
 .resultado-card {
-    background: linear-gradient(135deg, #0a5fd4 0%, #0A84FF 60%, #38a1ff 100%);
+    background: var(--resultado-bg, linear-gradient(135deg, #0a5fd4 0%, #0A84FF 60%, #38a1ff 100%));
     border-radius: 18px;
     padding: 18px;
     margin-bottom: 10px;
-    box-shadow: 0 8px 28px rgba(10,132,255,0.35);
+    box-shadow: var(--resultado-shdw, 0 8px 28px rgba(10,132,255,0.35));
     border: 1px solid rgba(255,255,255,0.12);
 }
 .resultado-label {
@@ -680,6 +692,7 @@ body {
 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 <body>
 
@@ -827,10 +840,16 @@ body {
                     </div>
                 </div>
             </div>
-            <button class="exp-btn" onclick="confirmarExportar()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Gerar PDF
-            </button>
+            <div style="display:flex;gap:8px;">
+                <button class="exp-btn" onclick="confirmarExportar()" style="flex:1;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Gerar PDF
+                </button>
+                <button class="exp-btn" onclick="exportarXLS()" style="flex:1;background:#16a34a;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    Exportar XLS
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -1044,16 +1063,13 @@ function opcoesParaInfra() {
 }
 
 // ── ADICIONAR PRODUTO ──
-let contadorProd=0;
-
-function adicionarProduto(codigo, quantidade) {
-    contadorProd++;
+function adicionarProduto(codigo, quantidade, precoManual) {
     const lista=document.getElementById("listaProdutos");
     const card=document.createElement("div");
     card.className="item-card item-produto";
 
     const topo=document.createElement("div"); topo.className="item-topo";
-    const numero=document.createElement("div"); numero.className="item-numero"; numero.textContent=contadorProd;
+    const numero=document.createElement("div"); numero.className="item-numero"; numero.textContent="";
     const busca=criarBusca(opcoesParaProdutos(),"Buscar produto...",codigo||"",()=>atualizarPrecoItem(card,true));
     topo.appendChild(numero); topo.appendChild(busca);
 
@@ -1081,6 +1097,10 @@ function adicionarProduto(codigo, quantidade) {
     preco.addEventListener("click",()=>ativarEdicaoPreco(card));
     preco.title="Toque para editar o valor";
 
+    if (precoManual != null && !isNaN(precoManual)) {
+        preco.dataset.valorUnit = precoManual;
+        preco.dataset.manual = "1";
+    }
     renumerarProd();
     atualizarPrecoItem(card,true);
 }
@@ -1109,7 +1129,7 @@ function renumerarProd() {
 }
 
 // ── ADICIONAR INFRA ──
-function adicionarInfra(nome, quantidade) {
+function adicionarInfra(nome, quantidade, precoManual) {
     const lista=document.getElementById("listaInfra");
     const card=document.createElement("div");
     card.className="item-card item-infra";
@@ -1142,6 +1162,10 @@ function adicionarInfra(nome, quantidade) {
     preco.addEventListener("click",()=>ativarEdicaoPreco(card));
     preco.title="Toque para editar o valor";
 
+    if (precoManual != null && !isNaN(precoManual)) {
+        preco.dataset.valorUnit = precoManual;
+        preco.dataset.manual = "1";
+    }
     atualizarPrecoInfra(card,true);
 }
 
@@ -1294,10 +1318,10 @@ document.getElementById("tituloApp").addEventListener("click",()=>{
     _clickTimer=setTimeout(()=>{ _clickCount=0; },600);
 });
 
-document.querySelectorAll(".dias-item input").forEach(i=>i.addEventListener("input",calcular));
 document.querySelectorAll(".dias-item input").forEach(i=>{
-    i.addEventListener("focus",()=>{ if(i.value==="0") i.value=""; });
-    i.addEventListener("blur",()=>{ if(i.value==="") { i.value="0"; calcular(); } });
+    i.addEventListener("input", calcular);
+    i.addEventListener("focus", ()=>{ if(i.value==="0") i.value=""; });
+    i.addEventListener("blur",  ()=>{ if(i.value==="") { i.value="0"; calcular(); } });
 });
 
 // ── PERSISTÊNCIA ──
@@ -1307,17 +1331,22 @@ function salvarEstado() {
         socio:document.getElementById("usarSocio").checked,
         diasTrabalho:document.getElementById("diasTrabalho").value,
         diasDiarista:document.getElementById("diasDiarista").value,
+        pagModo:_pagModo, subAvista:_subAvista,
+        nPix:_nPix, nBoleto:_nBoleto, nCartao:_nCartao,
+        clienteInfo:{ ..._clienteInfo },
         produtos:[], infra:[]
     };
-    const prods=[...document.querySelectorAll(".item-produto")];
-    prods.forEach(card=>{
+    document.querySelectorAll(".item-produto").forEach(card=>{
         const busca=card.querySelector(".item-busca-wrapper");
-        estado.produtos.push({codigo:busca?busca.getValor():"", qtd:card.querySelector(".qtd-num").value});
+        const precoEl=card.querySelector(".item-preco");
+        const pm=precoEl.dataset.manual?parseFloat(precoEl.dataset.valorUnit):null;
+        estado.produtos.push({codigo:busca?busca.getValor():"", qtd:card.querySelector(".qtd-num").value, precoManual:isNaN(pm)?null:pm});
     });
-    const infras=[...document.querySelectorAll(".item-infra")];
-    infras.forEach(card=>{
+    document.querySelectorAll(".item-infra").forEach(card=>{
         const busca=card.querySelector(".item-busca-wrapper");
-        estado.infra.push({nome:busca?busca.getValor():"", qtd:card.querySelector(".qtd-num").value});
+        const precoEl=card.querySelector(".item-preco");
+        const pm=precoEl.dataset.manual?parseFloat(precoEl.dataset.valorUnit):null;
+        estado.infra.push({nome:busca?busca.getValor():"", qtd:card.querySelector(".qtd-num").value, precoManual:isNaN(pm)?null:pm});
     });
     localStorage.setItem("cpz_estado",JSON.stringify(estado));
 }
@@ -1338,9 +1367,24 @@ function restaurarEstado() {
         document.getElementById("logoTopo").src=socio.checked?"ba-vision-assinatura.png":"cpz-assinatura.png";
         if (e.diasTrabalho) document.getElementById("diasTrabalho").value=e.diasTrabalho;
         if (e.diasDiarista) document.getElementById("diasDiarista").value=e.diasDiarista;
-        if (e.produtos&&e.produtos.length) e.produtos.forEach(p=>adicionarProduto(p.codigo,p.qtd));
+        if (e.pagModo)   _pagModo   = e.pagModo;
+        if (e.subAvista) _subAvista = e.subAvista;
+        if (e.nPix)      _nPix      = e.nPix;
+        if (e.nBoleto)   _nBoleto   = e.nBoleto;
+        if (e.nCartao)   _nCartao   = e.nCartao;
+        if (e.clienteInfo) {
+            _clienteInfo = { ..._clienteInfo, ...e.clienteInfo };
+            const ci = _clienteInfo;
+            if (ci.nome)     document.getElementById('expNome').value     = ci.nome;
+            if (ci.tel)      document.getElementById('expTel').value      = ci.tel;
+            if (ci.email)    document.getElementById('expEmail').value    = ci.email;
+            if (ci.data)     document.getElementById('expData').value     = ci.data;
+            if (ci.validade) document.getElementById('expValidade').value = ci.validade;
+            if (ci.prazo)    document.getElementById('expPrazo').value    = ci.prazo;
+        }
+        if (e.produtos&&e.produtos.length) e.produtos.forEach(p=>adicionarProduto(p.codigo,p.qtd,p.precoManual));
         else adicionarProduto();
-        if (e.infra&&e.infra.length) e.infra.forEach(i=>adicionarInfra(i.nome,i.qtd));
+        if (e.infra&&e.infra.length) e.infra.forEach(i=>adicionarInfra(i.nome,i.qtd,i.precoManual));
         else adicionarInfra();
         return true;
     } catch(err) { console.error(err); return false; }
@@ -1355,9 +1399,13 @@ function limparOrcamento() {
         cb.checked=i===0; cb.closest(".tipo-btn").classList.toggle("ativo",i===0);
     });
     document.getElementById("usarSocio").checked=false;
+    document.body.classList.remove('ba-vision');
     document.getElementById("subtituloApp").textContent="CPZ Digital";
+    document.getElementById("logoTopo").src="cpz-assinatura.png";
     document.getElementById("diasTrabalho").value=1;
     document.getElementById("diasDiarista").value=1;
+    _pagModo='avista'; _subAvista='5050'; _nPix=4; _nBoleto=4; _nCartao=4;
+    _clienteInfo={ nome:'', tel:'', email:'', data:'', validade:15, prazo:'2' };
     adicionarProduto(); adicionarInfra(); calcular();
 }
 
@@ -1365,7 +1413,7 @@ function limparOrcamento() {
 let _pag       = { valorFinal:0, totalProd:0, totalInfra:0, desl:0, diarias:0, diarista:0 };
 let _pagModo   = 'avista';  // 'avista' | 'boleto' | 'cartao'
 let _subAvista = '5050';    // '5050'  | '4pix'
-let _nPix      = 4;         // 2-4
+let _nPix      = 4;         // 2-6
 let _nBoleto   = 4;         // 2-6
 let _nCartao   = 4;         // 2-6
 
@@ -1383,6 +1431,9 @@ function fecharPagamentos() {
 document.getElementById('pagOverlay').addEventListener('click', function(e) {
     if (e.target === this) fecharPagamentos();
 });
+document.getElementById('expOverlay').addEventListener('click', function(e) {
+    if (e.target === this) fecharExportar();
+});
 
 function setPagModo(modo) {
     _pagModo = modo;
@@ -1397,16 +1448,19 @@ function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
 
 // ── EXPORTAR ──
-let _clienteInfo = { nome:'', tel:'', data:'', validade:15, prazo:'2' };
+let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2' };
 
 function abrirExportar() {
-    const overlay = document.getElementById('expOverlay');
-    // preenche data de hoje se vazia
+    const ci = _clienteInfo;
+    if (ci.nome)     document.getElementById('expNome').value     = ci.nome;
+    if (ci.tel)      document.getElementById('expTel').value      = ci.tel;
+    if (ci.email)    document.getElementById('expEmail').value    = ci.email;
+    if (ci.validade) document.getElementById('expValidade').value = ci.validade;
+    if (ci.prazo)    document.getElementById('expPrazo').value    = ci.prazo;
     const inputData = document.getElementById('expData');
-    if (!inputData.value) {
-        inputData.value = new Date().toISOString().slice(0,10);
-    }
-    overlay.classList.add('aberto');
+    if (ci.data) inputData.value = ci.data;
+    else if (!inputData.value) inputData.value = new Date().toISOString().slice(0,10);
+    document.getElementById('expOverlay').classList.add('aberto');
 }
 
 function fecharExportar() {
@@ -1423,6 +1477,7 @@ function confirmarExportar() {
     if (!nome)  { document.getElementById('expNome').focus();  return; }
     if (!tel)   { document.getElementById('expTel').focus();   return; }
     _clienteInfo = { nome, tel, email, data, validade, prazo };
+    salvarEstado();
     fecharExportar();
     gerarPDF();
 }
@@ -1608,6 +1663,390 @@ function gerarPDF() {
         .catch(e => alert('Erro ao carregar template: ' + e.message));
 }
 
+async function exportarXLS() {
+    const nome     = document.getElementById('expNome').value.trim();
+    const tel      = document.getElementById('expTel').value.trim();
+    const email    = document.getElementById('expEmail').value.trim();
+    const data     = document.getElementById('expData').value;
+    const validade = document.getElementById('expValidade').value;
+    const prazo    = document.getElementById('expPrazo').value || '2';
+    if (!nome) { document.getElementById('expNome').focus(); return; }
+    if (!tel)  { document.getElementById('expTel').focus();  return; }
+
+    _clienteInfo = { nome, tel, email, data, validade, prazo };
+    salvarEstado();
+    fecharExportar();
+    mostrarToast('Gerando planilha...');
+
+    const socio  = document.getElementById('usarSocio').checked;
+    const marca  = socio ? 'B&A Vision' : 'CPZ Digital';
+    const tipoEl = document.querySelector('input[name="tipo"]:checked');
+    const tipo   = tipoEl ? tipoEl.value : 'analogica';
+    const baseMs = data ? new Date(data + 'T12:00:00').getTime() : Date.now();
+    const addDias = d => new Date(baseMs + d * 86400000).toLocaleDateString('pt-BR');
+
+    // cores por modo
+    const COR    = socio ? 'FF059669' : 'FF0055B3';
+    const COR_DK = socio ? 'FF047857' : 'FF003D82';
+    const COR_LT = socio ? 'FFD1FAE5' : 'FFE0EEFF';
+    const COR_RW = socio ? 'FFF0FBF7' : 'FFF7F9FF';
+    const BRL    = '"R$" #,##0.00';
+    const THIN   = { style: 'thin', color: { argb: 'FFDDDDDD' } };
+
+    // coleta produtos
+    const itensProd = [];
+    document.querySelectorAll('.item-produto').forEach(card => {
+        const busca = card.querySelector('.item-busca-wrapper');
+        const codigo = busca ? busca.getValor() : '';
+        if (!codigo) return;
+        const qtd = Number(card.querySelector('.qtd-num').value) || 0;
+        if (!qtd) return;
+        const precoEl = card.querySelector('.item-preco');
+        const valorUnit = parseFloat(precoEl.dataset.valorUnit) || 0;
+        const prod = produtos.find(p => p.codigo === codigo);
+        itensProd.push({ codigo, descricao: prod ? (prod.descricao || prod.nome || codigo) : codigo, qtd, valorUnit, total: valorUnit * qtd });
+    });
+
+    // coleta infra
+    const itensInf = [];
+    document.querySelectorAll('.item-infra').forEach(card => {
+        const busca = card.querySelector('.item-busca-wrapper');
+        const nomeItem = busca ? busca.getValor() : '';
+        if (!nomeItem) return;
+        const qtd = Number(card.querySelector('.qtd-num').value) || 0;
+        if (!qtd) return;
+        const precoEl = card.querySelector('.item-preco');
+        const valorUnit = parseFloat(precoEl.dataset.valorUnit) || 0;
+        itensInf.push({ descricao: nomeItem, qtd, valorUnit, total: valorUnit * qtd });
+    });
+
+    const diasT    = Number(document.getElementById('diasTrabalho').value) || 0;
+    const diasD    = Number(document.getElementById('diasDiarista').value) || 0;
+    const desl     = 50 * diasT;
+    const diarias  = diasT * 500 * (socio ? 2 : 1);
+    const diarista = diasD * 120;
+    const totalServ = desl + diarias + diarista;
+
+    const inst = calcInstallments();
+    const modoLabel  = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[_pagModo];
+    const formaLabel = _pagModo === 'avista'
+        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : _nPix + '× Pix')
+        : _pagModo === 'boleto' ? (_nBoleto + '× mensais') : (_nCartao + '× no cartão');
+
+    const totalProdVal = itensProd.reduce((s, it) => s + it.total, 0);
+    const totalInfVal  = itensInf.reduce((s, it) => s + it.total, 0);
+
+    // ── workbook ──
+    const wb = new ExcelJS.Workbook();
+    wb.creator = marca;
+    const ws = wb.addWorksheet('Orçamento', { pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1 } });
+    ws.columns = [
+        { width: 5 }, { width: 18 }, { width: 44 }, { width: 8 }, { width: 18 }, { width: 18 }
+    ];
+
+    // ── helpers ──
+    function mergedRow(text, bgARGB, fontColor, fontSize, height) {
+        const r = ws.addRow([text]);
+        r.height = height || 24;
+        r.getCell(1).value = text;
+        r.getCell(1).style = {
+            font: { bold: true, size: fontSize || 11, color: { argb: fontColor || 'FFFFFFFF' }, name: 'Calibri' },
+            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: bgARGB } },
+            alignment: { horizontal: 'center', vertical: 'middle', wrapText: true }
+        };
+        ws.mergeCells(r.number, 1, r.number, 6);
+        return r;
+    }
+
+    function spacer() { const r = ws.addRow([]); r.height = 7; return r; }
+
+    function sectionHdr(text) { return mergedRow(text, COR, 'FFFFFFFF', 11, 24); }
+
+    function tblHdr(cols) {
+        const r = ws.addRow(cols);
+        r.height = 22;
+        for (let c = 1; c <= 6; c++) {
+            r.getCell(c).style = {
+                font: { bold: true, size: 10, color: { argb: 'FFFFFFFF' }, name: 'Calibri' },
+                fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_DK } },
+                alignment: { horizontal: 'center', vertical: 'middle' },
+                border: { bottom: { style: 'medium', color: { argb: 'FFFFFFFF' } } }
+            };
+        }
+        return r;
+    }
+
+    function dataRow(vals, isAlt) {
+        const r = ws.addRow(vals);
+        r.height = 20;
+        const bg = isAlt ? COR_RW : 'FFFFFFFF';
+        for (let c = 1; c <= 6; c++) {
+            r.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+            r.getCell(c).font = { size: 10, name: 'Calibri', color: { argb: 'FF333333' } };
+            r.getCell(c).border = { top: THIN, left: THIN, bottom: THIN, right: THIN };
+        }
+        return r;
+    }
+
+    function subtotalRow(label, value) {
+        const r = ws.addRow(['', '', label, '', '', value]);
+        r.height = 22;
+        ws.mergeCells(r.number, 2, r.number, 5);
+        r.getCell(3).style = {
+            font: { bold: true, size: 10, color: { argb: COR }, name: 'Calibri' },
+            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } },
+            alignment: { horizontal: 'right', vertical: 'middle', indent: 1 },
+            border: { top: THIN, left: THIN, bottom: { style: 'medium', color: { argb: COR } }, right: THIN }
+        };
+        r.getCell(6).style = {
+            font: { bold: true, size: 10, color: { argb: COR }, name: 'Calibri' },
+            fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } },
+            alignment: { horizontal: 'right', vertical: 'middle' },
+            numFmt: BRL,
+            border: { top: THIN, left: THIN, bottom: { style: 'medium', color: { argb: COR } }, right: THIN }
+        };
+        return r;
+    }
+
+    function duoCellRow(l1, v1, l2, v2) {
+        const r = ws.addRow(['', l1, v1, '', l2, v2]);
+        r.height = 20;
+        ws.mergeCells(r.number, 3, r.number, 4);
+        r.getCell(2).style = { font: { bold: true, size: 10, color: { argb: 'FF444444' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 }, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+        r.getCell(3).style = { font: { size: 10, name: 'Calibri', color: { argb: 'FF111111' } }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 }, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+        if (l2) {
+            r.getCell(5).style = { font: { bold: true, size: 10, color: { argb: 'FF444444' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 }, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+            r.getCell(6).style = { font: { size: 10, name: 'Calibri', color: { argb: 'FF111111' } }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 }, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+        }
+        return r;
+    }
+
+    // ══════════════════════════════════════
+    // TÍTULO
+    mergedRow(marca + ' — Proposta Comercial', COR, 'FFFFFFFF', 18, 44);
+    mergedRow('Gerado em: ' + new Date().toLocaleDateString('pt-BR') + '   ·   Cliente: ' + nome + '   ·   Data: ' + addDias(0), COR_LT, 'FF444444', 10, 18);
+    spacer();
+
+    // DADOS DO CLIENTE
+    sectionHdr('DADOS DO CLIENTE');
+    duoCellRow('Nome', nome, 'Data do orçamento', addDias(0));
+    duoCellRow('Telefone', tel, 'Validade', validade + ' dias');
+    duoCellRow(email ? 'E-mail' : 'Tipo de projeto', email || tipo, 'Prazo de execução', prazo + ' dias úteis');
+    if (email) duoCellRow('Tipo de projeto', tipo, '', '');
+    spacer();
+
+    // EQUIPAMENTOS
+    if (itensProd.length) {
+        sectionHdr('EQUIPAMENTOS');
+        tblHdr(['#', 'Código', 'Descrição', 'Qtd', 'Valor Unit.', 'Total']);
+        itensProd.forEach((it, i) => {
+            const r = dataRow([i + 1, it.codigo, it.descricao, it.qtd, it.valorUnit, it.total], i % 2 === 1);
+            r.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+            r.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
+            r.getCell(5).numFmt = BRL; r.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
+            r.getCell(6).numFmt = BRL; r.getCell(6).alignment = { horizontal: 'right', vertical: 'middle' };
+            r.getCell(6).font = { bold: true, size: 10, name: 'Calibri', color: { argb: COR } };
+        });
+        subtotalRow('SUBTOTAL EQUIPAMENTOS', totalProdVal);
+        spacer();
+    }
+
+    // INFRAESTRUTURA
+    if (itensInf.length) {
+        sectionHdr('INFRAESTRUTURA');
+        tblHdr(['#', '', 'Descrição', 'Qtd', 'Valor Unit.', 'Total']);
+        itensInf.forEach((it, i) => {
+            const r = dataRow([i + 1, '', it.descricao, it.qtd, it.valorUnit, it.total], i % 2 === 1);
+            r.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+            r.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
+            r.getCell(5).numFmt = BRL; r.getCell(5).alignment = { horizontal: 'right', vertical: 'middle' };
+            r.getCell(6).numFmt = BRL; r.getCell(6).alignment = { horizontal: 'right', vertical: 'middle' };
+            r.getCell(6).font = { bold: true, size: 10, name: 'Calibri', color: { argb: COR } };
+        });
+        subtotalRow('SUBTOTAL INFRAESTRUTURA', totalInfVal);
+        spacer();
+    }
+
+    // SERVIÇO
+    sectionHdr('SERVIÇO');
+    duoCellRow('Dias de trabalho', diasT + ' dias', 'Deslocamento', desl);
+    ws.lastRow.getCell(6).numFmt = BRL;
+    duoCellRow('Dias com diarista', diasD + ' dias', 'Diarista', diarista);
+    ws.lastRow.getCell(6).numFmt = BRL;
+    duoCellRow('', '', 'Diárias', diarias);
+    ws.lastRow.getCell(6).numFmt = BRL;
+    subtotalRow('TOTAL SERVIÇO', totalServ);
+    spacer();
+
+    // RESUMO FINANCEIRO
+    sectionHdr('RESUMO FINANCEIRO');
+    [
+        ['Equipamentos', totalProdVal],
+        ['Infraestrutura', totalInfVal],
+        ['Serviço', totalServ],
+    ].forEach(([label, val]) => {
+        const r = ws.addRow(['', label, '', '', '', val]);
+        r.height = 20;
+        ws.mergeCells(r.number, 2, r.number, 5);
+        r.getCell(2).style = { font: { size: 10, color: { argb: 'FF444444' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 }, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+        r.getCell(6).style = { font: { size: 10, color: { argb: 'FF333333' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } }, alignment: { horizontal: 'right', vertical: 'middle' }, numFmt: BRL, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+    });
+
+    // VALOR TOTAL — linha de destaque
+    const totRow = ws.addRow(['VALOR TOTAL DO PROJETO', '', '', '', '', inst.total]);
+    totRow.height = 36;
+    ws.mergeCells(totRow.number, 1, totRow.number, 5);
+    totRow.getCell(1).style = { font: { bold: true, size: 14, color: { argb: 'FFFFFFFF' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR } }, alignment: { horizontal: 'center', vertical: 'middle' } };
+    totRow.getCell(6).style = { font: { bold: true, size: 14, color: { argb: 'FFFFFFFF' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR } }, alignment: { horizontal: 'right', vertical: 'middle' }, numFmt: BRL };
+
+    // pagamento
+    [['Forma de pagamento', modoLabel], ['Condição', formaLabel]].forEach(([l, v]) => {
+        const r = ws.addRow(['', l, v, '', '', '']);
+        r.height = 20;
+        ws.mergeCells(r.number, 3, r.number, 6);
+        r.getCell(2).style = { font: { bold: true, size: 10, color: { argb: 'FF444444' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 }, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+        r.getCell(3).style = { font: { size: 10, color: { argb: 'FF222222' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 }, border: { top: THIN, left: THIN, bottom: THIN, right: THIN } };
+    });
+    spacer();
+
+    // PARCELAS
+    sectionHdr('PARCELAS');
+    const ph = ws.addRow(['#', 'Parcela', 'Vencimento', '', '', 'Valor (R$)']);
+    ph.height = 22;
+    for (let c = 1; c <= 6; c++) ph.getCell(c).style = { font: { bold: true, size: 10, color: { argb: 'FFFFFFFF' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_DK } }, alignment: { horizontal: 'center', vertical: 'middle' } };
+    ws.mergeCells(ph.number, 3, ph.number, 5);
+
+    inst.parcelas.forEach((p, i) => {
+        const r = dataRow([i + 1, p.label, addDias(Number(validade) + i * 30), '', '', p.recebe], i % 2 === 1);
+        r.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+        ws.mergeCells(r.number, 3, r.number, 5);
+        r.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
+        r.getCell(6).numFmt = BRL;
+        r.getCell(6).alignment = { horizontal: 'right', vertical: 'middle' };
+        r.getCell(6).font = { bold: true, size: 10, color: { argb: COR }, name: 'Calibri' };
+    });
+
+    // rodapé
+    spacer();
+    mergedRow(
+        marca + '   |   ' + (socio ? '(21) 99664-6927   |   ba.visionseguranca@gmail.com' : '(21) 96745-5648   |   contato@cpzdigital.com.br') +
+        '   |   CNPJ: ' + (socio ? '62.456.202/0001-08' : '58.589.970/0001-54'),
+        COR_LT, 'FF555555', 9, 18
+    );
+
+    // ── SHEET 2: FINANCEIRO ──
+    const ws2 = wb.addWorksheet('Financeiro');
+    ws2.columns = [
+        { width: 5 }, { width: 22 }, { width: 16 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 20 }
+    ];
+    const NC2 = 7;
+    const contato2 = socio ? '(21) 99664-6927  ·  ba.visionseguranca@gmail.com' : '(21) 96745-5648  ·  contato@cpzdigital.com.br';
+
+    function mr2(text, bg, fc, fs, h) {
+        const r = ws2.addRow([text]);
+        r.height = h || 24;
+        r.getCell(1).style = { font: { bold: true, size: fs || 11, color: { argb: fc || 'FFFFFFFF' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } }, alignment: { horizontal: 'center', vertical: 'middle' } };
+        ws2.mergeCells(r.number, 1, r.number, NC2);
+        return r;
+    }
+    function sp2() { const r = ws2.addRow([]); r.height = 7; return r; }
+    function secHdr2(t) { return mr2(t, COR, 'FFFFFFFF', 12, 26); }
+
+    // salva estado atual
+    const savedM = _pagModo, savedS = _subAvista, savedNP = _nPix, savedNB = _nBoleto, savedNC = _nCartao;
+
+    const allGroups = [
+        {
+            secao: 'À VISTA — PIX',
+            opcoes: [
+                { label: '50% + 50% (Pix)', modo: 'avista', sub: '5050', n: '5050' },
+                ...[2, 3, 4, 5, 6].map(n => ({ label: n + '× Pix', modo: 'avista', sub: 'npix', n }))
+            ]
+        },
+        {
+            secao: 'BOLETO BANCÁRIO  (+5%)',
+            opcoes: [2, 3, 4, 5, 6].map(n => ({ label: n + '× mensais', modo: 'boleto', n }))
+        },
+        {
+            secao: 'CARTÃO DE CRÉDITO  (+10%)',
+            opcoes: [2, 3, 4, 5, 6].map(n => ({ label: n + '× no cartão', modo: 'cartao', n }))
+        },
+    ];
+
+    mr2(marca + ' — Análise Financeira Completa', COR, 'FFFFFFFF', 16, 40);
+    mr2('Valor base: ' + new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(_pag.valorFinal) + '   ·   Cliente: ' + nome + '   ·   ' + addDias(0), COR_LT, 'FF444444', 10, 18);
+    sp2();
+
+    allGroups.forEach(group => {
+        secHdr2(group.secao);
+
+        group.opcoes.forEach(opt => {
+            _pagModo = opt.modo;
+            if (opt.modo === 'avista') { _subAvista = opt.sub; if (opt.sub !== '5050') _nPix = opt.n; }
+            else if (opt.modo === 'boleto') _nBoleto = opt.n;
+            else _nCartao = opt.n;
+
+            const inst   = calcInstallments();
+            const viavel = simularViabilidade(opt.modo, opt.n);
+
+            // sub-cabeçalho da opção
+            const sCor = viavel ? 'FF166534' : 'FF991B1B';
+            const sBg  = viavel ? 'FFD1FAE5' : 'FFFEE2E2';
+            const oRow = ws2.addRow([opt.label, '', '', '', '', inst.total, viavel ? '✔ VIÁVEL' : '✖ INVIÁVEL']);
+            oRow.height = 26;
+            ws2.mergeCells(oRow.number, 1, oRow.number, 5);
+            oRow.getCell(1).style = { font: { bold: true, size: 11, color: { argb: 'FF111111' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } }, alignment: { horizontal: 'left', vertical: 'middle', indent: 1 } };
+            oRow.getCell(6).style = { font: { bold: true, size: 11, color: { argb: COR }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_LT } }, alignment: { horizontal: 'right', vertical: 'middle' }, numFmt: BRL };
+            oRow.getCell(7).style = { font: { bold: true, size: 10, color: { argb: sCor }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: sBg } }, alignment: { horizontal: 'center', vertical: 'middle' } };
+
+            // cabeçalho da tabela
+            const hRow = ws2.addRow(['#', 'Parcela', 'Vencimento', 'Recebe (R$)', 'Saídas (R$)', 'Caixa período', 'Caixa acum.']);
+            hRow.height = 20;
+            for (let c = 1; c <= NC2; c++) {
+                hRow.getCell(c).style = { font: { bold: true, size: 9, color: { argb: 'FFFFFFFF' }, name: 'Calibri' }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: COR_DK } }, alignment: { horizontal: 'center', vertical: 'middle' } };
+            }
+
+            // linhas de parcelas
+            let acum = 0;
+            inst.parcelas.forEach((p, i) => {
+                acum += p.caixa;
+                const saidas = p.desp + p.adriano;
+                const bg = i % 2 === 1 ? COR_RW : 'FFFFFFFF';
+                const dr = ws2.addRow([i + 1, p.label, addDias(Number(validade) + i * 30), p.recebe, saidas, p.caixa, acum]);
+                dr.height = 18;
+                for (let c = 1; c <= NC2; c++) {
+                    dr.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+                    dr.getCell(c).font = { size: 9, name: 'Calibri', color: { argb: 'FF333333' } };
+                    dr.getCell(c).border = { top: THIN, left: THIN, bottom: THIN, right: THIN };
+                }
+                dr.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+                [4, 5, 6, 7].forEach(c => { dr.getCell(c).numFmt = BRL; dr.getCell(c).alignment = { horizontal: 'right', vertical: 'middle' }; });
+                dr.getCell(6).font = { size: 9, name: 'Calibri', color: { argb: p.caixa >= 0 ? COR : 'FFCC0000' } };
+                dr.getCell(7).font = { bold: true, size: 9, name: 'Calibri', color: { argb: acum >= 0 ? COR : 'FFCC0000' } };
+            });
+            sp2();
+        });
+        sp2();
+    });
+
+    // restaura estado
+    _pagModo = savedM; _subAvista = savedS; _nPix = savedNP; _nBoleto = savedNB; _nCartao = savedNC;
+
+    sp2();
+    mr2(marca + '   |   ' + contato2 + '   |   CNPJ: ' + (socio ? '62.456.202/0001-08' : '58.589.970/0001-54'), COR_LT, 'FF555555', 9, 18);
+
+    // download
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0, 10)) + '.xlsx';
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarToast('Planilha exportada!');
+}
+
 function simularViabilidade(modo, n) {
     const { valorFinal, totalProd, totalInfra, desl, diarias, diarista } = _pag;
     if (!valorFinal) return true;
@@ -1740,7 +2179,7 @@ function renderPagamento() {
     let html = '';
 
     const totalDesc = {
-        avista: _subAvista === '5050' ? 'Pix — 50% + 50%' : 'Pix — 4×',
+        avista: _subAvista === '5050' ? 'Pix — 50% + 50%' : `Pix — ${_nPix}×`,
         boleto: `Boleto — ${_nBoleto}×`,
         cartao: `Cartão — ${_nCartao}×`
     }[_pagModo];
@@ -1752,8 +2191,6 @@ function renderPagamento() {
         </div>
         <span class="pag-total-valor">${fmt(data.total)}</span>
     </div>`;
-
-    const r50 = v => Math.round(v / 50) * 50;
 
     // auto-corrige seleção inviável para o menor N viável
     const corrigirN = (opts, nAtual, setter, modo) => {
@@ -1915,46 +2352,20 @@ function renderPagamento() {
     document.getElementById('pagConteudo').innerHTML = html;
 }
 
-// ── ESTADO DE TESTE (orçamento fixo de referência) ──
-const ESTADO_TESTE = {
-    tipo: "ip",
-    socio: false,
-    diasTrabalho: 1,
-    diasDiarista: 1,
-    produtos: [
-        { codigo: "CAM-IP-001", qtd: 3 },
-        { codigo: "CAM-WF-003", qtd: 1 },
-        { codigo: "INF-CX-002", qtd: 3 },
-        { codigo: "CAB-CFTV-002", qtd: 1 },
-        { codigo: "NVR-008-001", qtd: 1 },
-        { codigo: "SW-004",      qtd: 1 }
-    ],
-    infra: [
-        { nome: "Conector RJ45",                          qtd: 10  },
-        { nome: "Abraçadeira de Nylon Preto 2,20mm X 200mm", qtd: 300 },
-        { nome: "Bucha 6 / Parafuso 4",                   qtd: 10  }
-    ]
-};
-
-function carregarTeste() {
-    localStorage.setItem("cpz_estado", JSON.stringify(ESTADO_TESTE));
-    document.getElementById("listaProdutos").innerHTML = "";
-    document.getElementById("listaInfra").innerHTML = "";
-    restaurarEstado();
-    calcular();
-}
-
 // ── INIT ──
 async function init() {
     await carregarBanco();
     if (!restaurarEstado()) {
-        // sem histórico: carrega orçamento de referência para testes
-        ESTADO_TESTE.produtos.forEach(p => adicionarProduto(p.codigo, p.qtd));
-        ESTADO_TESTE.infra.forEach(i => adicionarInfra(i.nome, i.qtd));
+        adicionarProduto();
+        adicionarInfra();
     }
     calcular();
 }
 init();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
 
 </script>
 </body>
