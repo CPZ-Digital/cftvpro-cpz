@@ -1458,6 +1458,7 @@ function gerarPDF() {
         : '';
 
     const placeholders = {
+        '{{logo_src}}':        socio ? 'ba-vision-assinatura.png' : 'cpz-assinatura.png',
         '{{marca}}':           marca,
         '{{dataFmt}}':         dataFmt,
         '{{dataVenc}}':        dataVenc,
