@@ -67,6 +67,20 @@
     }
 }
 
+/* ── B&A Vision palette ── */
+body.ba-vision {
+    --blue:      #10b981;
+    --blue-dim:  #063d28;
+    --blue-glow: rgba(16,185,129,0.18);
+}
+@media (prefers-color-scheme: light) {
+    body.ba-vision {
+        --blue:      #059669;
+        --blue-dim:  #d1fae5;
+        --blue-glow: rgba(5,150,105,0.12);
+    }
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body {
@@ -1249,6 +1263,7 @@ function toggleBAVision() {
     const cb=document.getElementById("usarSocio");
     cb.checked=!cb.checked;
     const ativo=cb.checked;
+    document.body.classList.toggle('ba-vision', ativo);
     document.getElementById("subtituloApp").textContent=ativo?"B&A Vision":"CPZ Digital";
     mostrarToast(ativo?"B&A Vision ativada":"CPZ Digital ativada");
     calcular();
@@ -1300,6 +1315,7 @@ function restaurarEstado() {
         });
         const socio=document.getElementById("usarSocio");
         socio.checked=e.socio||false;
+        document.body.classList.toggle('ba-vision', socio.checked);
         document.getElementById("subtituloApp").textContent=socio.checked?"B&A Vision":"CPZ Digital";
         if (e.diasTrabalho) document.getElementById("diasTrabalho").value=e.diasTrabalho;
         if (e.diasDiarista) document.getElementById("diasDiarista").value=e.diasDiarista;
@@ -1403,7 +1419,10 @@ function gerarPDF() {
     const dataFmt  = addDias(0);
     const dataVenc = addDias(Number(validade));
 
-    const TH  = 'background:#0055b3;color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
+    const cor  = socio ? '#059669' : '#0055b3';
+    const corL = socio ? '#d1f5e8' : '#e8eef8';
+    const corR = socio ? '#f0fbf7' : '#f7f9ff';
+    const TH  = 'background:' + cor + ';color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
     const TDL = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;';
     const TDC = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:center;';
     const TDR = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:right;';
@@ -1438,29 +1457,29 @@ function gerarPDF() {
         : _pagModo === 'boleto' ? (_nBoleto + '× mensais') : (_nCartao + '× no cartão');
 
     const rowsProd = itensProd.map((it, i) =>
-        '<tr style="background:' + (i%2 ? '#f7f9ff' : '#fff') + '">' +
+        '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
         '<td style="' + TDL + '">' + it.descricao + '</td>' +
         '<td style="' + TDC + '">' + it.qtd + '</td></tr>').join('');
 
     const rowsInf = itensInf.map((it, i) =>
-        '<tr style="background:' + (i%2 ? '#f7f9ff' : '#fff') + '">' +
+        '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
         '<td style="' + TDL + 'color:#555;">' + it.descricao + '</td>' +
         '<td style="' + TDC + 'color:#555;">' + it.qtd + '</td></tr>').join('');
 
     const rowsParc = inst.parcelas.map((p, i) => {
         const venc = addDias(Number(validade) + i * 30);
-        return '<tr style="background:' + (i%2 ? '#f7f9ff' : '#fff') + '">' +
+        return '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
             '<td style="' + TDL + '">' + p.label + '</td>' +
             '<td style="' + TDC + '">' + venc + '</td>' +
-            '<td style="' + TDR + 'font-weight:700;color:#0055b3;">' + fmtR(p.recebe) + '</td></tr>';
+            '<td style="' + TDR + 'font-weight:700;color:' + cor + ';">' + fmtR(p.recebe) + '</td></tr>';
     }).join('');
 
     const blocoMateriais = (itensProd.length || itensInf.length)
-        ? '<p style="font-size:13px;font-weight:700;color:#0055b3;border-bottom:2px solid #0055b3;padding-bottom:4px;margin:0 0 10px;">Materiais e Equipamentos</p>' +
+        ? '<p style="font-size:13px;font-weight:700;color:' + cor + ';border-bottom:2px solid ' + cor + ';padding-bottom:4px;margin:0 0 10px;">Materiais e Equipamentos</p>' +
           '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">' +
           '<tr><th style="' + TH + '">Descrição</th><th style="' + TH + 'text-align:center;width:60px;">Qtd</th></tr>' +
           rowsProd +
-          (itensInf.length ? '<tr><td colspan="2" style="background:#e8eef8;padding:6px 12px;font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.5px;">Infraestrutura</td></tr>' + rowsInf : '') +
+          (itensInf.length ? '<tr><td colspan="2" style="background:' + corL + ';padding:6px 12px;font-size:10px;font-weight:700;color:' + cor + ';text-transform:uppercase;letter-spacing:0.5px;">Infraestrutura</td></tr>' + rowsInf : '') +
           '</table>' +
           (itensInf.length ? '<p style="font-size:10px;color:#999;font-style:italic;margin:4px 0 20px;">* Itens de infraestrutura são estimativas e podem variar conforme o ambiente.</p>' : '<p style="margin:0 0 20px;"></p>')
         : '';
@@ -1480,6 +1499,10 @@ function gerarPDF() {
         '{{rows_parc}}':       rowsParc,
         '{{validade}}':        validade,
         '{{prazo}}':           prazo + ' dias úteis',
+        '{{cor_pri}}':         socio ? '#059669' : '#0055b3',
+        '{{cor_light}}':       socio ? '#d1f5e8' : '#e8eef8',
+        '{{cor_bg}}':          socio ? '#f0fbf7' : '#f0f5ff',
+        '{{cor_row}}':         socio ? '#f0fbf7' : '#f7f9ff',
         '{{contato_email}}':   socio ? 'ba.visionseguranca@gmail.com' : 'contato@cpzdigital.com.br',
         '{{contato_tel}}':     socio ? '(21) 99664-6927' : '(21) 96745-5648',
         '{{geradoEm}}':        new Date().toLocaleDateString('pt-BR'),
