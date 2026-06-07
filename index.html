@@ -71,13 +71,13 @@
 body.ba-vision {
     --blue:      #10b981;
     --blue-dim:  #063d28;
-    --blue-glow: rgba(16,185,129,0.18);
+    --blue-glow: rgba(16,185,129,0.40);
 }
 @media (prefers-color-scheme: light) {
     body.ba-vision {
         --blue:      #059669;
         --blue-dim:  #d1fae5;
-        --blue-glow: rgba(5,150,105,0.12);
+        --blue-glow: rgba(5,150,105,0.35);
     }
 }
 
@@ -453,7 +453,7 @@ body {
 .fab-azul {
     background: var(--blue);
     color: white;
-    box-shadow: 0 4px 16px rgba(10,132,255,0.4);
+    box-shadow: 0 4px 16px var(--blue-glow);
 }
 .fab-ghost {
     background: var(--surface);
