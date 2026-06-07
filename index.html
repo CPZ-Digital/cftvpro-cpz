@@ -620,6 +620,16 @@ body {
     background: var(--blue-dim); border-color: var(--blue); color: var(--blue);
 }
 .pag-boleto-opt.ativo .opt-parc-val { opacity: 1; }
+.pag-boleto-opt.inviavel {
+    opacity: 0.38; cursor: not-allowed;
+    border-color: var(--danger-text); color: var(--danger-text);
+    text-decoration: line-through;
+}
+.pag-aviso-inviavel {
+    font-size: 11px; color: var(--danger-text);
+    background: var(--danger); border-radius: 8px;
+    padding: 7px 11px; margin-top: 6px; line-height: 1.5;
+}
 
 .pag-parc {
     background: var(--item-bg); border: 1px solid var(--border2);
@@ -1548,6 +1558,60 @@ function gerarPDF() {
         .catch(e => alert('Erro ao carregar template: ' + e.message));
 }
 
+function simularViabilidade(modo, n) {
+    const { valorFinal, totalProd, totalInfra, desl, diarias, diarista } = _pag;
+    if (!valorFinal) return true;
+    const r50 = v => Math.round(v / 50) * 50;
+    const caixaParc = (recebe, despMat, despInfra, despDesl, despDiar, adriano) =>
+        (recebe - despMat - despInfra - despDesl - despDiar) - adriano;
+
+    let caixas = [];
+
+    if (modo === 'avista') {
+        if (n === '5050') {
+            const meia = valorFinal / 2;
+            caixas = [
+                caixaParc(meia, 0,         totalInfra, desl, 0,        0),
+                caixaParc(meia, totalProd, 0,          0,    diarista,  diarias)
+            ];
+        } else {
+            const total  = valorFinal;
+            const parc   = total / n;
+            const adPerc = diarias / n;
+            const matPer = n > 1 ? totalProd / (n - 1) : 0;
+            for (let i = 1; i <= n; i++)
+                caixas.push(caixaParc(parc, i >= 2 ? matPer : 0,
+                    i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
+                    i === 1 ? diarista : 0, adPerc));
+        }
+    } else if (modo === 'boleto') {
+        const total  = r50(valorFinal * 1.05);
+        const parc   = total / n;
+        const adPerc = diarias / n;
+        const matPer = n > 1 ? totalProd / (n - 1) : 0;
+        for (let i = 1; i <= n; i++)
+            caixas.push(caixaParc(parc, i >= 2 ? matPer : 0,
+                i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
+                i === 1 ? diarista : 0, adPerc));
+    } else if (modo === 'cartao') {
+        const total  = r50(valorFinal * 1.10);
+        const parc   = total / n;
+        const adPerc = diarias / n;
+        const matPer = totalProd / n;
+        for (let i = 1; i <= n; i++)
+            caixas.push(caixaParc(parc, matPer,
+                i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
+                i === 1 ? diarista : 0, adPerc));
+    }
+
+    let acum = 0;
+    for (const c of caixas) {
+        acum += c;
+        if (acum < 0) return false;
+    }
+    return true;
+}
+
 function calcInstallments() {
     const { valorFinal, totalProd, totalInfra, desl, diarias, diarista } = _pag;
     const r50 = v => Math.round(v / 50) * 50;
@@ -1640,10 +1704,30 @@ function renderPagamento() {
     </div>`;
 
     const r50 = v => Math.round(v / 50) * 50;
-    const mkOpts = (opts, nAtual, setter) =>
-        opts.map(n =>
-            `<button class="pag-boleto-opt ${n===nAtual?'ativo':''}" onclick="${setter}(${n})">${n}×</button>`
-        ).join('');
+
+    // auto-corrige seleção inviável para o menor N viável
+    const corrigirN = (opts, nAtual, setter, modo) => {
+        if (!simularViabilidade(modo, nAtual)) {
+            const viavel = opts.find(n => simularViabilidade(modo, n));
+            if (viavel) { window[setter](viavel); return true; }
+        }
+        return false;
+    };
+    if (_pagModo === 'avista' && _subAvista === '4pix') corrigirN([2,3,4], _nPix,    'setNPix',    'avista');
+    if (_pagModo === 'boleto')                          corrigirN([2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto');
+    if (_pagModo === 'cartao')                          corrigirN([2,3,4,5,6], _nCartao, 'setNCartao', 'cartao');
+
+    const mkOpts = (opts, nAtual, setter, modo) =>
+        opts.map(n => {
+            const viavel = simularViabilidade(modo, n);
+            const cls = `pag-boleto-opt ${n === nAtual ? 'ativo' : ''} ${!viavel ? 'inviavel' : ''}`;
+            const click = viavel ? `onclick="${setter}(${n})"` : '';
+            return `<button class="${cls}" ${click} ${!viavel ? 'title="Caixa fica negativo neste parcelamento"' : ''}>${n}×</button>`;
+        }).join('');
+
+    const avisoInviavel = (modo, n) => !simularViabilidade(modo, n)
+        ? `<div class="pag-aviso-inviavel">⚠ Projeto inviável em ${n}× — o caixa acumulado fica negativo neste parcelamento.</div>`
+        : '';
 
     if (_pagModo === 'avista') {
         html += `<div class="pag-boleto-ctrl">
@@ -1657,9 +1741,10 @@ function renderPagamento() {
             html += `<div class="pag-boleto-ctrl">
                 <span class="pag-boleto-label">Parcelas:</span>
                 <div class="pag-boleto-sel">
-                    ${mkOpts([2,3,4], _nPix, 'setNPix')}
+                    ${mkOpts([2,3,4], _nPix, 'setNPix', 'avista')}
                 </div>
-            </div>`;
+            </div>
+            ${avisoInviavel('avista', _nPix)}`;
         }
     }
 
@@ -1667,18 +1752,20 @@ function renderPagamento() {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                ${mkOpts([2,3,4,5,6], _nBoleto, 'setNBoleto')}
+                ${mkOpts([2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto')}
             </div>
-        </div>`;
+        </div>
+        ${avisoInviavel('boleto', _nBoleto)}`;
     }
 
     if (_pagModo === 'cartao') {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                ${mkOpts([2,3,4,5,6], _nCartao, 'setNCartao')}
+                ${mkOpts([2,3,4,5,6], _nCartao, 'setNCartao', 'cartao')}
             </div>
-        </div>`;
+        </div>
+        ${avisoInviavel('cartao', _nCartao)}`;
     }
 
     let acum = 0;
