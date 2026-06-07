@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -1386,179 +1386,150 @@ function confirmarExportar() {
 
 function gerarPDF() {
     const { nome, tel, email, data, validade } = _clienteInfo;
-    const fmtR   = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-    const socio  = document.getElementById('usarSocio').checked;
-    const marca  = socio ? 'BA Vision' : 'CPZ Digital';
+    const fmtR  = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const socio = document.getElementById('usarSocio').checked;
+    const marca = socio ? 'BA Vision' : 'CPZ Digital';
 
-    // Datas
     const baseMs   = data ? new Date(data + 'T12:00:00').getTime() : Date.now();
     const addDias  = d => new Date(baseMs + d * 86400000).toLocaleDateString('pt-BR');
     const dataFmt  = addDias(0);
     const dataVenc = addDias(Number(validade));
 
-    // Coleta produtos (sem preços)
     const itensProd = [];
     document.querySelectorAll('.item-produto').forEach(card => {
-        const busca = card.querySelector('.item-busca-wrapper');
+        const busca  = card.querySelector('.item-busca-wrapper');
         const codigo = busca ? busca.getValor() : '';
         if (!codigo) return;
         const qtd = Number(card.querySelector('.qtd-num').value) || 0;
-        if (qtd === 0) return;
+        if (!qtd) return;
         const prod = produtos.find(p => p.codigo === codigo);
-        const descricao = prod ? (prod.descricao || prod.nome || codigo) : codigo;
-        itensProd.push({ descricao, qtd });
+        itensProd.push({ descricao: prod ? (prod.descricao || prod.nome || codigo) : codigo, qtd });
     });
 
-    // Coleta infra (sem preços)
     const itensInf = [];
     document.querySelectorAll('.item-infra').forEach(card => {
-        const busca = card.querySelector('.item-busca-wrapper');
+        const busca    = card.querySelector('.item-busca-wrapper');
         const nomeItem = busca ? busca.getValor() : '';
         if (!nomeItem) return;
         const qtd = Number(card.querySelector('.qtd-num').value) || 0;
-        if (qtd === 0) return;
+        if (!qtd) return;
         itensInf.push({ descricao: nomeItem, qtd });
     });
 
-    // Pagamento
-    const inst = calcInstallments();
-    const modoLabel = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[_pagModo];
+    const inst       = calcInstallments();
+    const modoLabel  = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[_pagModo];
     const formaLabel = _pagModo === 'avista'
-        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : `${_nPix}× Pix`)
-        : _pagModo === 'boleto' ? `${_nBoleto}× mensais` : `${_nCartao}× no cartão`;
+        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : _nPix + '× Pix')
+        : _pagModo === 'boleto' ? (_nBoleto + '× mensais') : (_nCartao + '× no cartão');
 
-    // Datas de vencimento: base = vencimento da proposta, depois +30 dias por parcela
-    const vencBase = Number(validade);
-    const parcRows = inst.parcelas.map((p, i) => {
-        const venc = addDias(vencBase + i * 30);
-        return `<tr style="border-bottom:1px solid #e8e8e8;">
-            <td style="padding:9px 12px;font-size:12px;color:#333;">${p.label}</td>
-            <td style="padding:9px 12px;font-size:12px;color:#555;text-align:center;">${venc}</td>
-            <td style="padding:9px 12px;font-size:12px;font-weight:700;text-align:right;color:#0055b3;">${fmtR(p.recebe)}</td>
-        </tr>`;
+    // estilos base (sem flex/grid)
+    const TH  = 'background:#0055b3;color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
+    const TDL = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;';
+    const TDC = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:center;';
+    const TDR = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:right;';
+    const SEC = 'font-size:13px;font-weight:700;color:#0055b3;border-bottom:2px solid #0055b3;padding-bottom:4px;margin:0 0 10px;';
+
+    const rowsProd = itensProd.map((it, i) =>
+        '<tr style="background:' + (i%2 ? '#f7f9ff' : '#fff') + '">' +
+        '<td style="' + TDL + '">' + it.descricao + '</td>' +
+        '<td style="' + TDC + '">' + it.qtd + '</td></tr>').join('');
+
+    const rowsInf = itensInf.map((it, i) =>
+        '<tr style="background:' + (i%2 ? '#f7f9ff' : '#fff') + '">' +
+        '<td style="' + TDL + 'color:#555;">' + it.descricao + '</td>' +
+        '<td style="' + TDC + 'color:#555;">' + it.qtd + '</td></tr>').join('');
+
+    const rowsParc = inst.parcelas.map((p, i) => {
+        const venc = addDias(Number(validade) + i * 30);
+        return '<tr style="background:' + (i%2 ? '#f7f9ff' : '#fff') + '">' +
+            '<td style="' + TDL + '">' + p.label + '</td>' +
+            '<td style="' + TDC + '">' + venc + '</td>' +
+            '<td style="' + TDR + 'font-weight:700;color:#0055b3;">' + fmtR(p.recebe) + '</td></tr>';
     }).join('');
 
-    const th = 'background:#0055b3;color:white;padding:9px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;';
-    const sep = `<tr style="background:#f0f5ff;">
-        <td colspan="2" style="padding:7px 12px;font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.5px;">Infraestrutura</td>
-    </tr>`;
+    const tabelaMat = (itensProd.length || itensInf.length)
+        ? '<p style="' + SEC + '">Materiais e Equipamentos</p>' +
+          '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">' +
+          '<tr><th style="' + TH + '">Descrição</th><th style="' + TH + 'text-align:center;width:60px;">Qtd</th></tr>' +
+          rowsProd +
+          (itensInf.length
+              ? '<tr><td colspan="2" style="background:#e8eef8;padding:6px 12px;font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.5px;">Infraestrutura</td></tr>' + rowsInf
+              : '') +
+          '</table>' +
+          (itensInf.length
+              ? '<p style="font-size:10px;color:#999;font-style:italic;margin:4px 0 20px;">* Itens de infraestrutura são estimativas e podem variar conforme o ambiente.</p>'
+              : '<p style="margin:0 0 20px;"></p>')
+        : '';
 
-    const linhasProd = itensProd.map((i, idx) => `<tr style="border-bottom:1px solid #eef0f5;background:${idx%2===0?'white':'#fafbff'}">
-        <td style="padding:9px 12px;font-size:12px;color:#333;">${i.descricao}</td>
-        <td style="padding:9px 12px;font-size:12px;text-align:center;color:#555;">${i.qtd}</td>
-    </tr>`).join('');
+    const html =
+        '<table width="780" cellpadding="0" cellspacing="0" style="font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;margin:0 auto;">' +
+        '<tr><td style="padding:36px 48px;">' +
 
-    const linhasInf = itensInf.map((i, idx) => `<tr style="border-bottom:1px solid #eef0f5;background:${idx%2===0?'#fafbff':'white'}">
-        <td style="padding:9px 12px;font-size:12px;color:#555;">${i.descricao}</td>
-        <td style="padding:9px 12px;font-size:12px;text-align:center;color:#555;">${i.qtd}</td>
-    </tr>`).join('');
+        // cabeçalho
+        '<table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:3px solid #0055b3;padding-bottom:16px;margin-bottom:22px;">' +
+        '<tr>' +
+        '<td><img src="cpz-assinatura.png" height="48" style="display:block;" crossorigin="anonymous"></td>' +
+        '<td style="text-align:right;vertical-align:top;">' +
+        '<p style="margin:0;font-size:16px;font-weight:700;color:#0055b3;">PROPOSTA DE SERVIÇO</p>' +
+        '<p style="margin:4px 0 0;font-size:11px;color:#555;">Data: <strong>' + dataFmt + '</strong> &nbsp;|&nbsp; Válido até: <strong>' + dataVenc + '</strong></p>' +
+        '</td></tr></table>' +
 
-    const html = `<div style="font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;padding:36px 48px;max-width:780px;margin:0 auto;">
+        // cliente
+        '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">' +
+        '<tr><td style="padding:12px 16px;background:#f0f5ff;border-left:4px solid #0055b3;">' +
+        '<p style="margin:0 0 8px;font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.6px;">Cliente</p>' +
+        '<table width="100%" cellpadding="2" cellspacing="0" style="font-size:12px;">' +
+        '<tr><td style="color:#888;width:70px;">Nome</td><td style="font-weight:700;">' + nome + '</td>' +
+        '<td style="color:#888;width:70px;">Telefone</td><td style="font-weight:700;">' + tel + '</td></tr>' +
+        (email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '') +
+        '</table></td></tr></table>' +
 
-        <!-- CABEÇALHO -->
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0055b3;padding-bottom:18px;margin-bottom:24px;">
-            <div>
-                <img src="cpz-assinatura.png" style="height:50px;object-fit:contain;" crossorigin="anonymous">
-            </div>
-            <div style="text-align:right;line-height:1.9;">
-                <div style="font-size:15px;font-weight:700;color:#0055b3;">PROPOSTA DE SERVIÇO</div>
-                <div style="font-size:11px;color:#555;">Data: <strong>${dataFmt}</strong></div>
-                <div style="font-size:11px;color:#555;">Válido até: <strong>${dataVenc}</strong></div>
-            </div>
-        </div>
+        // escopo
+        '<p style="' + SEC + '">Escopo do Serviço</p>' +
+        '<p style="font-size:12px;color:#444;line-height:1.75;margin:0 0 20px;">Fornecimento e instalação de sistema de vigilância (câmeras IP/analógicas), incluindo equipamentos, infraestrutura de cabos, configuração, testes de funcionamento e treinamento básico de operação.<br>O prazo de execução será de <strong>02 dias úteis</strong> a contar da aprovação desta proposta.</p>' +
 
-        <!-- CLIENTE -->
-        <div style="background:#f0f5ff;border-left:4px solid #0055b3;border-radius:6px;padding:14px 18px;margin-bottom:24px;">
-            <div style="font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">Cliente</div>
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <tr>
-                    <td style="padding:2px 0;color:#888;width:80px;">Nome</td>
-                    <td style="padding:2px 0;font-weight:700;">${nome}</td>
-                    <td style="padding:2px 0;color:#888;width:80px;">Telefone</td>
-                    <td style="padding:2px 0;font-weight:700;">${tel}</td>
-                </tr>
-                ${email ? `<tr><td style="padding:2px 0;color:#888;">E-mail</td><td colspan="3" style="padding:2px 0;font-weight:700;">${email}</td></tr>` : ''}
-            </table>
-        </div>
+        tabelaMat +
 
-        <!-- ESCOPO -->
-        <div style="margin-bottom:22px;">
-            <div style="font-size:13px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:5px;margin-bottom:10px;">Escopo do Serviço</div>
-            <p style="font-size:12px;color:#444;line-height:1.75;margin:0;">
-                Fornecimento e instalação de sistema de vigilância (câmeras IP/analógicas), incluindo equipamentos, infraestrutura de cabos, configuração, testes de funcionamento e treinamento básico de operação.
-                O prazo de execução será de <strong>02 dias úteis</strong> a contar da aprovação desta proposta.
-            </p>
-        </div>
+        // total
+        '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0055b3;margin-bottom:22px;">' +
+        '<tr><td style="padding:14px 18px;color:#fff;font-size:13px;font-weight:700;">VALOR TOTAL DO PROJETO</td>' +
+        '<td style="padding:14px 18px;color:#fff;font-size:20px;font-weight:700;text-align:right;">' + fmtR(inst.total) + '</td></tr></table>' +
 
-        <!-- MATERIAIS -->
-        ${(itensProd.length || itensInf.length) ? `
-        <div style="margin-bottom:22px;">
-            <div style="font-size:13px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:5px;margin-bottom:10px;">Materiais e Equipamentos</div>
-            <table style="width:100%;border-collapse:collapse;border-radius:6px;overflow:hidden;">
-                <thead><tr>
-                    <th style="${th}text-align:left;">Descrição</th>
-                    <th style="${th}text-align:center;width:60px;">Qtd</th>
-                </tr></thead>
-                <tbody>
-                    ${linhasProd}
-                    ${itensInf.length ? sep + linhasInf : ''}
-                </tbody>
-            </table>
-            ${itensInf.length ? `<p style="font-size:10px;color:#999;margin:6px 0 0;font-style:italic;">* Os itens de infraestrutura listados acima são estimativas e podem variar conforme o ambiente.</p>` : ''}
-        </div>` : ''}
+        // pagamento
+        '<p style="' + SEC + '">Condições de Pagamento</p>' +
+        '<p style="font-size:12px;color:#444;margin:0 0 10px;"><strong>Forma:</strong> ' + modoLabel + ' — ' + formaLabel + '</p>' +
+        '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">' +
+        '<tr><th style="' + TH + '">Parcela</th><th style="' + TH + 'text-align:center;">Vencimento</th><th style="' + TH + 'text-align:right;">Valor</th></tr>' +
+        rowsParc + '</table>' +
 
-        <!-- TOTAL -->
-        <div style="background:#0055b3;color:white;border-radius:8px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
-            <span style="font-size:13px;font-weight:700;">VALOR TOTAL DO PROJETO</span>
-            <span style="font-size:20px;font-weight:700;">${fmtR(inst.total)}</span>
-        </div>
+        // observações
+        '<p style="' + SEC + '">Observações</p>' +
+        '<p style="font-size:11px;color:#555;line-height:2;margin:0 0 30px;">' +
+        '&bull; Serviços adicionais não previstos serão orçados separadamente.<br>' +
+        '&bull; Equipamentos como andaimes ou plataformas elevadas são de responsabilidade do contratante.<br>' +
+        '&bull; Esta proposta é válida por <strong>' + validade + ' dias</strong> a partir de ' + dataFmt + '.<br>' +
+        '&bull; Os preços podem sofrer reajuste após o prazo de validade.</p>' +
 
-        <!-- PAGAMENTO -->
-        <div style="margin-bottom:22px;">
-            <div style="font-size:13px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:5px;margin-bottom:10px;">Condições de Pagamento</div>
-            <div style="font-size:12px;color:#444;margin-bottom:10px;"><strong>Forma:</strong> ${modoLabel} — ${formaLabel}</div>
-            <table style="width:100%;border-collapse:collapse;">
-                <thead><tr>
-                    <th style="${th}text-align:left;">Parcela</th>
-                    <th style="${th}text-align:center;">Vencimento</th>
-                    <th style="${th}text-align:right;">Valor</th>
-                </tr></thead>
-                <tbody>${parcRows}</tbody>
-            </table>
-        </div>
+        // rodapé
+        '<table width="100%" cellpadding="0" cellspacing="0" style="border-top:2px solid #0055b3;padding-top:14px;">' +
+        '<tr>' +
+        '<td style="font-size:11px;color:#666;line-height:1.9;"><strong style="color:#0055b3;font-size:12px;">' + marca + '</strong><br>contato@cpzdigital.com.br &nbsp;|&nbsp; (21) 96745-5648</td>' +
+        '<td style="text-align:right;font-size:10px;color:#bbb;vertical-align:bottom;">Gerado em ' + new Date().toLocaleDateString('pt-BR') + '</td>' +
+        '</tr></table>' +
 
-        <!-- OBSERVAÇÕES -->
-        <div style="margin-bottom:32px;">
-            <div style="font-size:13px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:5px;margin-bottom:10px;">Observações</div>
-            <ul style="font-size:11px;color:#555;line-height:2.1;margin:0;padding-left:16px;">
-                <li>Serviços adicionais não previstos nesta proposta serão orçados separadamente.</li>
-                <li>Equipamentos como andaimes ou plataformas elevadas são de responsabilidade do contratante.</li>
-                <li>Esta proposta é válida por <strong>${validade} dias</strong> a partir de ${dataFmt}.</li>
-                <li>Os preços podem sofrer reajuste após o prazo de validade.</li>
-            </ul>
-        </div>
+        '</td></tr></table>';
 
-        <!-- RODAPÉ -->
-        <div style="border-top:2px solid #0055b3;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end;">
-            <div style="font-size:11px;color:#666;line-height:1.8;">
-                <div style="font-weight:700;color:#0055b3;font-size:12px;">${marca}</div>
-                <div>contato@cpzdigital.com.br</div>
-                <div>(21) 96745-5648</div>
-            </div>
-            <div style="font-size:10px;color:#bbb;">Gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
-        </div>
-    </div>`;
-
-    const nomeArq = `orcamento-${nome.replace(/\s+/g,'-').toLowerCase()}-${data||new Date().toISOString().slice(0,10)}.pdf`;
+    const nomeArq = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0,10)) + '.pdf';
     const el = document.createElement('div');
+    el.style.cssText = 'position:absolute;left:-9999px;top:0;';
     el.innerHTML = html;
     document.body.appendChild(el);
     html2pdf().set({
-        margin: 0, filename: nomeArq,
+        margin:      [10, 0, 10, 0],
+        filename:    nomeArq,
         image:       { type:'jpeg', quality:0.97 },
         html2canvas: { scale:2, useCORS:true, logging:false },
-        jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' },
-        pagebreak:   { mode:'avoid-all' }
+        jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
     }).from(el).save().then(() => document.body.removeChild(el));
 }
 
