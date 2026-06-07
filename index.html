@@ -794,6 +794,13 @@ body {
                     <span style="color:var(--muted);font-size:14px">dias</span>
                 </div>
             </div>
+            <div class="exp-field">
+                <label class="exp-label">Prazo de execução</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input class="exp-input" id="expPrazo" type="number" min="1" max="60" value="2" style="width:80px;flex:none">
+                    <span style="color:var(--muted);font-size:14px">dias úteis</span>
+                </div>
+            </div>
             <button class="exp-btn" onclick="confirmarExportar()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Gerar PDF
@@ -1242,8 +1249,8 @@ function toggleBAVision() {
     const cb=document.getElementById("usarSocio");
     cb.checked=!cb.checked;
     const ativo=cb.checked;
-    document.getElementById("subtituloApp").textContent=ativo?"BA Vision":"CPZ Digital";
-    mostrarToast(ativo?"BA Vision ativada":"CPZ Digital ativada");
+    document.getElementById("subtituloApp").textContent=ativo?"B&A Vision":"CPZ Digital";
+    mostrarToast(ativo?"B&A Vision ativada":"CPZ Digital ativada");
     calcular();
 }
 
@@ -1293,7 +1300,7 @@ function restaurarEstado() {
         });
         const socio=document.getElementById("usarSocio");
         socio.checked=e.socio||false;
-        document.getElementById("subtituloApp").textContent=socio.checked?"BA Vision":"CPZ Digital";
+        document.getElementById("subtituloApp").textContent=socio.checked?"B&A Vision":"CPZ Digital";
         if (e.diasTrabalho) document.getElementById("diasTrabalho").value=e.diasTrabalho;
         if (e.diasDiarista) document.getElementById("diasDiarista").value=e.diasDiarista;
         if (e.produtos&&e.produtos.length) e.produtos.forEach(p=>adicionarProduto(p.codigo,p.qtd));
@@ -1355,7 +1362,7 @@ function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
 
 // ── EXPORTAR ──
-let _clienteInfo = { nome:'', tel:'', data:'', validade:15 };
+let _clienteInfo = { nome:'', tel:'', data:'', validade:15, prazo:'2' };
 
 function abrirExportar() {
     const overlay = document.getElementById('expOverlay');
@@ -1377,18 +1384,19 @@ function confirmarExportar() {
     const email    = document.getElementById('expEmail').value.trim();
     const data     = document.getElementById('expData').value;
     const validade = document.getElementById('expValidade').value;
+    const prazo    = document.getElementById('expPrazo').value || '2';
     if (!nome)  { document.getElementById('expNome').focus();  return; }
     if (!tel)   { document.getElementById('expTel').focus();   return; }
-    _clienteInfo = { nome, tel, email, data, validade };
+    _clienteInfo = { nome, tel, email, data, validade, prazo };
     fecharExportar();
     gerarPDF();
 }
 
 function gerarPDF() {
-    const { nome, tel, email, data, validade } = _clienteInfo;
+    const { nome, tel, email, data, validade, prazo = '2' } = _clienteInfo;
     const fmtR  = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
     const socio = document.getElementById('usarSocio').checked;
-    const marca = socio ? 'BA Vision' : 'CPZ Digital';
+    const marca = socio ? 'B&A Vision' : 'CPZ Digital';
 
     const baseMs   = data ? new Date(data + 'T12:00:00').getTime() : Date.now();
     const addDias  = d => new Date(baseMs + d * 86400000).toLocaleDateString('pt-BR');
@@ -1471,6 +1479,9 @@ function gerarPDF() {
         '{{formaLabel}}':      formaLabel,
         '{{rows_parc}}':       rowsParc,
         '{{validade}}':        validade,
+        '{{prazo}}':           prazo + ' dias úteis',
+        '{{contato_email}}':   socio ? 'ba.visionseguranca@gmail.com' : 'contato@cpzdigital.com.br',
+        '{{contato_tel}}':     socio ? '(21) 99664-6927' : '(21) 96745-5648',
         '{{geradoEm}}':        new Date().toLocaleDateString('pt-BR'),
     };
 
