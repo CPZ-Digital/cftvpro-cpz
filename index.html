@@ -1422,6 +1422,12 @@ function gerarPDF() {
     const cor  = socio ? '#059669' : '#0055b3';
     const corL = socio ? '#d1f5e8' : '#e8eef8';
     const corR = socio ? '#f0fbf7' : '#f7f9ff';
+
+    const msgInstitucional = socio
+        ? 'A B&A Vision agradece a oportunidade de apresentar esta proposta e coloca-se à disposição para esclarecer qualquer dúvida.'
+        : 'A CPZ Digital agradece a oportunidade de apresentar esta proposta e coloca-se à disposição para esclarecer qualquer dúvida.';
+    const responsavel = socio ? 'Bruno &amp; Adriano — B&A Vision' : 'Adriano — CPZ Digital';
+    const cnpj        = socio ? '62.456.202/0001-08' : '58.589.970/0001-54';
     const TH  = 'background:' + cor + ';color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
     const TDL = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;';
     const TDC = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:center;';
@@ -1449,6 +1455,14 @@ function gerarPDF() {
         if (!qtd) return;
         itensInf.push({ descricao: nomeItem, qtd });
     });
+
+    const qtdCameras = itensProd
+        .filter(it => /câmera|camera/i.test(it.descricao))
+        .reduce((s, it) => s + Number(it.qtd), 0);
+    const qtdCamerasRow = qtdCameras > 0
+        ? '<p style="font-size:12px;color:#333;margin:0 0 16px;padding:7px 12px;background:' + corL + ';border-left:3px solid ' + cor + ';">' +
+          '<strong>Quantidade de câmeras previstas:</strong> ' + qtdCameras + ' unidades</p>'
+        : '';
 
     const inst       = calcInstallments();
     const modoLabel  = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[_pagModo];
@@ -1489,27 +1503,31 @@ function gerarPDF() {
         : '';
 
     const placeholders = {
-        '{{logo_src}}':           socio ? 'ba-vision-assinatura.png' : 'cpz-assinatura.png',
-        '{{marca}}':              marca,
-        '{{dataFmt}}':            dataFmt,
-        '{{dataVenc}}':           dataVenc,
-        '{{nome}}':               nome,
-        '{{tel}}':                tel,
-        '{{email_row}}':          email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '',
-        '{{relacao_materiais}}':  relacaoMateriais,
-        '{{total}}':              fmtR(inst.total),
-        '{{modoLabel}}':       modoLabel,
-        '{{formaLabel}}':      formaLabel,
-        '{{rows_parc}}':       rowsParc,
-        '{{validade}}':        validade,
-        '{{prazo}}':           prazo + ' dias úteis',
-        '{{cor_pri}}':         socio ? '#059669' : '#0055b3',
-        '{{cor_light}}':       socio ? '#d1f5e8' : '#e8eef8',
-        '{{cor_bg}}':          socio ? '#f0fbf7' : '#f0f5ff',
-        '{{cor_row}}':         socio ? '#f0fbf7' : '#f7f9ff',
-        '{{contato_email}}':   socio ? 'ba.visionseguranca@gmail.com' : 'contato@cpzdigital.com.br',
-        '{{contato_tel}}':     socio ? '(21) 99664-6927' : '(21) 96745-5648',
-        '{{geradoEm}}':        new Date().toLocaleDateString('pt-BR'),
+        '{{logo_src}}':          socio ? 'ba-vision-assinatura.png' : 'cpz-assinatura.png',
+        '{{marca}}':             marca,
+        '{{dataFmt}}':           dataFmt,
+        '{{dataVenc}}':          dataVenc,
+        '{{nome}}':              nome,
+        '{{tel}}':               tel,
+        '{{email_row}}':         email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '',
+        '{{msg_institucional}}': msgInstitucional,
+        '{{qtd_cameras_row}}':   qtdCamerasRow,
+        '{{relacao_materiais}}': relacaoMateriais,
+        '{{responsavel}}':       responsavel,
+        '{{cnpj}}':              cnpj,
+        '{{total}}':             fmtR(inst.total),
+        '{{modoLabel}}':         modoLabel,
+        '{{formaLabel}}':        formaLabel,
+        '{{rows_parc}}':         rowsParc,
+        '{{validade}}':          validade,
+        '{{prazo}}':             prazo + ' dias úteis',
+        '{{cor_pri}}':           socio ? '#059669' : '#0055b3',
+        '{{cor_light}}':         socio ? '#d1f5e8' : '#e8eef8',
+        '{{cor_bg}}':            socio ? '#f0fbf7' : '#f0f5ff',
+        '{{cor_row}}':           socio ? '#f0fbf7' : '#f7f9ff',
+        '{{contato_email}}':     socio ? 'ba.visionseguranca@gmail.com' : 'contato@cpzdigital.com.br',
+        '{{contato_tel}}':       socio ? '(21) 99664-6927' : '(21) 96745-5648',
+        '{{geradoEm}}':          new Date().toLocaleDateString('pt-BR'),
     };
 
     const nomeArq = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0,10)) + '.pdf';

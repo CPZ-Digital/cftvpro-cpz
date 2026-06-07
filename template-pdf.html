@@ -1,21 +1,26 @@
 <table width="100%" cellpadding="0" cellspacing="0" style="font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;">
-<tr><td style="padding:12px 16px 16px 16px;">
+<tr><td style="padding:10px 16px 16px 16px;">
 
     <!-- CABEÇALHO -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:3px solid {{cor_pri}};padding-bottom:16px;margin-bottom:22px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:3px solid {{cor_pri}};padding-bottom:10px;margin-bottom:10px;">
         <tr>
-            <td><img src="{{logo_src}}" height="48" style="display:block;" crossorigin="anonymous"></td>
-            <td style="text-align:right;vertical-align:top;">
+            <td style="vertical-align:middle;">
+                <img src="{{logo_src}}" height="72" style="display:block;" crossorigin="anonymous">
+            </td>
+            <td style="text-align:right;vertical-align:middle;">
                 <p style="margin:0;font-size:16px;font-weight:700;color:{{cor_pri}};">PROPOSTA DE SERVIÇO</p>
-                <p style="margin:4px 0 0;font-size:11px;color:#555;">Data: <strong>{{dataFmt}}</strong> &nbsp;|&nbsp; Válido até: <strong>{{dataVenc}}</strong></p>
+                <p style="margin:5px 0 0;font-size:11px;color:#555;">Data: <strong>{{dataFmt}}</strong> &nbsp;|&nbsp; Válido até: <strong>{{dataVenc}}</strong></p>
             </td>
         </tr>
     </table>
 
+    <!-- MENSAGEM INSTITUCIONAL -->
+    <p style="font-size:11px;color:#666;font-style:italic;margin:0 0 16px;line-height:1.7;text-align:center;">{{msg_institucional}}</p>
+
     <!-- CLIENTE -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
-        <tr><td style="padding:12px 16px;background:{{cor_bg}};border-left:4px solid {{cor_pri}};">
-            <p style="margin:0 0 8px;font-size:10px;font-weight:700;color:{{cor_pri}};text-transform:uppercase;letter-spacing:0.6px;">Cliente</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+        <tr><td style="padding:10px 14px;background:{{cor_bg}};border-left:4px solid {{cor_pri}};">
+            <p style="margin:0 0 6px;font-size:10px;font-weight:700;color:{{cor_pri}};text-transform:uppercase;letter-spacing:0.6px;">Cliente</p>
             <table width="100%" cellpadding="2" cellspacing="0" style="font-size:12px;">
                 <tr>
                     <td style="color:#888;width:70px;">Nome</td>
@@ -29,51 +34,84 @@
     </table>
 
     <!-- ESCOPO -->
-    <p style="font-size:13px;font-weight:700;color:{{cor_pri}};border-bottom:2px solid {{cor_pri}};padding-bottom:4px;margin:0 0 10px;">Escopo do Serviço</p>
-    <p style="font-size:12px;color:#444;line-height:1.75;margin:0 0 20px;">
+    <p style="font-size:13px;font-weight:700;color:{{cor_pri}};border-bottom:2px solid {{cor_pri}};padding-bottom:4px;margin:0 0 8px;">Escopo do Serviço</p>
+    <p style="font-size:12px;color:#444;line-height:1.75;margin:0 0 10px;">
         Fornecimento e instalação de sistema de vigilância (câmeras IP/analógicas), incluindo equipamentos,
         infraestrutura de cabos, configuração, testes de funcionamento e treinamento básico de operação.<br>
         O prazo de execução será de <strong>{{prazo}}</strong> a contar da aprovação desta proposta.
     </p>
+    {{qtd_cameras_row}}
 
     <!-- TOTAL -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:{{cor_pri}};margin-bottom:22px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:{{cor_pri}};margin-bottom:16px;">
         <tr>
-            <td style="padding:14px 18px;color:#fff;font-size:13px;font-weight:700;">VALOR TOTAL DO PROJETO</td>
-            <td style="padding:14px 18px;color:#fff;font-size:20px;font-weight:700;text-align:right;">{{total}}</td>
+            <td style="padding:9px 16px;color:#fff;font-size:12px;font-weight:700;">VALOR TOTAL DO PROJETO</td>
+            <td style="padding:9px 16px;color:#fff;font-size:18px;font-weight:700;text-align:right;">{{total}}</td>
         </tr>
     </table>
 
     <!-- CONDIÇÕES DE PAGAMENTO -->
-    <p style="font-size:13px;font-weight:700;color:{{cor_pri}};border-bottom:2px solid {{cor_pri}};padding-bottom:4px;margin:0 0 10px;">Condições de Pagamento</p>
-    <p style="font-size:12px;color:#444;margin:0 0 10px;"><strong>Forma:</strong> {{modoLabel}} — {{formaLabel}}</p>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
+    <p style="font-size:13px;font-weight:700;color:{{cor_pri}};border-bottom:2px solid {{cor_pri}};padding-bottom:4px;margin:0 0 8px;">Condições de Pagamento</p>
+    <p style="font-size:12px;color:#444;margin:0 0 8px;"><strong>Forma:</strong> {{modoLabel}} — {{formaLabel}}</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
         <tr>
-            <th style="background:{{cor_pri}};color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;">Parcela</th>
-            <th style="background:{{cor_pri}};color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:center;">Vencimento</th>
-            <th style="background:{{cor_pri}};color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:right;">Valor</th>
+            <th style="background:{{cor_pri}};color:#fff;padding:7px 12px;font-size:11px;font-weight:700;text-align:left;">Parcela</th>
+            <th style="background:{{cor_pri}};color:#fff;padding:7px 12px;font-size:11px;font-weight:700;text-align:center;">Vencimento</th>
+            <th style="background:{{cor_pri}};color:#fff;padding:7px 12px;font-size:11px;font-weight:700;text-align:right;">Valor</th>
         </tr>
         {{rows_parc}}
     </table>
 
     <!-- OBSERVAÇÕES -->
-    <p style="font-size:13px;font-weight:700;color:{{cor_pri}};border-bottom:2px solid {{cor_pri}};padding-bottom:4px;margin:0 0 10px;">Observações</p>
-    <p style="font-size:11px;color:#555;line-height:2;margin:0 0 22px;">
+    <p style="font-size:13px;font-weight:700;color:{{cor_pri}};border-bottom:2px solid {{cor_pri}};padding-bottom:4px;margin:0 0 8px;">Observações</p>
+    <p style="font-size:11px;color:#555;line-height:2;margin:0 0 16px;">
         &bull; Serviços adicionais não previstos serão orçados separadamente.<br>
         &bull; Equipamentos como andaimes ou plataformas elevadas são de responsabilidade do contratante.<br>
         &bull; Esta proposta é válida por <strong>{{validade}} dias</strong> a partir de {{dataFmt}}.<br>
         &bull; Os preços podem sofrer reajuste após o prazo de validade.
     </p>
 
+    <!-- CLÁUSULA DE ACEITE -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr><td style="padding:10px 14px;background:#fffbea;border-left:4px solid #c9a800;">
+            <p style="font-size:11px;color:#5a4a00;margin:0;line-height:1.7;">
+                <strong>Cláusula de Aceite:</strong> A aprovação desta proposta comercial caracteriza a aceitação integral dos serviços e condições descritos neste documento, passando o presente orçamento a possuir validade contratual entre as partes, independentemente de instrumento apartado.
+            </p>
+        </td></tr>
+    </table>
+
     <!-- RELAÇÃO DE MATERIAIS -->
     {{relacao_materiais}}
 
-    <!-- RODAPÉ -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:2px solid {{cor_pri}};padding-top:14px;">
+    <!-- ASSINATURAS -->
+    <p style="font-size:11px;color:#888;margin:0 0 6px;">Local e data: _______________________________, _____ / _____ / _______</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
         <tr>
-            <td style="font-size:11px;color:#666;line-height:1.9;">
-                <strong style="color:{{cor_pri}};font-size:12px;">{{marca}}</strong><br>
-                {{contato_email}} &nbsp;|&nbsp; {{contato_tel}}
+            <td style="width:46%;height:52px;vertical-align:bottom;border-bottom:1px solid #555;"></td>
+            <td style="width:8%;"></td>
+            <td style="width:46%;height:52px;vertical-align:bottom;border-bottom:1px solid #555;"></td>
+        </tr>
+        <tr>
+            <td style="padding-top:5px;text-align:center;font-size:11px;color:#333;font-weight:700;">Contratante</td>
+            <td></td>
+            <td style="padding-top:5px;text-align:center;font-size:11px;color:#333;font-weight:700;">Contratado</td>
+        </tr>
+        <tr>
+            <td style="text-align:center;font-size:10px;color:#777;">{{nome}}</td>
+            <td></td>
+            <td style="text-align:center;font-size:10px;color:#777;">{{responsavel}}</td>
+        </tr>
+    </table>
+
+    <!-- RODAPÉ INSTITUCIONAL -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-top:2px solid {{cor_pri}};padding-top:10px;">
+        <tr>
+            <td style="font-size:10px;color:#555;line-height:1.9;">
+                <strong style="color:{{cor_pri}};font-size:11px;">{{marca}}</strong>
+                &nbsp;|&nbsp; {{contato_tel}}
+                &nbsp;|&nbsp; {{contato_email}}
+                &nbsp;|&nbsp; CNPJ: {{cnpj}}<br>
+                <span style="color:#888;">Responsável(is): {{responsavel}}</span>
             </td>
             <td style="text-align:right;font-size:10px;color:#bbb;vertical-align:bottom;">Gerado em {{geradoEm}}</td>
         </tr>
