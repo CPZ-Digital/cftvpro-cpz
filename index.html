@@ -1686,11 +1686,9 @@ function renderPagamento() {
         const acumBefore = acum;
         acum += p.caixa;
 
-        // No 50/50, a 2ª parcela usa o saldo do sinal para cobrir as saídas
-        const carry = (_pagModo === 'avista' && _subAvista === '5050' && idx > 0 && acumBefore > 0)
-            ? acumBefore : 0;
-        const totalDisp  = p.recebe + carry;
-        const saldoDisp  = totalDisp - p.desp;
+        // carry: saldo acumulado das parcelas anteriores (positivo ou negativo)
+        const carry     = idx > 0 ? acumBefore : 0;
+        const saldoDisp = p.recebe + carry - p.desp;
 
         const saidasRows = [
             p.despInfra > 0 ? `<div class="pag-row pag-row-sub">
@@ -1719,8 +1717,11 @@ function renderPagamento() {
                 <span class="pag-row-val verde">${fmt(p.recebe)}</span>
             </div>
             ${carry > 0 ? `<div class="pag-row">
-                <span class="pag-row-label">+ Saldo do sinal</span>
+                <span class="pag-row-label">+ Saldo anterior</span>
                 <span class="pag-row-val verde">${fmt(carry)}</span>
+            </div>` : carry < 0 ? `<div class="pag-row">
+                <span class="pag-row-label">− Déficit anterior</span>
+                <span class="pag-row-val vermelho">−${fmt(-carry)}</span>
             </div>` : ''}
             ${p.desp > 0 ? `<div class="pag-saidas-label">Saídas</div>${saidasRows}` : ''}
             <div class="pag-sep"></div>
