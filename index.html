@@ -1395,6 +1395,12 @@ function gerarPDF() {
     const dataFmt  = addDias(0);
     const dataVenc = addDias(Number(validade));
 
+    const TH  = 'background:#0055b3;color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
+    const TDL = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;';
+    const TDC = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:center;';
+    const TDR = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:right;';
+
+    // Produtos
     const itensProd = [];
     document.querySelectorAll('.item-produto').forEach(card => {
         const busca  = card.querySelector('.item-busca-wrapper');
@@ -1406,6 +1412,7 @@ function gerarPDF() {
         itensProd.push({ descricao: prod ? (prod.descricao || prod.nome || codigo) : codigo, qtd });
     });
 
+    // Infra
     const itensInf = [];
     document.querySelectorAll('.item-infra').forEach(card => {
         const busca    = card.querySelector('.item-busca-wrapper');
@@ -1421,13 +1428,6 @@ function gerarPDF() {
     const formaLabel = _pagModo === 'avista'
         ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : _nPix + '× Pix')
         : _pagModo === 'boleto' ? (_nBoleto + '× mensais') : (_nCartao + '× no cartão');
-
-    // estilos base (sem flex/grid)
-    const TH  = 'background:#0055b3;color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
-    const TDL = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;';
-    const TDC = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:center;';
-    const TDR = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:right;';
-    const SEC = 'font-size:13px;font-weight:700;color:#0055b3;border-bottom:2px solid #0055b3;padding-bottom:4px;margin:0 0 10px;';
 
     const rowsProd = itensProd.map((it, i) =>
         '<tr style="background:' + (i%2 ? '#f7f9ff' : '#fff') + '">' +
@@ -1447,88 +1447,48 @@ function gerarPDF() {
             '<td style="' + TDR + 'font-weight:700;color:#0055b3;">' + fmtR(p.recebe) + '</td></tr>';
     }).join('');
 
-    const tabelaMat = (itensProd.length || itensInf.length)
-        ? '<p style="' + SEC + '">Materiais e Equipamentos</p>' +
+    const blocoMateriais = (itensProd.length || itensInf.length)
+        ? '<p style="font-size:13px;font-weight:700;color:#0055b3;border-bottom:2px solid #0055b3;padding-bottom:4px;margin:0 0 10px;">Materiais e Equipamentos</p>' +
           '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">' +
           '<tr><th style="' + TH + '">Descrição</th><th style="' + TH + 'text-align:center;width:60px;">Qtd</th></tr>' +
           rowsProd +
-          (itensInf.length
-              ? '<tr><td colspan="2" style="background:#e8eef8;padding:6px 12px;font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.5px;">Infraestrutura</td></tr>' + rowsInf
-              : '') +
+          (itensInf.length ? '<tr><td colspan="2" style="background:#e8eef8;padding:6px 12px;font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.5px;">Infraestrutura</td></tr>' + rowsInf : '') +
           '</table>' +
-          (itensInf.length
-              ? '<p style="font-size:10px;color:#999;font-style:italic;margin:4px 0 20px;">* Itens de infraestrutura são estimativas e podem variar conforme o ambiente.</p>'
-              : '<p style="margin:0 0 20px;"></p>')
+          (itensInf.length ? '<p style="font-size:10px;color:#999;font-style:italic;margin:4px 0 20px;">* Itens de infraestrutura são estimativas e podem variar conforme o ambiente.</p>' : '<p style="margin:0 0 20px;"></p>')
         : '';
 
-    const html =
-        '<table width="100%" cellpadding="0" cellspacing="0" style="font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;">' +
-        '<tr><td style="padding:12px 16px 16px 16px;">' +
-
-        // cabeçalho
-        '<table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:3px solid #0055b3;padding-bottom:16px;margin-bottom:22px;">' +
-        '<tr>' +
-        '<td><img src="cpz-assinatura.png" height="48" style="display:block;" crossorigin="anonymous"></td>' +
-        '<td style="text-align:right;vertical-align:top;">' +
-        '<p style="margin:0;font-size:16px;font-weight:700;color:#0055b3;">PROPOSTA DE SERVIÇO</p>' +
-        '<p style="margin:4px 0 0;font-size:11px;color:#555;">Data: <strong>' + dataFmt + '</strong> &nbsp;|&nbsp; Válido até: <strong>' + dataVenc + '</strong></p>' +
-        '</td></tr></table>' +
-
-        // cliente
-        '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">' +
-        '<tr><td style="padding:12px 16px;background:#f0f5ff;border-left:4px solid #0055b3;">' +
-        '<p style="margin:0 0 8px;font-size:10px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.6px;">Cliente</p>' +
-        '<table width="100%" cellpadding="2" cellspacing="0" style="font-size:12px;">' +
-        '<tr><td style="color:#888;width:70px;">Nome</td><td style="font-weight:700;">' + nome + '</td>' +
-        '<td style="color:#888;width:70px;">Telefone</td><td style="font-weight:700;">' + tel + '</td></tr>' +
-        (email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '') +
-        '</table></td></tr></table>' +
-
-        // escopo
-        '<p style="' + SEC + '">Escopo do Serviço</p>' +
-        '<p style="font-size:12px;color:#444;line-height:1.75;margin:0 0 20px;">Fornecimento e instalação de sistema de vigilância (câmeras IP/analógicas), incluindo equipamentos, infraestrutura de cabos, configuração, testes de funcionamento e treinamento básico de operação.<br>O prazo de execução será de <strong>02 dias úteis</strong> a contar da aprovação desta proposta.</p>' +
-
-        tabelaMat +
-
-        // total
-        '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0055b3;margin-bottom:22px;">' +
-        '<tr><td style="padding:14px 18px;color:#fff;font-size:13px;font-weight:700;">VALOR TOTAL DO PROJETO</td>' +
-        '<td style="padding:14px 18px;color:#fff;font-size:20px;font-weight:700;text-align:right;">' + fmtR(inst.total) + '</td></tr></table>' +
-
-        // pagamento
-        '<p style="' + SEC + '">Condições de Pagamento</p>' +
-        '<p style="font-size:12px;color:#444;margin:0 0 10px;"><strong>Forma:</strong> ' + modoLabel + ' — ' + formaLabel + '</p>' +
-        '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">' +
-        '<tr><th style="' + TH + '">Parcela</th><th style="' + TH + 'text-align:center;">Vencimento</th><th style="' + TH + 'text-align:right;">Valor</th></tr>' +
-        rowsParc + '</table>' +
-
-        // observações
-        '<p style="' + SEC + '">Observações</p>' +
-        '<p style="font-size:11px;color:#555;line-height:2;margin:0 0 30px;">' +
-        '&bull; Serviços adicionais não previstos serão orçados separadamente.<br>' +
-        '&bull; Equipamentos como andaimes ou plataformas elevadas são de responsabilidade do contratante.<br>' +
-        '&bull; Esta proposta é válida por <strong>' + validade + ' dias</strong> a partir de ' + dataFmt + '.<br>' +
-        '&bull; Os preços podem sofrer reajuste após o prazo de validade.</p>' +
-
-        // rodapé
-        '<table width="100%" cellpadding="0" cellspacing="0" style="border-top:2px solid #0055b3;padding-top:14px;">' +
-        '<tr>' +
-        '<td style="font-size:11px;color:#666;line-height:1.9;"><strong style="color:#0055b3;font-size:12px;">' + marca + '</strong><br>contato@cpzdigital.com.br &nbsp;|&nbsp; (21) 96745-5648</td>' +
-        '<td style="text-align:right;font-size:10px;color:#bbb;vertical-align:bottom;">Gerado em ' + new Date().toLocaleDateString('pt-BR') + '</td>' +
-        '</tr></table>' +
-
-        '</td></tr></table>';
+    const placeholders = {
+        '{{marca}}':           marca,
+        '{{dataFmt}}':         dataFmt,
+        '{{dataVenc}}':        dataVenc,
+        '{{nome}}':            nome,
+        '{{tel}}':             tel,
+        '{{email_row}}':       email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '',
+        '{{bloco_materiais}}': blocoMateriais,
+        '{{total}}':           fmtR(inst.total),
+        '{{modoLabel}}':       modoLabel,
+        '{{formaLabel}}':      formaLabel,
+        '{{rows_parc}}':       rowsParc,
+        '{{validade}}':        validade,
+        '{{geradoEm}}':        new Date().toLocaleDateString('pt-BR'),
+    };
 
     const nomeArq = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0,10)) + '.pdf';
-    try {
-        html2pdf().from(html).set({
-            margin:      [4, 4, 4, 4],
-            filename:    nomeArq,
-            image:       { type:'jpeg', quality:0.95 },
-            html2canvas: { scale:2, useCORS:true, windowWidth:756, scrollX:0, scrollY:0 },
-            jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
-        }).save();
-    } catch(e) { alert('Erro ao gerar PDF: ' + e.message); }
+
+    fetch('template-pdf.html')
+        .then(r => r.text())
+        .then(tpl => {
+            let html = tpl;
+            Object.entries(placeholders).forEach(([k, v]) => { html = html.split(k).join(v); });
+            html2pdf().from(html).set({
+                margin:      [4, 4, 4, 4],
+                filename:    nomeArq,
+                image:       { type:'jpeg', quality:0.95 },
+                html2canvas: { scale:2, useCORS:true, windowWidth:756, scrollX:0, scrollY:0 },
+                jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
+            }).save();
+        })
+        .catch(e => alert('Erro ao carregar template: ' + e.message));
 }
 
 function calcInstallments() {
