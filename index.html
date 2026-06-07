@@ -1492,24 +1492,29 @@ function gerarPDF() {
         ...itensProd.map(it => ({ descricao: it.descricao, qtd: it.qtd })),
         ...itensInf.map(it => ({ descricao: it.descricao, qtd: it.qtd }))
     ];
+    const THs  = 'background:' + cor + ';color:#fff;padding:5px 8px;font-size:9px;font-weight:700;text-align:left;';
+    const TDLs = 'padding:4px 8px;font-size:9px;color:#333;border-bottom:1px solid #eee;';
+    const TDCs = 'padding:4px 8px;font-size:9px;color:#333;border-bottom:1px solid #eee;text-align:center;';
     const relacaoMateriais = todosItens.length
-        ? '<p style="font-size:13px;font-weight:700;color:' + cor + ';border-bottom:2px solid ' + cor + ';padding-bottom:4px;margin:0 0 10px;">Relação de Materiais e Equipamentos</p>' +
-          '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;page-break-inside:avoid;">' +
+        ? '<div style="page-break-inside:avoid;">' +
+          '<p style="font-size:13px;font-weight:700;color:' + cor + ';border-bottom:2px solid ' + cor + ';padding-bottom:4px;margin:0 0 8px;page-break-after:avoid;">Relação de Materiais e Equipamentos</p>' +
+          '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">' +
           '<tr>' +
-          '<th style="' + TH + 'width:40px;text-align:center;">Item</th>' +
-          '<th style="' + TH + '">Descrição</th>' +
-          '<th style="' + TH + 'text-align:center;width:50px;">Qtd</th>' +
-          '<th style="' + TH + 'width:80px;">Unidade</th>' +
+          '<th style="' + THs + 'width:36px;text-align:center;">Item</th>' +
+          '<th style="' + THs + '">Descrição</th>' +
+          '<th style="' + THs + 'text-align:center;width:44px;">Qtd</th>' +
+          '<th style="' + THs + 'width:60px;">Unidade</th>' +
           '</tr>' +
           todosItens.map((it, i) =>
               '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
-              '<td style="' + TDC + 'color:#888;">' + (i+1) + '</td>' +
-              '<td style="' + TDL + '">' + it.descricao + '</td>' +
-              '<td style="' + TDC + '">' + it.qtd + '</td>' +
-              '<td style="' + TDL + 'color:#888;">un</td>' +
+              '<td style="' + TDCs + 'color:#888;">' + (i+1) + '</td>' +
+              '<td style="' + TDLs + '">' + it.descricao + '</td>' +
+              '<td style="' + TDCs + '">' + it.qtd + '</td>' +
+              '<td style="' + TDLs + 'color:#888;">un</td>' +
               '</tr>').join('') +
           '</table>' +
-          '<p style="font-size:10px;color:#999;font-style:italic;margin:4px 0 22px;">* Poderão ocorrer ajustes de marca ou modelo, sempre garantindo equivalência técnica.</p>'
+          '<p style="font-size:9px;color:#999;font-style:italic;margin:3px 0 18px;">* Poderão ocorrer ajustes de marca ou modelo, sempre garantindo equivalência técnica.</p>' +
+          '</div>'
         : '';
 
     const placeholders = {
@@ -1547,12 +1552,32 @@ function gerarPDF() {
         .then(tpl => {
             let html = tpl;
             Object.entries(placeholders).forEach(([k, v]) => { html = html.split(k).join(v); });
+            const [fr,fg,fb] = socio ? [5,150,105] : [0,85,179];
+            const footerLine = socio
+                ? 'B&A Vision  |  (21) 99664-6927  |  ba.visionseguranca@gmail.com  |  CNPJ: 62.456.202/0001-08  |  Responsáveis: Bruno & Adriano'
+                : 'CPZ Digital  |  (21) 96745-5648  |  contato@cpzdigital.com.br  |  CNPJ: 58.589.970/0001-54  |  Responsável: Adriano';
             html2pdf().from(html).set({
-                margin:      [4, 4, 4, 4],
+                margin:      [4, 4, 16, 4],
                 filename:    nomeArq,
                 image:       { type:'jpeg', quality:0.95 },
                 html2canvas: { scale:2, useCORS:true, windowWidth:756, scrollX:0, scrollY:0 },
                 jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
+            }).toPdf().get('pdf').then(pdf => {
+                const n = pdf.internal.getNumberOfPages();
+                const w = pdf.internal.pageSize.getWidth();
+                const h = pdf.internal.pageSize.getHeight();
+                for (let i = 1; i <= n; i++) {
+                    pdf.setPage(i);
+                    pdf.setDrawColor(fr, fg, fb);
+                    pdf.setLineWidth(0.4);
+                    pdf.line(4, h - 11, w - 4, h - 11);
+                    pdf.setFontSize(7);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(100, 100, 100);
+                    pdf.text(footerLine, w / 2, h - 7, { align: 'center' });
+                    pdf.setTextColor(180, 180, 180);
+                    pdf.text(i + ' / ' + n, w - 4, h - 7, { align: 'right' });
+                }
             }).save();
         })
         .catch(e => alert('Erro ao carregar template: ' + e.message));
