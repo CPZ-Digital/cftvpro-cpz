@@ -811,18 +811,20 @@ body {
                 <label class="exp-label">Data do orçamento</label>
                 <input class="exp-input" id="expData" type="date">
             </div>
-            <div class="exp-field">
-                <label class="exp-label">Validade do orçamento</label>
-                <div style="display:flex;gap:8px;align-items:center">
-                    <input class="exp-input" id="expValidade" type="number" min="1" max="90" value="15" style="width:80px;flex:none">
-                    <span style="color:var(--muted);font-size:14px">dias</span>
+            <div style="display:flex;gap:12px;">
+                <div class="exp-field" style="flex:1;">
+                    <label class="exp-label">Validade</label>
+                    <div style="display:flex;gap:6px;align-items:center">
+                        <input class="exp-input" id="expValidade" type="number" min="1" max="90" value="15" style="width:64px;flex:none">
+                        <span style="color:var(--muted);font-size:13px">dias</span>
+                    </div>
                 </div>
-            </div>
-            <div class="exp-field">
-                <label class="exp-label">Prazo de execução</label>
-                <div style="display:flex;gap:8px;align-items:center">
-                    <input class="exp-input" id="expPrazo" type="number" min="1" max="60" value="2" style="width:80px;flex:none">
-                    <span style="color:var(--muted);font-size:14px">dias úteis</span>
+                <div class="exp-field" style="flex:1;">
+                    <label class="exp-label">Prazo execução</label>
+                    <div style="display:flex;gap:6px;align-items:center">
+                        <input class="exp-input" id="expPrazo" type="number" min="1" max="60" value="2" style="width:64px;flex:none">
+                        <span style="color:var(--muted);font-size:13px">dias úteis</span>
+                    </div>
                 </div>
             </div>
             <button class="exp-btn" onclick="confirmarExportar()">
