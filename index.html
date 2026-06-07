@@ -1245,10 +1245,12 @@ let _nCartao   = 4;         // 4 ou 6
 function abrirPagamentos() {
     renderPagamento();
     document.getElementById('pagOverlay').classList.add('aberto');
+    document.querySelector('.fab-area').style.display = 'none';
 }
 
 function fecharPagamentos() {
     document.getElementById('pagOverlay').classList.remove('aberto');
+    document.querySelector('.fab-area').style.display = '';
 }
 
 document.getElementById('pagOverlay').addEventListener('click', function(e) {
