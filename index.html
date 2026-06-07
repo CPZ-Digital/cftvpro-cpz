@@ -837,7 +837,7 @@ body {
 
 <!-- ASSINATURA -->
 <div style="display:flex;align-items:center;justify-content:center;padding:20px 16px 8px;">
-    <img src="cpz-assinatura.png" alt="CPZ" style="width:130px;height:auto;background:white;border-radius:8px;padding:4px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <img id="logoAssinatura" src="cpz-assinatura.png" alt="CPZ" style="width:130px;height:auto;background:white;border-radius:8px;padding:4px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 </div>
 
 <!-- BOTÕES FIXOS -->
@@ -1282,6 +1282,7 @@ function toggleBAVision() {
     const ativo=cb.checked;
     document.body.classList.toggle('ba-vision', ativo);
     document.getElementById("subtituloApp").textContent=ativo?"B&A Vision":"CPZ Digital";
+    document.getElementById("logoAssinatura").src=ativo?"ba-vision-assinatura.png":"cpz-assinatura.png";
     mostrarToast(ativo?"B&A Vision ativada":"CPZ Digital ativada");
     calcular();
 }
@@ -1334,6 +1335,7 @@ function restaurarEstado() {
         socio.checked=e.socio||false;
         document.body.classList.toggle('ba-vision', socio.checked);
         document.getElementById("subtituloApp").textContent=socio.checked?"B&A Vision":"CPZ Digital";
+        document.getElementById("logoAssinatura").src=socio.checked?"ba-vision-assinatura.png":"cpz-assinatura.png";
         if (e.diasTrabalho) document.getElementById("diasTrabalho").value=e.diasTrabalho;
         if (e.diasDiarista) document.getElementById("diasDiarista").value=e.diasDiarista;
         if (e.produtos&&e.produtos.length) e.produtos.forEach(p=>adicionarProduto(p.codigo,p.qtd));
