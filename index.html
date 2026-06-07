@@ -1484,7 +1484,7 @@ function gerarPDF() {
     ];
     const relacaoMateriais = todosItens.length
         ? '<p style="font-size:13px;font-weight:700;color:' + cor + ';border-bottom:2px solid ' + cor + ';padding-bottom:4px;margin:0 0 10px;">Relação de Materiais e Equipamentos</p>' +
-          '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">' +
+          '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;page-break-inside:avoid;">' +
           '<tr>' +
           '<th style="' + TH + 'width:40px;text-align:center;">Item</th>' +
           '<th style="' + TH + '">Descrição</th>' +
