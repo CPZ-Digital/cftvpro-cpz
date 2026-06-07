@@ -1577,8 +1577,7 @@ function gerarPDF() {
                     pdf.setFont('helvetica', 'normal');
                     pdf.setTextColor(100, 100, 100);
                     pdf.text(footerLine, w / 2, h - 7, { align: 'center' });
-                    pdf.setTextColor(180, 180, 180);
-                    pdf.text(i + ' / ' + n, w - 4, h - 7, { align: 'right' });
+
                 }
             }).save();
         })
