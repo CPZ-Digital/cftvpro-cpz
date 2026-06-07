@@ -1367,19 +1367,16 @@ function renderPagamento() {
     </div>`;
 
     const r50 = v => Math.round(v / 50) * 50;
-    const mkOpts = (opts, nAtual, setter, totalFn) =>
-        opts.map(n => {
-            const val = totalFn(n) / n;
-            return `<button class="pag-boleto-opt ${n===nAtual?'ativo':''}" onclick="${setter}(${n})">
-                ${n}×<span class="opt-parc-val">${fmt(val)}</span>
-            </button>`;
-        }).join('');
+    const mkOpts = (opts, nAtual, setter) =>
+        opts.map(n =>
+            `<button class="pag-boleto-opt ${n===nAtual?'ativo':''}" onclick="${setter}(${n})">${n}×</button>`
+        ).join('');
 
     if (_pagModo === 'avista') {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Forma:</span>
             <div class="pag-boleto-sel">
-                <button class="pag-boleto-opt ${_subAvista==='5050'?'ativo':''}" onclick="setSubAvista('5050')">50%+50%<span class="opt-parc-val">${fmt(data.total/2)}/parcela</span></button>
+                <button class="pag-boleto-opt ${_subAvista==='5050'?'ativo':''}" onclick="setSubAvista('5050')">50%+50%</button>
                 <button class="pag-boleto-opt ${_subAvista==='4pix'?'ativo':''}" onclick="setSubAvista('4pix')">Pix</button>
             </div>
         </div>`;
@@ -1387,7 +1384,7 @@ function renderPagamento() {
             html += `<div class="pag-boleto-ctrl">
                 <span class="pag-boleto-label">Parcelas:</span>
                 <div class="pag-boleto-sel">
-                    ${mkOpts([2,3,4], _nPix, 'setNPix', n => _pag.valorFinal)}
+                    ${mkOpts([2,3,4], _nPix, 'setNPix')}
                 </div>
             </div>`;
         }
@@ -1397,7 +1394,7 @@ function renderPagamento() {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                ${mkOpts([2,3,4,5,6], _nBoleto, 'setNBoleto', n => r50(_pag.valorFinal * 1.05))}
+                ${mkOpts([2,3,4,5,6], _nBoleto, 'setNBoleto')}
             </div>
         </div>`;
     }
@@ -1406,7 +1403,7 @@ function renderPagamento() {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                ${mkOpts([2,3,4,5,6], _nCartao, 'setNCartao', n => r50(_pag.valorFinal * 1.10))}
+                ${mkOpts([2,3,4,5,6], _nCartao, 'setNCartao')}
             </div>
         </div>`;
     }
