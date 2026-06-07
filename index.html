@@ -1521,7 +1521,7 @@ function gerarPDF() {
 
     const nomeArq = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0,10)) + '.pdf';
     const el = document.createElement('div');
-    el.style.cssText = 'position:absolute;left:-9999px;top:0;';
+    el.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:#fff;z-index:99999;';
     el.innerHTML = html;
     document.body.appendChild(el);
     html2pdf().set({
