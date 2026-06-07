@@ -655,6 +655,7 @@ body {
 }
 
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -1380,8 +1381,211 @@ function confirmarExportar() {
     if (!tel)   { document.getElementById('expTel').focus();   return; }
     _clienteInfo = { nome, tel, email, data, validade };
     fecharExportar();
-    // PDF será gerado aqui na próxima etapa
-    alert(`Orçamento para ${nome} pronto para exportar!\n(PDF em breve)`);
+    gerarPDF();
+}
+
+function gerarPDF() {
+    const { nome, tel, email, data, validade } = _clienteInfo;
+    const { valorFinal, totalProd, totalInfra, desl, diarias, diarista } = _pag;
+    const dataFmt = data ? new Date(data + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+    const dataVenc = data ? new Date(new Date(data + 'T12:00:00').getTime() + validade*86400000).toLocaleDateString('pt-BR') : '—';
+    const fmtR = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const socio = document.getElementById('usarSocio').checked;
+
+    // Coleta produtos
+    const itensProd = [];
+    document.querySelectorAll('.item-produto').forEach(card => {
+        const busca = card.querySelector('.item-busca-wrapper');
+        const codigo = busca ? busca.getValor() : '';
+        if (!codigo) return;
+        const qtd = Number(card.querySelector('.qtd-num').value) || 0;
+        if (qtd === 0) return;
+        const precoEl = card.querySelector('.item-preco');
+        const valorUnit = parseFloat(precoEl.dataset.valorUnit) || 0;
+        const prod = produtos.find(p => p.codigo === codigo);
+        const descricao = prod ? (prod.descricao || prod.nome || codigo) : codigo;
+        itensProd.push({ descricao, qtd, valorUnit, total: valorUnit * qtd });
+    });
+
+    // Coleta infra
+    const itensInf = [];
+    document.querySelectorAll('.item-infra').forEach(card => {
+        const busca = card.querySelector('.item-busca-wrapper');
+        const nomeItem = busca ? busca.getValor() : '';
+        if (!nomeItem) return;
+        const qtd = Number(card.querySelector('.qtd-num').value) || 0;
+        if (qtd === 0) return;
+        const precoEl = card.querySelector('.item-preco');
+        const valorUnit = parseFloat(precoEl.dataset.valorUnit) || 0;
+        itensInf.push({ descricao: nomeItem, qtd, valorUnit, total: valorUnit * qtd });
+    });
+
+    // Condições de pagamento
+    const data_ = calcInstallments();
+    const modoLabel = { avista: 'À Vista (Pix)', boleto: 'Boleto Bancário', cartao: 'Cartão de Crédito' }[_pagModo];
+    const formaLabel = _pagModo === 'avista'
+        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : `${_nPix}× Pix`)
+        : _pagModo === 'boleto' ? `${_nBoleto}× parcelas mensais`
+        : `${_nCartao}× parcelas no cartão`;
+
+    const rowStyle = 'border-bottom:1px solid #e8e8e8; padding:8px 10px;';
+    const thStyle  = 'background:#0055b3; color:white; padding:9px 10px; text-align:left; font-size:12px;';
+    const tdStyle  = 'padding:8px 10px; font-size:12px; color:#333;';
+    const tdR      = tdStyle + 'text-align:right;';
+
+    const tabelaProd = itensProd.length ? `
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+            <thead><tr>
+                <th style="${thStyle}">Descrição</th>
+                <th style="${thStyle}text-align:center">Qtd</th>
+                <th style="${thStyle}text-align:right">Unit.</th>
+                <th style="${thStyle}text-align:right">Total</th>
+            </tr></thead>
+            <tbody>
+                ${itensProd.map(i => `<tr style="${rowStyle}">
+                    <td style="${tdStyle}">${i.descricao}</td>
+                    <td style="${tdStyle}text-align:center">${i.qtd}</td>
+                    <td style="${tdR}">${fmtR(i.valorUnit)}</td>
+                    <td style="${tdR}"><strong>${fmtR(i.total)}</strong></td>
+                </tr>`).join('')}
+                <tr><td colspan="3" style="${tdR}font-weight:700;padding-top:10px">Subtotal Equipamentos</td>
+                    <td style="${tdR}font-weight:700;padding-top:10px;color:#0055b3">${fmtR(totalProd)}</td></tr>
+            </tbody>
+        </table>` : '';
+
+    const tabelaInfra = itensInf.length ? `
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+            <thead><tr>
+                <th style="${thStyle}">Item de Infraestrutura</th>
+                <th style="${thStyle}text-align:center">Qtd</th>
+                <th style="${thStyle}text-align:right">Unit.</th>
+                <th style="${thStyle}text-align:right">Total</th>
+            </tr></thead>
+            <tbody>
+                ${itensInf.map(i => `<tr style="${rowStyle}">
+                    <td style="${tdStyle}">${i.descricao}</td>
+                    <td style="${tdStyle}text-align:center">${i.qtd}</td>
+                    <td style="${tdR}">${fmtR(i.valorUnit)}</td>
+                    <td style="${tdR}"><strong>${fmtR(i.total)}</strong></td>
+                </tr>`).join('')}
+                <tr><td colspan="3" style="${tdR}font-weight:700;padding-top:10px">Subtotal Infraestrutura</td>
+                    <td style="${tdR}font-weight:700;padding-top:10px;color:#0055b3">${fmtR(totalInfra)}</td></tr>
+            </tbody>
+        </table>` : '';
+
+    const parcRow = data_.parcelas.map((p, i) => `
+        <tr style="${rowStyle}">
+            <td style="${tdStyle}">${p.label}</td>
+            <td style="${tdR}"><strong>${fmtR(p.recebe)}</strong></td>
+        </tr>`).join('');
+
+    const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:780px;margin:0 auto;color:#1a1a2e;padding:40px 48px;">
+
+        <!-- CABEÇALHO -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0055b3;padding-bottom:20px;margin-bottom:28px;">
+            <div>
+                <img src="cpz-assinatura.png" style="height:52px;object-fit:contain;" crossorigin="anonymous">
+                ${socio ? '<div style="font-size:11px;color:#888;margin-top:6px;font-weight:600">BA Vision</div>' : ''}
+            </div>
+            <div style="text-align:right;font-size:11px;color:#555;line-height:1.8;">
+                <div style="font-weight:700;font-size:13px;color:#0055b3">PROPOSTA DE SERVIÇO</div>
+                <div>Data: <strong>${dataFmt}</strong></div>
+                <div>Válido até: <strong>${dataVenc}</strong></div>
+            </div>
+        </div>
+
+        <!-- DADOS DO CLIENTE -->
+        <div style="background:#f0f5ff;border-left:4px solid #0055b3;border-radius:6px;padding:16px 20px;margin-bottom:28px;">
+            <div style="font-size:11px;font-weight:700;color:#0055b3;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Dados do Cliente</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+                <div><span style="color:#888">Nome:</span> <strong>${nome}</strong></div>
+                <div><span style="color:#888">Telefone:</span> <strong>${tel}</strong></div>
+                ${email ? `<div style="grid-column:1/-1"><span style="color:#888">E-mail:</span> <strong>${email}</strong></div>` : ''}
+            </div>
+        </div>
+
+        <!-- ESCOPO -->
+        <div style="margin-bottom:24px;">
+            <div style="font-size:14px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:6px;margin-bottom:12px;">Escopo do Serviço</div>
+            <p style="font-size:12px;color:#444;line-height:1.7;margin:0;">
+                Fornecimento e instalação de sistema de vigilância, incluindo equipamentos, cabeamento, configuração e testes de funcionamento.
+                O prazo de execução será definido após aprovação desta proposta.
+            </p>
+        </div>
+
+        <!-- EQUIPAMENTOS -->
+        ${itensProd.length ? `
+        <div style="margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:6px;margin-bottom:12px;">Equipamentos</div>
+            ${tabelaProd}
+        </div>` : ''}
+
+        <!-- INFRAESTRUTURA -->
+        ${itensInf.length ? `
+        <div style="margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:6px;margin-bottom:12px;">Infraestrutura</div>
+            ${tabelaInfra}
+        </div>` : ''}
+
+        <!-- TOTAL GERAL -->
+        <div style="background:#0055b3;color:white;border-radius:8px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
+            <span style="font-size:14px;font-weight:700;">VALOR TOTAL DO PROJETO</span>
+            <span style="font-size:20px;font-weight:700;">${fmtR(data_.total)}</span>
+        </div>
+
+        <!-- PAGAMENTO -->
+        <div style="margin-bottom:28px;">
+            <div style="font-size:14px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:6px;margin-bottom:12px;">Condições de Pagamento</div>
+            <div style="font-size:12px;color:#444;margin-bottom:10px;">
+                <strong>Forma:</strong> ${modoLabel} — ${formaLabel}
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+                <thead><tr>
+                    <th style="${thStyle}">Parcela</th>
+                    <th style="${thStyle}text-align:right">Valor</th>
+                </tr></thead>
+                <tbody>${parcRow}</tbody>
+            </table>
+        </div>
+
+        <!-- OBSERVAÇÕES -->
+        <div style="margin-bottom:36px;">
+            <div style="font-size:14px;font-weight:700;color:#0055b3;border-bottom:1px solid #dde6f7;padding-bottom:6px;margin-bottom:12px;">Observações</div>
+            <ul style="font-size:11px;color:#555;line-height:2;margin:0;padding-left:18px;">
+                <li>Serviços adicionais não previstos nesta proposta serão orçados separadamente.</li>
+                <li>Equipamentos como andaimes ou plataformas são de responsabilidade do contratante.</li>
+                <li>Esta proposta é válida por <strong>${validade} dias</strong> a partir de ${dataFmt}.</li>
+                <li>Os preços podem sofrer reajuste após o prazo de validade.</li>
+            </ul>
+        </div>
+
+        <!-- RODAPÉ -->
+        <div style="border-top:2px solid #0055b3;padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:11px;color:#888;">
+                <div style="font-weight:700;color:#0055b3;font-size:12px;">CPZ Digital${socio ? ' | BA Vision' : ''}</div>
+                <div>contato@cpzdigital.com.br</div>
+                <div>(21) 96745-5648</div>
+            </div>
+            <div style="font-size:10px;color:#aaa;text-align:right;">
+                Documento gerado em ${new Date().toLocaleDateString('pt-BR')}
+            </div>
+        </div>
+    </div>`;
+
+    const nomeArq = `orcamento-${nome.replace(/\s+/g,'-').toLowerCase()}-${data || new Date().toISOString().slice(0,10)}.pdf`;
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    document.body.appendChild(el);
+
+    html2pdf().set({
+        margin:        0,
+        filename:      nomeArq,
+        image:         { type:'jpeg', quality:0.97 },
+        html2canvas:   { scale:2, useCORS:true, logging:false },
+        jsPDF:         { unit:'mm', format:'a4', orientation:'portrait' },
+        pagebreak:     { mode:'avoid-all' }
+    }).from(el).save().then(() => document.body.removeChild(el));
 }
 
 function calcInstallments() {
