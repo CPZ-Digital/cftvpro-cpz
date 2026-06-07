@@ -1456,16 +1456,6 @@ function gerarPDF() {
         ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : _nPix + '× Pix')
         : _pagModo === 'boleto' ? (_nBoleto + '× mensais') : (_nCartao + '× no cartão');
 
-    const rowsProd = itensProd.map((it, i) =>
-        '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
-        '<td style="' + TDL + '">' + it.descricao + '</td>' +
-        '<td style="' + TDC + '">' + it.qtd + '</td></tr>').join('');
-
-    const rowsInf = itensInf.map((it, i) =>
-        '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
-        '<td style="' + TDL + 'color:#555;">' + it.descricao + '</td>' +
-        '<td style="' + TDC + 'color:#555;">' + it.qtd + '</td></tr>').join('');
-
     const rowsParc = inst.parcelas.map((p, i) => {
         const venc = addDias(Number(validade) + i * 30);
         return '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
@@ -1474,26 +1464,40 @@ function gerarPDF() {
             '<td style="' + TDR + 'font-weight:700;color:' + cor + ';">' + fmtR(p.recebe) + '</td></tr>';
     }).join('');
 
-    const blocoMateriais = (itensProd.length || itensInf.length)
-        ? '<p style="font-size:13px;font-weight:700;color:' + cor + ';border-bottom:2px solid ' + cor + ';padding-bottom:4px;margin:0 0 10px;">Materiais e Equipamentos</p>' +
+    const todosItens = [
+        ...itensProd.map(it => ({ descricao: it.descricao, qtd: it.qtd })),
+        ...itensInf.map(it => ({ descricao: it.descricao, qtd: it.qtd }))
+    ];
+    const relacaoMateriais = todosItens.length
+        ? '<p style="font-size:13px;font-weight:700;color:' + cor + ';border-bottom:2px solid ' + cor + ';padding-bottom:4px;margin:0 0 10px;">Relação de Materiais e Equipamentos</p>' +
           '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">' +
-          '<tr><th style="' + TH + '">Descrição</th><th style="' + TH + 'text-align:center;width:60px;">Qtd</th></tr>' +
-          rowsProd +
-          (itensInf.length ? '<tr><td colspan="2" style="background:' + corL + ';padding:6px 12px;font-size:10px;font-weight:700;color:' + cor + ';text-transform:uppercase;letter-spacing:0.5px;">Infraestrutura</td></tr>' + rowsInf : '') +
+          '<tr>' +
+          '<th style="' + TH + 'width:40px;text-align:center;">Item</th>' +
+          '<th style="' + TH + '">Descrição</th>' +
+          '<th style="' + TH + 'text-align:center;width:50px;">Qtd</th>' +
+          '<th style="' + TH + 'width:80px;">Unidade</th>' +
+          '</tr>' +
+          todosItens.map((it, i) =>
+              '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
+              '<td style="' + TDC + 'color:#888;">' + (i+1) + '</td>' +
+              '<td style="' + TDL + '">' + it.descricao + '</td>' +
+              '<td style="' + TDC + '">' + it.qtd + '</td>' +
+              '<td style="' + TDL + 'color:#888;">un</td>' +
+              '</tr>').join('') +
           '</table>' +
-          (itensInf.length ? '<p style="font-size:10px;color:#999;font-style:italic;margin:4px 0 20px;">* Itens de infraestrutura são estimativas e podem variar conforme o ambiente.</p>' : '<p style="margin:0 0 20px;"></p>')
+          '<p style="font-size:10px;color:#999;font-style:italic;margin:4px 0 22px;">* Poderão ocorrer ajustes de marca ou modelo, sempre garantindo equivalência técnica.</p>'
         : '';
 
     const placeholders = {
-        '{{logo_src}}':        socio ? 'ba-vision-assinatura.png' : 'cpz-assinatura.png',
-        '{{marca}}':           marca,
-        '{{dataFmt}}':         dataFmt,
-        '{{dataVenc}}':        dataVenc,
-        '{{nome}}':            nome,
-        '{{tel}}':             tel,
-        '{{email_row}}':       email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '',
-        '{{bloco_materiais}}': blocoMateriais,
-        '{{total}}':           fmtR(inst.total),
+        '{{logo_src}}':           socio ? 'ba-vision-assinatura.png' : 'cpz-assinatura.png',
+        '{{marca}}':              marca,
+        '{{dataFmt}}':            dataFmt,
+        '{{dataVenc}}':           dataVenc,
+        '{{nome}}':               nome,
+        '{{tel}}':                tel,
+        '{{email_row}}':          email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '',
+        '{{relacao_materiais}}':  relacaoMateriais,
+        '{{total}}':              fmtR(inst.total),
         '{{modoLabel}}':       modoLabel,
         '{{formaLabel}}':      formaLabel,
         '{{rows_parc}}':       rowsParc,
