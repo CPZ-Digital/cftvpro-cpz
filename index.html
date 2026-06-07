@@ -779,6 +779,10 @@ body {
                 <input class="exp-input" id="expTel" type="tel" placeholder="(00) 00000-0000" autocomplete="off">
             </div>
             <div class="exp-field">
+                <label class="exp-label">E-mail</label>
+                <input class="exp-input" id="expEmail" type="email" placeholder="cliente@email.com" autocomplete="off">
+            </div>
+            <div class="exp-field">
                 <label class="exp-label">Data do orçamento</label>
                 <input class="exp-input" id="expData" type="date">
             </div>
@@ -1369,11 +1373,12 @@ function fecharExportar() {
 function confirmarExportar() {
     const nome     = document.getElementById('expNome').value.trim();
     const tel      = document.getElementById('expTel').value.trim();
+    const email    = document.getElementById('expEmail').value.trim();
     const data     = document.getElementById('expData').value;
     const validade = document.getElementById('expValidade').value;
-    if (!nome) { document.getElementById('expNome').focus(); return; }
-    if (!tel)  { document.getElementById('expTel').focus();  return; }
-    _clienteInfo = { nome, tel, data, validade };
+    if (!nome)  { document.getElementById('expNome').focus();  return; }
+    if (!tel)   { document.getElementById('expTel').focus();   return; }
+    _clienteInfo = { nome, tel, email, data, validade };
     fecharExportar();
     // PDF será gerado aqui na próxima etapa
     alert(`Orçamento para ${nome} pronto para exportar!\n(PDF em breve)`);
