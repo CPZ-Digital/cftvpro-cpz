@@ -561,18 +561,23 @@ body {
 .pag-boleto-label { font-size: 13px; color: var(--muted); font-weight: 600; }
 .pag-boleto-sel { display: flex; gap: 6px; }
 .pag-boleto-opt {
-    padding: 6px 14px;
+    padding: 6px 10px;
     background: var(--item-bg);
     border: 1.5px solid var(--border2);
     border-radius: 8px;
     font-size: 13px; font-weight: 700;
     color: var(--muted); cursor: pointer;
     font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
     transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.pag-boleto-opt .opt-parc-val {
+    font-size: 10px; font-weight: 500; opacity: 0.75; white-space: nowrap;
 }
 .pag-boleto-opt.ativo {
     background: var(--blue-dim); border-color: var(--blue); color: var(--blue);
 }
+.pag-boleto-opt.ativo .opt-parc-val { opacity: 1; }
 
 .pag-parc {
     background: var(--item-bg); border: 1px solid var(--border2);
@@ -1239,8 +1244,9 @@ function limparOrcamento() {
 let _pag       = { valorFinal:0, totalProd:0, totalInfra:0, desl:0, diarias:0, diarista:0 };
 let _pagModo   = 'avista';  // 'avista' | 'boleto' | 'cartao'
 let _subAvista = '5050';    // '5050'  | '4pix'
-let _nBoleto   = 4;         // 4 ou 6
-let _nCartao   = 4;         // 4 ou 6
+let _nPix      = 4;         // 2-4
+let _nBoleto   = 4;         // 2-6
+let _nCartao   = 4;         // 2-6
 
 function abrirPagamentos() {
     renderPagamento();
@@ -1265,6 +1271,7 @@ function setPagModo(modo) {
 }
 
 function setSubAvista(sub) { _subAvista = sub; renderPagamento(); }
+function setNPix(n)        { _nPix      = n;   renderPagamento(); }
 function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
 
@@ -1307,8 +1314,8 @@ function calcInstallments() {
                 mkParc('Final (50%)', meia, totalProd,  0,          0,    diarista,  diarias)
             ]};
         }
-        // 4× Pix — material nas parcelas 2-4
-        return gerarParcelas(total, 4, 2);
+        // N× Pix — material nas parcelas 2-N
+        return gerarParcelas(total, _nPix, 2);
     }
 
     if (_pagModo === 'boleto') {
@@ -1359,22 +1366,38 @@ function renderPagamento() {
         <span class="pag-total-valor">${fmt(data.total)}</span>
     </div>`;
 
+    const r50 = v => Math.round(v / 50) * 50;
+    const mkOpts = (opts, nAtual, setter, totalFn) =>
+        opts.map(n => {
+            const val = totalFn(n) / n;
+            return `<button class="pag-boleto-opt ${n===nAtual?'ativo':''}" onclick="${setter}(${n})">
+                ${n}×<span class="opt-parc-val">${fmt(val)}</span>
+            </button>`;
+        }).join('');
+
     if (_pagModo === 'avista') {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Forma:</span>
             <div class="pag-boleto-sel">
-                <button class="pag-boleto-opt ${_subAvista==='5050'?'ativo':''}" onclick="setSubAvista('5050')">50%+50%</button>
-                <button class="pag-boleto-opt ${_subAvista==='4pix'?'ativo':''}" onclick="setSubAvista('4pix')">4× Pix</button>
+                <button class="pag-boleto-opt ${_subAvista==='5050'?'ativo':''}" onclick="setSubAvista('5050')">50%+50%<span class="opt-parc-val">${fmt(data.total/2)}/parcela</span></button>
+                <button class="pag-boleto-opt ${_subAvista==='4pix'?'ativo':''}" onclick="setSubAvista('4pix')">Pix</button>
             </div>
         </div>`;
+        if (_subAvista === '4pix') {
+            html += `<div class="pag-boleto-ctrl">
+                <span class="pag-boleto-label">Parcelas:</span>
+                <div class="pag-boleto-sel">
+                    ${mkOpts([2,3,4], _nPix, 'setNPix', n => _pag.valorFinal)}
+                </div>
+            </div>`;
+        }
     }
 
     if (_pagModo === 'boleto') {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                <button class="pag-boleto-opt ${_nBoleto===4?'ativo':''}" onclick="setNBoleto(4)">4×</button>
-                <button class="pag-boleto-opt ${_nBoleto===6?'ativo':''}" onclick="setNBoleto(6)">6×</button>
+                ${mkOpts([2,3,4,5,6], _nBoleto, 'setNBoleto', n => r50(_pag.valorFinal * 1.05))}
             </div>
         </div>`;
     }
@@ -1383,8 +1406,7 @@ function renderPagamento() {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                <button class="pag-boleto-opt ${_nCartao===4?'ativo':''}" onclick="setNCartao(4)">4×</button>
-                <button class="pag-boleto-opt ${_nCartao===6?'ativo':''}" onclick="setNCartao(6)">6×</button>
+                ${mkOpts([2,3,4,5,6], _nCartao, 'setNCartao', n => r50(_pag.valorFinal * 1.10))}
             </div>
         </div>`;
     }
