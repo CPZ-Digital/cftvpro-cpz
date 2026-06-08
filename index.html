@@ -555,40 +555,75 @@ body {
 }
 
 /* ── HISTÓRICO ── */
+.hist-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 16px;
+}
+.hist-stat {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 10px 8px; text-align: center;
+}
+.hist-stat-val { font-size: 16px; font-weight: 700; color: var(--blue); }
+.hist-stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.hist-backup-row {
+    display: flex; gap: 8px; margin-bottom: 14px;
+}
+.hist-backup-btn {
+    flex: 1; border: 1.5px solid var(--border2); border-radius: 10px;
+    background: var(--surface2); color: var(--muted);
+    font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+    padding: 8px 6px; display: flex; align-items: center; justify-content: center; gap: 5px;
+    transition: color 0.15s, border-color 0.15s;
+}
+.hist-backup-btn:hover { color: var(--text); border-color: var(--blue); }
+
 .hist-card {
     background: var(--surface2);
-    border: 1px solid var(--border2);
+    border: 1.5px solid var(--border2);
     border-radius: 14px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    padding: 12px 14px;
     margin-bottom: 10px;
 }
+.hist-card-top { display: flex; align-items: flex-start; gap: 10px; }
 .hist-info { flex: 1; min-width: 0; }
+.hist-badges { display: flex; gap: 5px; margin-bottom: 5px; flex-wrap: wrap; }
+.hist-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 99px; letter-spacing: 0.3px;
+}
+.hist-badge-cpz  { background: #0055b322; color: #4499ff; border: 1px solid #0055b344; }
+.hist-badge-ba   { background: #05966922; color: #10b981; border: 1px solid #05966944; }
+.hist-badge-ag   { background: var(--warn);   color: var(--warn-text);   border: 1px solid #5a3a0055; }
+.hist-badge-ap   { background: var(--ok);     color: var(--ok-text);     border: 1px solid #0d33205a; }
+.hist-badge-rec  { background: var(--danger); color: var(--danger-text); border: 1px solid #3d0f0f5a; }
+.hist-badge-exp  { background: #3d1500; color: #ff8855; border: 1px solid #5a250055; }
 .hist-nome {
-    font-size: 14px; font-weight: 700;
-    color: var(--text);
+    font-size: 14px; font-weight: 700; color: var(--text);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.hist-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.hist-total { font-size: 14px; font-weight: 700; color: var(--blue); white-space: nowrap; }
-.hist-acoes { display: flex; flex-direction: column; gap: 6px; }
+.hist-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.hist-total { font-size: 14px; font-weight: 700; color: var(--blue); white-space: nowrap; padding-top: 2px; }
+.hist-acoes {
+    display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+}
 .hist-btn {
-    border: none; border-radius: 8px; padding: 5px 12px;
-    font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
-    transition: filter 0.15s;
+    border: none; border-radius: 8px; padding: 5px 11px;
+    font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: filter 0.15s; white-space: nowrap;
 }
 .hist-btn:active { filter: brightness(0.85); }
-.hist-btn-reabrir { background: var(--blue); color: #fff; }
-.hist-btn-excluir { background: var(--danger); color: var(--danger-text); }
+.hist-btn-reabrir  { background: var(--blue);   color: #fff; }
+.hist-btn-duplicar { background: var(--surface); color: var(--label); border: 1px solid var(--border2); }
+.hist-btn-ag       { background: var(--warn);    color: var(--warn-text); }
+.hist-btn-ap       { background: var(--ok);      color: var(--ok-text); }
+.hist-btn-rec      { background: var(--danger);  color: var(--danger-text); }
+.hist-btn-excluir  { background: transparent;    color: var(--muted); border: 1px solid var(--border2); margin-left: auto; }
 .hist-vazio {
     text-align: center; color: var(--muted);
     font-size: 14px; padding: 40px 0;
 }
-.hist-salvar-row {
-    display: flex; gap: 8px; margin-bottom: 16px;
-}
+.hist-salvar-row { display: flex; gap: 8px; margin-bottom: 10px; }
 .hist-salvar-row input {
     flex: 1; background: var(--input-bg); border: 1.5px solid var(--border2);
     border-radius: 10px; padding: 10px 12px; color: var(--input-color);
@@ -1126,6 +1161,18 @@ body {
         <div class="pag-header">
             <span class="pag-titulo">Histórico de Propostas</span>
             <button class="pag-fechar" onclick="fecharHistorico()">✕</button>
+        </div>
+        <div id="histStats" class="hist-stats"></div>
+        <div class="hist-backup-row">
+            <button class="hist-backup-btn" onclick="exportarHistorico()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar backup
+            </button>
+            <button class="hist-backup-btn" onclick="document.getElementById('histImportFile').click()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Importar backup
+            </button>
+            <input type="file" id="histImportFile" accept=".json" style="display:none" onchange="importarHistorico(this)">
         </div>
         <div class="hist-salvar-row">
             <input type="text" id="histNomeManual" placeholder="Nome para salvar proposta atual…">
@@ -2754,13 +2801,26 @@ function _salvarHistoricoStorage(lista) {
 }
 
 function salvarNoHistorico(nomeLabel) {
-    const estado = JSON.parse(localStorage.getItem('cpz_estado') || '{}');
-    const total  = document.getElementById('totalValor')?.textContent || '';
-    const entry  = {
-        id:     Date.now(),
-        nome:   nomeLabel || _clienteInfo.nome || 'Sem nome',
-        data:   new Date().toLocaleDateString('pt-BR'),
+    const estado   = JSON.parse(localStorage.getItem('cpz_estado') || '{}');
+    const totalEl  = document.getElementById('resultadoValor');
+    const total    = totalEl ? totalEl.textContent : '';
+    const socio    = document.getElementById('usarSocio').checked;
+    const ci       = _clienteInfo;
+    // calcula data de vencimento da proposta
+    let dataVenc = null;
+    if (ci.data && ci.validade) {
+        const base = new Date(ci.data + 'T12:00:00');
+        base.setDate(base.getDate() + Number(ci.validade));
+        dataVenc = base.toISOString().slice(0, 10);
+    }
+    const entry = {
+        id:       Date.now(),
+        nome:     nomeLabel || ci.nome || 'Sem nome',
+        data:     new Date().toLocaleDateString('pt-BR'),
+        dataVenc,
         total,
+        marca:    socio ? 'ba' : 'cpz',
+        status:   'aguardando',
         estado
     };
     const lista = _carregarHistorico();
@@ -2778,6 +2838,7 @@ function salvarHistoricoManual() {
 }
 
 function excluirHistorico(id) {
+    if (!confirm('Excluir esta proposta do histórico?')) return;
     const lista = _carregarHistorico().filter(e => e.id !== id);
     _salvarHistoricoStorage(lista);
     renderHistorico();
@@ -2793,26 +2854,115 @@ function reabrirHistorico(id) {
     location.reload();
 }
 
+function duplicarHistorico(id) {
+    const lista  = _carregarHistorico();
+    const entry  = lista.find(e => e.id === id);
+    if (!entry) return;
+    const copia  = { ...entry, id: Date.now(), nome: entry.nome + ' (cópia)', status: 'aguardando', data: new Date().toLocaleDateString('pt-BR') };
+    lista.unshift(copia);
+    _salvarHistoricoStorage(lista);
+    renderHistorico();
+    mostrarToast('Proposta duplicada');
+}
+
+function setStatusHistorico(id, status) {
+    const lista = _carregarHistorico();
+    const entry = lista.find(e => e.id === id);
+    if (!entry) return;
+    entry.status = entry.status === status ? 'aguardando' : status;
+    _salvarHistoricoStorage(lista);
+    renderHistorico();
+}
+
+function exportarHistorico() {
+    const lista = _carregarHistorico();
+    if (!lista.length) { mostrarToast('Histórico vazio'); return; }
+    const blob = new Blob([JSON.stringify(lista, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'historico-propostas-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    mostrarToast('Backup exportado!');
+}
+
+function importarHistorico(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const lista = JSON.parse(e.target.result);
+            if (!Array.isArray(lista)) throw new Error();
+            const atual = _carregarHistorico();
+            const idsExistentes = new Set(atual.map(x => x.id));
+            const novas = lista.filter(x => !idsExistentes.has(x.id));
+            _salvarHistoricoStorage([...novas, ...atual]);
+            renderHistorico();
+            mostrarToast(novas.length + ' propostas importadas');
+        } catch { mostrarToast('Arquivo inválido'); }
+    };
+    reader.readAsText(file);
+    input.value = '';
+}
+
+function _diasAteVencer(dataVenc) {
+    if (!dataVenc) return null;
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const venc = new Date(dataVenc + 'T00:00:00');
+    return Math.round((venc - hoje) / 86400000);
+}
+
 function renderHistorico() {
     const lista = _carregarHistorico();
-    const el    = document.getElementById('histLista');
+
+    // stats
+    const total    = lista.length;
+    const aprovadas = lista.filter(e => e.status === 'aprovada');
+    const taxaAp   = total ? Math.round(aprovadas.length / total * 100) : 0;
+    const valorTotal = aprovadas.reduce((s, e) => {
+        const n = parseFloat((e.total || '').replace(/[^\d,]/g,'').replace(',','.'));
+        return s + (isNaN(n) ? 0 : n);
+    }, 0);
+    document.getElementById('histStats').innerHTML = `
+        <div class="hist-stat"><div class="hist-stat-val">${total}</div><div class="hist-stat-lbl">Propostas</div></div>
+        <div class="hist-stat"><div class="hist-stat-val">${taxaAp}%</div><div class="hist-stat-lbl">Aprovação</div></div>
+        <div class="hist-stat"><div class="hist-stat-val">${aprovadas.length}</div><div class="hist-stat-lbl">Aprovadas</div></div>
+    `;
+
+    const el = document.getElementById('histLista');
     if (!lista.length) {
         el.innerHTML = '<div class="hist-vazio">Nenhuma proposta salva ainda.</div>';
         return;
     }
-    el.innerHTML = lista.map(e => `
+
+    const statusLabel = { aguardando: 'Aguardando', aprovada: 'Aprovada', recusada: 'Recusada' };
+    const statusBadge = { aguardando: 'ag', aprovada: 'ap', recusada: 'rec' };
+
+    el.innerHTML = lista.map(e => {
+        const dias      = _diasAteVencer(e.dataVenc);
+        const vencBadge = dias !== null && dias <= 3 && e.status === 'aguardando'
+            ? `<span class="hist-badge hist-badge-exp">${dias < 0 ? 'Vencida' : dias === 0 ? 'Vence hoje' : 'Vence em ' + dias + 'd'}</span>` : '';
+        const marcaBadge = `<span class="hist-badge hist-badge-${e.marca || 'cpz'}">${e.marca === 'ba' ? 'B&A Vision' : 'CPZ'}</span>`;
+        const stBadge    = `<span class="hist-badge hist-badge-${statusBadge[e.status] || 'ag'}">${statusLabel[e.status] || 'Aguardando'}</span>`;
+        return `
         <div class="hist-card">
-            <div class="hist-info">
-                <div class="hist-nome">${e.nome}</div>
-                <div class="hist-meta">${e.data}</div>
+            <div class="hist-card-top">
+                <div class="hist-info">
+                    <div class="hist-badges">${marcaBadge}${stBadge}${vencBadge}</div>
+                    <div class="hist-nome">${e.nome}</div>
+                    <div class="hist-meta">${e.data}${e.dataVenc ? ' · vence ' + new Date(e.dataVenc+'T00:00:00').toLocaleDateString('pt-BR') : ''}</div>
+                </div>
+                <div class="hist-total">${e.total}</div>
             </div>
-            <div class="hist-total">${e.total}</div>
             <div class="hist-acoes">
-                <button class="hist-btn hist-btn-reabrir" onclick="reabrirHistorico(${e.id})">Reabrir</button>
+                <button class="hist-btn hist-btn-reabrir"  onclick="reabrirHistorico(${e.id})">Reabrir</button>
+                <button class="hist-btn hist-btn-duplicar" onclick="duplicarHistorico(${e.id})">Duplicar</button>
+                <button class="hist-btn hist-btn-ap"  onclick="setStatusHistorico(${e.id},'aprovada')" title="Marcar aprovada">✓ Aprovada</button>
+                <button class="hist-btn hist-btn-rec" onclick="setStatusHistorico(${e.id},'recusada')" title="Marcar recusada">✗ Recusada</button>
                 <button class="hist-btn hist-btn-excluir" onclick="excluirHistorico(${e.id})">Excluir</button>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function abrirHistorico() {
