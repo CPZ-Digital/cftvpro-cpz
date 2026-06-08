@@ -602,6 +602,41 @@ body {
     white-space: nowrap;
 }
 
+/* ── CARD WHATSAPP ── */
+.wpp-card {
+    position: fixed;
+    bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 9998;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    width: calc(100% - 32px);
+    max-width: 448px;
+}
+.wpp-card.visivel { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
+.wpp-card-texto { flex: 1; }
+.wpp-card-titulo { font-size: 13px; font-weight: 700; color: var(--text); }
+.wpp-card-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.wpp-card-btn {
+    background: #25D366; color: #fff;
+    border: none; border-radius: 10px;
+    padding: 9px 14px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: inherit; white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+    transition: filter 0.15s;
+}
+.wpp-card-btn:active { filter: brightness(0.88); }
+.wpp-card-fechar {
+    background: none; border: none; color: var(--muted);
+    font-size: 16px; cursor: pointer; padding: 4px; line-height: 1;
+    flex-shrink: 0;
+}
+
 /* ── TOAST ── */
 .toast {
     position: fixed;
@@ -944,6 +979,18 @@ body {
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="wpp-card" id="wppCard">
+    <div class="wpp-card-texto">
+        <div class="wpp-card-titulo">PDF gerado!</div>
+        <div class="wpp-card-sub" id="wppCardSub">Enviar para o cliente?</div>
+    </div>
+    <button class="wpp-card-btn" id="wppCardBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.856L.072 23.928l6.244-1.636A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.374l-.358-.214-3.716.974.992-3.617-.234-.372A9.818 9.818 0 1112 21.818z"/></svg>
+        WhatsApp
+    </button>
+    <button class="wpp-card-fechar" onclick="fecharWppCard()">✕</button>
+</div>
 
 <!-- MODAL PAGAMENTO -->
 <div class="pag-overlay" id="pagOverlay">
@@ -1927,21 +1974,14 @@ function gerarPDF() {
                     pdf.text(footerLine, w / 2, h - 7, { align: 'center' });
                 }
 
-                const fone = '55' + tel.replace(/\D/g, '').replace(/^55/, '');
-                const msgWpp = encodeURIComponent('Olá ' + nome + ', segue a proposta comercial.');
-                const blob = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
-                const file = new File([blob], nomeArq, { type: 'application/pdf' });
+                const fone   = '55' + tel.replace(/\D/g, '').replace(/^55/, '');
+                const msgWpp = encodeURIComponent('Olá ' + nome + '! Segue a proposta comercial gerada pela ' + (socio ? 'B&A Vision' : 'CPZ Digital') + '.');
+                const blob   = new Blob([pdf.output('arraybuffer')], { type: 'application/pdf' });
+                const file   = new File([blob], nomeArq, { type: 'application/pdf' });
 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({ files: [file], title: 'Proposta — ' + nome, text: 'Segue a proposta comercial.' });
-                    } catch(e) {
-                        if (e.name !== 'AbortError') pdf.save(nomeArq);
-                    }
-                } else {
-                    pdf.save(nomeArq);
-                    if (tel) setTimeout(() => window.open('https://wa.me/' + fone + '?text=' + msgWpp, '_blank'), 1000);
-                }
+                pdf.save(nomeArq);
+                mostrarToast('PDF salvo!');
+                exibirWppCard(nome, fone, msgWpp, file, nomeArq);
             });
         })
         .catch(e => alert('Erro ao carregar template: ' + e.message));
@@ -2646,6 +2686,36 @@ async function init() {
     }
     calcular();
 }
+// ── CARD WHATSAPP ──
+let _wppTimer = null;
+
+function exibirWppCard(nome, fone, msgWpp, file, nomeArq) {
+    document.getElementById('wppCardSub').textContent = nome ? 'Enviar para ' + nome + '?' : 'Enviar para o cliente?';
+    document.getElementById('wppCardBtn').onclick = () => enviarWpp(fone, msgWpp, file, nomeArq);
+    const card = document.getElementById('wppCard');
+    card.classList.add('visivel');
+    clearTimeout(_wppTimer);
+    _wppTimer = setTimeout(fecharWppCard, 12000);
+}
+
+function fecharWppCard() {
+    document.getElementById('wppCard').classList.remove('visivel');
+    clearTimeout(_wppTimer);
+}
+
+async function enviarWpp(fone, msgWpp, file, nomeArq) {
+    fecharWppCard();
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({ files: [file], title: nomeArq, text: 'Segue a proposta comercial.' });
+        } catch(e) {
+            if (e.name !== 'AbortError') window.open('https://wa.me/' + fone + '?text=' + msgWpp, '_blank');
+        }
+    } else {
+        window.open('https://wa.me/' + fone + '?text=' + msgWpp, '_blank');
+    }
+}
+
 // ── HISTÓRICO ──
 function _carregarHistorico() {
     try { return JSON.parse(localStorage.getItem('cpz_historico') || '[]'); }
