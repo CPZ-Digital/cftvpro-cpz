@@ -1017,6 +1017,10 @@ body {
                     <option value="2 anos">2 anos</option>
                 </select>
             </div>
+            <div class="exp-field">
+                <label class="exp-label">Observações <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+                <textarea class="exp-input" id="expObs" rows="3" placeholder="Ex: incluir suporte de teto, cliente prefere instalação aos fins de semana…" style="resize:vertical;min-height:72px;line-height:1.5;"></textarea>
+            </div>
             <div style="display:flex;gap:8px;">
                 <button class="exp-btn" onclick="confirmarExportar()" style="flex:1;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1670,7 +1674,7 @@ function limparOrcamento() {
     document.getElementById("diasTrabalho").value=1;
     document.getElementById("diasDiarista").value=1;
     _pagModo='avista'; _subAvista='5050'; _nPix=4; _nBoleto=4; _nCartao=4;
-    _clienteInfo={ nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses' };
+    _clienteInfo={ nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses', obs:'' };
     _descontoPct=0;
     document.getElementById('descontoPct').value=0;
     document.getElementById('descontoEconomia').style.display='none';
@@ -1718,7 +1722,7 @@ function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
 
 // ── EXPORTAR ──
-let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses' };
+let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses', obs:'' };
 
 function abrirExportar() {
     const ci = _clienteInfo;
@@ -1728,6 +1732,7 @@ function abrirExportar() {
     if (ci.validade) document.getElementById('expValidade').value = ci.validade;
     if (ci.prazo)    document.getElementById('expPrazo').value    = ci.prazo;
     if (ci.garantia) document.getElementById('expGarantia').value = ci.garantia;
+    document.getElementById('expObs').value = ci.obs || '';
     const inputData = document.getElementById('expData');
     if (ci.data) inputData.value = ci.data;
     else if (!inputData.value) inputData.value = new Date().toISOString().slice(0,10);
@@ -1746,9 +1751,10 @@ function confirmarExportar() {
     const validade = document.getElementById('expValidade').value;
     const prazo    = document.getElementById('expPrazo').value || '2';
     const garantia = document.getElementById('expGarantia').value;
+    const obs      = document.getElementById('expObs').value.trim();
     if (!nome)  { document.getElementById('expNome').focus();  return; }
     if (!tel)   { document.getElementById('expTel').focus();   return; }
-    _clienteInfo = { nome, tel, email, data, validade, prazo, garantia };
+    _clienteInfo = { nome, tel, email, data, validade, prazo, garantia, obs };
     salvarEstado();
     salvarNoHistorico(nome);
     fecharExportar();
@@ -1756,7 +1762,7 @@ function confirmarExportar() {
 }
 
 function gerarPDF() {
-    const { nome, tel, email, data, validade, prazo = '2', garantia = '' } = _clienteInfo;
+    const { nome, tel, email, data, validade, prazo = '2', garantia = '', obs = '' } = _clienteInfo;
     const fmtR  = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
     const socio = document.getElementById('usarSocio').checked;
     const marca = socio ? 'B&A Vision' : 'CPZ Digital';
@@ -1882,6 +1888,10 @@ function gerarPDF() {
         '{{contato_email}}':     socio ? 'ba.visionseguranca@gmail.com' : 'contato@cpzdigital.com.br',
         '{{contato_tel}}':       socio ? '(21) 99664-6927' : '(21) 96745-5648',
         '{{geradoEm}}':          new Date().toLocaleDateString('pt-BR'),
+        '{{obs_block}}':         obs ? `
+            <p style="font-size:13px;font-weight:700;color:{{cor_pri}};border-bottom:2px solid {{cor_pri}};padding-bottom:4px;margin:0 0 8px;">Observações do Cliente</p>
+            <p style="font-size:11px;color:#444;line-height:1.8;margin:0 0 16px;white-space:pre-wrap;">${obs.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+        `.replace(/\{\{cor_pri\}\}/g, socio ? '#059669' : '#0055b3') : '',
     };
 
     const nomeArq = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0,10)) + '.pdf';
