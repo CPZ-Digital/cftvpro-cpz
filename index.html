@@ -544,6 +544,54 @@ body {
     font-size: 19px;
 }
 
+/* ── HISTÓRICO ── */
+.hist-card {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+.hist-info { flex: 1; min-width: 0; }
+.hist-nome {
+    font-size: 14px; font-weight: 700;
+    color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hist-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.hist-total { font-size: 14px; font-weight: 700; color: var(--blue); white-space: nowrap; }
+.hist-acoes { display: flex; flex-direction: column; gap: 6px; }
+.hist-btn {
+    border: none; border-radius: 8px; padding: 5px 12px;
+    font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: filter 0.15s;
+}
+.hist-btn:active { filter: brightness(0.85); }
+.hist-btn-reabrir { background: var(--blue); color: #fff; }
+.hist-btn-excluir { background: var(--danger); color: var(--danger-text); }
+.hist-vazio {
+    text-align: center; color: var(--muted);
+    font-size: 14px; padding: 40px 0;
+}
+.hist-salvar-row {
+    display: flex; gap: 8px; margin-bottom: 16px;
+}
+.hist-salvar-row input {
+    flex: 1; background: var(--input-bg); border: 1.5px solid var(--border2);
+    border-radius: 10px; padding: 10px 12px; color: var(--input-color);
+    font-size: 14px; font-family: inherit;
+}
+.hist-salvar-row input:focus { outline: none; border-color: var(--blue); }
+.hist-salvar-btn {
+    border: none; border-radius: 10px; padding: 0 16px;
+    background: var(--blue); color: #fff;
+    font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+    white-space: nowrap;
+}
+
 /* ── TOAST ── */
 .toast {
     position: fixed;
@@ -980,13 +1028,33 @@ body {
 
 <!-- BOTÕES FIXOS -->
 <div class="fab-area">
+    <button class="fab fab-ghost" onclick="abrirHistorico()" title="Histórico de propostas" style="flex:0 0 50px;font-size:19px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
+        </svg>
+    </button>
     <button class="fab fab-azul" onclick="abrirPagamentos()">💳 Pagamento</button>
-    <button class="fab fab-ghost" onclick="limparOrcamento()" title="Novo orçamento">
+    <button class="fab fab-ghost" onclick="limparOrcamento()" title="Novo orçamento" style="flex:0 0 50px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
         </svg>
     </button>
+</div>
+
+<!-- MODAL HISTÓRICO -->
+<div class="pag-overlay" id="histOverlay">
+    <div class="pag-modal">
+        <div class="pag-header">
+            <span class="pag-titulo">Histórico de Propostas</span>
+            <button class="pag-fechar" onclick="fecharHistorico()">✕</button>
+        </div>
+        <div class="hist-salvar-row">
+            <input type="text" id="histNomeManual" placeholder="Nome para salvar proposta atual…">
+            <button class="hist-salvar-btn" onclick="salvarHistoricoManual()">Salvar</button>
+        </div>
+        <div id="histLista"></div>
+    </div>
 </div>
 
 <script>
@@ -1672,6 +1740,7 @@ function confirmarExportar() {
     if (!tel)   { document.getElementById('expTel').focus();   return; }
     _clienteInfo = { nome, tel, email, data, validade, prazo, garantia };
     salvarEstado();
+    salvarNoHistorico(nome);
     fecharExportar();
     gerarPDF();
 }
@@ -1870,6 +1939,7 @@ async function exportarXLS() {
 
     _clienteInfo = { nome, tel, email, data, validade, prazo };
     salvarEstado();
+    salvarNoHistorico(nome);
     fecharExportar();
     mostrarToast('Gerando planilha...');
 
@@ -2556,6 +2626,93 @@ async function init() {
     }
     calcular();
 }
+// ── HISTÓRICO ──
+function _carregarHistorico() {
+    try { return JSON.parse(localStorage.getItem('cpz_historico') || '[]'); }
+    catch { return []; }
+}
+
+function _salvarHistoricoStorage(lista) {
+    localStorage.setItem('cpz_historico', JSON.stringify(lista));
+}
+
+function salvarNoHistorico(nomeLabel) {
+    const estado = JSON.parse(localStorage.getItem('cpz_estado') || '{}');
+    const total  = document.getElementById('totalValor')?.textContent || '';
+    const entry  = {
+        id:     Date.now(),
+        nome:   nomeLabel || _clienteInfo.nome || 'Sem nome',
+        data:   new Date().toLocaleDateString('pt-BR'),
+        total,
+        estado
+    };
+    const lista = _carregarHistorico();
+    lista.unshift(entry);
+    _salvarHistoricoStorage(lista);
+}
+
+function salvarHistoricoManual() {
+    const inp  = document.getElementById('histNomeManual');
+    const nome = inp.value.trim() || _clienteInfo.nome || 'Proposta';
+    salvarNoHistorico(nome);
+    inp.value = '';
+    renderHistorico();
+    mostrarToast('Proposta salva no histórico');
+}
+
+function excluirHistorico(id) {
+    const lista = _carregarHistorico().filter(e => e.id !== id);
+    _salvarHistoricoStorage(lista);
+    renderHistorico();
+}
+
+function reabrirHistorico(id) {
+    const entry = _carregarHistorico().find(e => e.id === id);
+    if (!entry) return;
+    const temItens = document.querySelectorAll('.item-produto, .item-infra').length > 2;
+    if (temItens && !confirm(`Substituir orçamento atual por "${entry.nome}"?`)) return;
+    localStorage.setItem('cpz_estado', JSON.stringify(entry.estado));
+    fecharHistorico();
+    location.reload();
+}
+
+function renderHistorico() {
+    const lista = _carregarHistorico();
+    const el    = document.getElementById('histLista');
+    if (!lista.length) {
+        el.innerHTML = '<div class="hist-vazio">Nenhuma proposta salva ainda.</div>';
+        return;
+    }
+    el.innerHTML = lista.map(e => `
+        <div class="hist-card">
+            <div class="hist-info">
+                <div class="hist-nome">${e.nome}</div>
+                <div class="hist-meta">${e.data}</div>
+            </div>
+            <div class="hist-total">${e.total}</div>
+            <div class="hist-acoes">
+                <button class="hist-btn hist-btn-reabrir" onclick="reabrirHistorico(${e.id})">Reabrir</button>
+                <button class="hist-btn hist-btn-excluir" onclick="excluirHistorico(${e.id})">Excluir</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function abrirHistorico() {
+    renderHistorico();
+    document.getElementById('histOverlay').classList.add('aberto');
+    document.querySelector('.fab-area').style.display = 'none';
+}
+
+function fecharHistorico() {
+    document.getElementById('histOverlay').classList.remove('aberto');
+    document.querySelector('.fab-area').style.display = '';
+}
+
+document.getElementById('histOverlay').addEventListener('click', function(e) {
+    if (e.target === this) fecharHistorico();
+});
+
 init();
 
 if ('serviceWorker' in navigator) {
