@@ -215,6 +215,75 @@ body {
 .cameras-badge.medio   { background: var(--warn);    color: var(--warn-text);   border-color: transparent; }
 .cameras-badge.dificil { background: var(--danger);  color: var(--danger-text); border-color: transparent; }
 
+/* ── CANAIS ── */
+.canais-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 14px;
+    background: var(--item-bg);
+    border-radius: 12px;
+    margin-top: 8px;
+    border: 1px solid var(--border2);
+}
+.canais-input {
+    width: 64px; height: 34px;
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border2); border-radius: 8px;
+    font-size: 16px; font-weight: 700; text-align: center;
+    font-family: inherit; margin-left: auto;
+}
+.canais-aviso {
+    font-size: 11px; font-weight: 700; color: var(--danger-text);
+    background: var(--danger); border-radius: 7px; padding: 3px 8px;
+    white-space: nowrap;
+}
+
+/* ── ARMAZENAMENTO ── */
+.armazena-wrap {
+    background: var(--item-bg);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 11px 14px;
+    margin-top: 8px;
+}
+.armazena-titulo {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--muted); margin-bottom: 8px;
+}
+.armazena-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.armazena-select {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border2); border-radius: 8px;
+    padding: 6px 8px; font-size: 12px; font-family: inherit;
+    flex: 1; min-width: 0;
+}
+.armazena-dias { display: flex; gap: 4px; }
+.armazena-dia-btn {
+    background: var(--surface2); color: var(--muted);
+    border: 1px solid var(--border2); border-radius: 7px;
+    padding: 5px 9px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s;
+}
+.armazena-dia-btn.ativo { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+.armazena-result { font-size: 15px; font-weight: 700; color: var(--blue); margin-left: auto; white-space: nowrap; }
+
+/* ── DESCONTO ── */
+.desconto-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    flex-wrap: wrap;
+}
+.desconto-label { font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 600; flex: 1; }
+.desconto-input {
+    width: 56px; height: 32px;
+    background: rgba(255,255,255,0.12); color: white;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 8px;
+    font-size: 15px; font-weight: 700; text-align: center;
+    font-family: inherit;
+}
+.desconto-pct { color: rgba(255,255,255,0.65); font-size: 13px; }
+.desconto-economia { font-size: 11px; font-weight: 700; color: var(--ok-text); background: var(--ok); border-radius: 7px; padding: 3px 8px; white-space: nowrap; }
+
 /* ── ITENS ── */
 .item-card {
     background: var(--item-bg);
@@ -723,6 +792,30 @@ body {
             <span class="cameras-label">Total de câmeras</span>
             <span class="cameras-badge" id="totalCameras">0</span>
         </div>
+
+        <div class="canais-row" id="canaisRow" style="display:none;">
+            <span class="cameras-label">Canais do gravador</span>
+            <span id="canaisAviso" class="canais-aviso" style="display:none;">⚠ Câmeras excedem canais</span>
+            <input type="number" id="canaisGravador" class="canais-input" min="1" max="256" value="8" oninput="verificarCanais()">
+        </div>
+
+        <div class="armazena-wrap" id="armazenamentoCalc" style="display:none;">
+            <div class="armazena-titulo">Estimativa de armazenamento</div>
+            <div class="armazena-row">
+                <select id="resSelect" class="armazena-select" onchange="calcArmazenamento()">
+                    <option value="1">SD (D1)</option>
+                    <option value="2" selected>HD 720p</option>
+                    <option value="4">Full HD 1080p</option>
+                    <option value="8">4K / 2160p</option>
+                </select>
+                <div class="armazena-dias">
+                    <button class="armazena-dia-btn ativo" onclick="setDiasArmazena(this,7)">7d</button>
+                    <button class="armazena-dia-btn" onclick="setDiasArmazena(this,15)">15d</button>
+                    <button class="armazena-dia-btn" onclick="setDiasArmazena(this,30)">30d</button>
+                </div>
+                <span id="armazenaResult" class="armazena-result">—</span>
+            </div>
+        </div>
     </div>
 
     <!-- PRODUTOS -->
@@ -762,6 +855,7 @@ body {
     <div class="resultado-card">
         <div class="resultado-label">Valor final do projeto</div>
         <div class="resultado-valor" id="resultadoValor">R$ 0,00</div>
+        <div id="resultadoOriginal" style="display:none;font-size:12px;color:rgba(255,255,255,0.5);text-decoration:line-through;margin-top:2px;"></div>
 
         <div class="resumo-toggle" id="resumoToggle" onclick="toggleResumo()">
             <span>Ver detalhes</span>
@@ -771,6 +865,13 @@ body {
             <div class="resumo-linha"><span>Equipamentos</span><strong id="rEquip">R$ 0,00</strong></div>
             <div class="resumo-linha"><span>Infraestrutura</span><strong id="rInfra">R$ 0,00</strong></div>
             <div class="resumo-linha"><span>Serviço e despesas</span><strong id="rServico">R$ 0,00</strong></div>
+        </div>
+
+        <div class="desconto-row">
+            <span class="desconto-label">Desconto</span>
+            <span id="descontoEconomia" class="desconto-economia" style="display:none;"></span>
+            <input type="number" id="descontoPct" class="desconto-input" min="0" max="50" value="0" oninput="aplicarDesconto()">
+            <span class="desconto-pct">%</span>
         </div>
     </div>
 
@@ -839,6 +940,16 @@ body {
                         <span style="color:var(--muted);font-size:13px">dias úteis</span>
                     </div>
                 </div>
+            </div>
+            <div class="exp-field">
+                <label class="exp-label">Garantia</label>
+                <select class="exp-input" id="expGarantia" style="width:100%;">
+                    <option value="">Não informar</option>
+                    <option value="90 dias">90 dias</option>
+                    <option value="6 meses" selected>6 meses</option>
+                    <option value="1 ano">1 ano</option>
+                    <option value="2 anos">2 anos</option>
+                </select>
             </div>
             <div style="display:flex;gap:8px;">
                 <button class="exp-btn" onclick="confirmarExportar()" style="flex:1;">
@@ -1223,6 +1334,56 @@ function ativarEdicaoPreco(card) {
 }
 
 // ── CÁLCULO ──
+// ── ARMAZENAMENTO ──
+let _diasArmazena = 7;
+
+function setDiasArmazena(btn, dias) {
+    _diasArmazena = dias;
+    document.querySelectorAll('.armazena-dia-btn').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+    calcArmazenamento();
+}
+
+function calcArmazenamento() {
+    const qtd = Number(document.getElementById('totalCameras').textContent) || 0;
+    if (!qtd) return;
+    const bitrate = Number(document.getElementById('resSelect').value);
+    const gb = qtd * bitrate * 10.8 * _diasArmazena;
+    document.getElementById('armazenaResult').textContent = (gb / 1000).toFixed(1) + ' TB';
+}
+
+// ── CANAIS ──
+function verificarCanais() {
+    const qtdCam = Number(document.getElementById('totalCameras').textContent) || 0;
+    const canais = Number(document.getElementById('canaisGravador').value) || 0;
+    document.getElementById('canaisAviso').style.display = (canais > 0 && qtdCam > canais) ? '' : 'none';
+}
+
+// ── DESCONTO ──
+let _descontoPct = 0;
+let _saveTimer = null;
+
+function aplicarDesconto() {
+    _descontoPct = Math.min(50, Math.max(0, Number(document.getElementById('descontoPct').value) || 0));
+    const base = _pag.valorBruto || 0;
+    const desc = _descontoPct > 0 ? Math.round(base * (1 - _descontoPct / 100) / 50) * 50 : base;
+    _pag.valorFinal = desc;
+    document.getElementById('resultadoValor').textContent = fmt(desc);
+    const originalEl = document.getElementById('resultadoOriginal');
+    const economiaEl = document.getElementById('descontoEconomia');
+    if (_descontoPct > 0 && base > desc) {
+        originalEl.textContent = 'de ' + fmt(base);
+        originalEl.style.display = '';
+        economiaEl.textContent = '−' + fmt(base - desc);
+        economiaEl.style.display = '';
+    } else {
+        originalEl.style.display = 'none';
+        economiaEl.style.display = 'none';
+    }
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(salvarEstado, 600);
+}
+
 function calcular() {
     const tipoEl=document.querySelector('input[name="tipo"]:checked');
     const tipo=tipoEl?tipoEl.value:"analogica";
@@ -1263,16 +1424,19 @@ function calcular() {
     const diarias=diasT*500*(usarSocio?2:1);
     const diarista=diasD*120;
     const despesas=desl+totalInfra+diarias+diarista;
-    const valorFinal=Math.round((totalProd*mult+despesas)/50)*50;
+    const valorBruto=Math.round((totalProd*mult+despesas)/50)*50;
 
-    document.getElementById("resultadoValor").textContent=fmt(valorFinal);
     document.getElementById("rEquip").textContent=fmt(totalProd);
     document.getElementById("rInfra").textContent=fmt(totalInfra);
     document.getElementById("rServico").textContent=fmt(despesas-totalInfra);
 
-    _pag = { valorFinal, totalProd, totalInfra, desl, diarias, diarista };
+    _pag = { valorFinal: valorBruto, valorBruto, totalProd, totalInfra, desl, diarias, diarista };
+    aplicarDesconto();
 
-    salvarEstado();
+    const temCam = qtdCameras > 0;
+    document.getElementById('canaisRow').style.display = temCam ? '' : 'none';
+    document.getElementById('armazenamentoCalc').style.display = temCam ? '' : 'none';
+    if (temCam) { verificarCanais(); calcArmazenamento(); }
 }
 
 function toggleResumo() {
@@ -1334,6 +1498,8 @@ function salvarEstado() {
         pagModo:_pagModo, subAvista:_subAvista,
         nPix:_nPix, nBoleto:_nBoleto, nCartao:_nCartao,
         clienteInfo:{ ..._clienteInfo },
+        desconto: _descontoPct,
+        canais: document.getElementById('canaisGravador').value,
         produtos:[], infra:[]
     };
     document.querySelectorAll(".item-produto").forEach(card=>{
@@ -1382,6 +1548,8 @@ function restaurarEstado() {
             if (ci.validade) document.getElementById('expValidade').value = ci.validade;
             if (ci.prazo)    document.getElementById('expPrazo').value    = ci.prazo;
         }
+        if (e.desconto) { _descontoPct = e.desconto; document.getElementById('descontoPct').value = e.desconto; }
+        if (e.canais)   { document.getElementById('canaisGravador').value = e.canais; }
         if (e.produtos&&e.produtos.length) e.produtos.forEach(p=>adicionarProduto(p.codigo,p.qtd,p.precoManual));
         else adicionarProduto();
         if (e.infra&&e.infra.length) e.infra.forEach(i=>adicionarInfra(i.nome,i.qtd,i.precoManual));
@@ -1405,7 +1573,12 @@ function limparOrcamento() {
     document.getElementById("diasTrabalho").value=1;
     document.getElementById("diasDiarista").value=1;
     _pagModo='avista'; _subAvista='5050'; _nPix=4; _nBoleto=4; _nCartao=4;
-    _clienteInfo={ nome:'', tel:'', email:'', data:'', validade:15, prazo:'2' };
+    _clienteInfo={ nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses' };
+    _descontoPct=0;
+    document.getElementById('descontoPct').value=0;
+    document.getElementById('descontoEconomia').style.display='none';
+    document.getElementById('resultadoOriginal').style.display='none';
+    document.getElementById('canaisGravador').value=8;
     adicionarProduto(); adicionarInfra(); calcular();
 }
 
@@ -1448,7 +1621,7 @@ function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
 
 // ── EXPORTAR ──
-let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2' };
+let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses' };
 
 function abrirExportar() {
     const ci = _clienteInfo;
@@ -1457,6 +1630,7 @@ function abrirExportar() {
     if (ci.email)    document.getElementById('expEmail').value    = ci.email;
     if (ci.validade) document.getElementById('expValidade').value = ci.validade;
     if (ci.prazo)    document.getElementById('expPrazo').value    = ci.prazo;
+    if (ci.garantia) document.getElementById('expGarantia').value = ci.garantia;
     const inputData = document.getElementById('expData');
     if (ci.data) inputData.value = ci.data;
     else if (!inputData.value) inputData.value = new Date().toISOString().slice(0,10);
@@ -1474,16 +1648,17 @@ function confirmarExportar() {
     const data     = document.getElementById('expData').value;
     const validade = document.getElementById('expValidade').value;
     const prazo    = document.getElementById('expPrazo').value || '2';
+    const garantia = document.getElementById('expGarantia').value;
     if (!nome)  { document.getElementById('expNome').focus();  return; }
     if (!tel)   { document.getElementById('expTel').focus();   return; }
-    _clienteInfo = { nome, tel, email, data, validade, prazo };
+    _clienteInfo = { nome, tel, email, data, validade, prazo, garantia };
     salvarEstado();
     fecharExportar();
     gerarPDF();
 }
 
 function gerarPDF() {
-    const { nome, tel, email, data, validade, prazo = '2' } = _clienteInfo;
+    const { nome, tel, email, data, validade, prazo = '2', garantia = '' } = _clienteInfo;
     const fmtR  = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
     const socio = document.getElementById('usarSocio').checked;
     const marca = socio ? 'B&A Vision' : 'CPZ Digital';
@@ -1595,7 +1770,8 @@ function gerarPDF() {
         '{{relacao_materiais}}': relacaoMateriais,
         '{{responsavel}}':       responsavel,
         '{{cnpj}}':              cnpj,
-        '{{total}}':             fmtR(inst.total),
+        '{{total}}':             fmtR(inst.total) + (_descontoPct > 0 ? ' <span style="font-size:12px;font-weight:400;opacity:0.7;">(desconto ' + _descontoPct + '% aplicado)</span>' : ''),
+        '{{garantia_bullet}}':   garantia ? '&bull; Garantia de <strong>' + garantia + '</strong> para os equipamentos e serviços instalados.<br>' : '',
         '{{modoLabel}}':         modoLabel,
         '{{formaLabel}}':        formaLabel,
         '{{rows_parc}}':         rowsParc,
