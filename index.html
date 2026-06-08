@@ -995,27 +995,27 @@ body {
                 <div class="exp-field" style="flex:1;">
                     <label class="exp-label">Validade</label>
                     <div style="display:flex;gap:6px;align-items:center">
-                        <input class="exp-input" id="expValidade" type="number" min="1" max="90" value="15" style="width:64px;flex:none">
+                        <input class="exp-input" id="expValidade" type="number" min="1" max="90" value="15" style="width:56px;flex:none">
                         <span style="color:var(--muted);font-size:13px">dias</span>
                     </div>
                 </div>
                 <div class="exp-field" style="flex:1;">
-                    <label class="exp-label">Prazo execução</label>
+                    <label class="exp-label">Prazo exec.</label>
                     <div style="display:flex;gap:6px;align-items:center">
-                        <input class="exp-input" id="expPrazo" type="number" min="1" max="60" value="2" style="width:64px;flex:none">
-                        <span style="color:var(--muted);font-size:13px">dias úteis</span>
+                        <input class="exp-input" id="expPrazo" type="number" min="1" max="60" value="2" style="width:56px;flex:none">
+                        <span style="color:var(--muted);font-size:13px">dias</span>
                     </div>
                 </div>
-            </div>
-            <div class="exp-field">
-                <label class="exp-label">Garantia</label>
-                <select class="exp-input" id="expGarantia" style="width:100%;">
-                    <option value="">Não informar</option>
-                    <option value="90 dias">90 dias</option>
-                    <option value="6 meses" selected>6 meses</option>
-                    <option value="1 ano">1 ano</option>
-                    <option value="2 anos">2 anos</option>
-                </select>
+                <div class="exp-field" style="flex:1;">
+                    <label class="exp-label">Garantia</label>
+                    <select class="exp-input" id="expGarantia" style="width:100%;padding-left:8px;">
+                        <option value="">—</option>
+                        <option value="90 dias">90 dias</option>
+                        <option value="6 meses" selected>6 meses</option>
+                        <option value="1 ano">1 ano</option>
+                        <option value="2 anos">2 anos</option>
+                    </select>
+                </div>
             </div>
             <div class="exp-field">
                 <label class="exp-label">Observações <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
