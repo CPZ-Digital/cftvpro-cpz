@@ -124,13 +124,21 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
     margin-bottom: 12px;
     background: var(--surface);
-    padding: 14px 18px;
+    padding: 10px 12px;
     border-radius: 18px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow-card);
+}
+.topo-centro {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 10px;
+    min-width: 0;
 }
 .topo-texto h2 {
     margin: 0;
@@ -152,7 +160,20 @@ body {
     border-radius: 6px;
     background: #fff;
     padding: 4px 8px;
+    flex-shrink: 0;
 }
+.topo-icon-btn {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border2);
+    background: var(--surface2);
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.topo-icon-btn:active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
 /* ── CARDS ── */
 .card {
@@ -1008,11 +1029,23 @@ body {
 
     <!-- TOPO -->
     <div class="topo">
-        <div class="topo-texto">
-            <h2 id="tituloApp" style="cursor:default;user-select:none;">Orçamento</h2>
-            <p class="subtitulo" id="subtituloApp">B&A Vision</p>
+        <button class="topo-icon-btn" onclick="abrirHistorico()" title="Histórico">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
+            </svg>
+        </button>
+        <div class="topo-centro">
+            <div class="topo-texto">
+                <h2 id="tituloApp" style="cursor:default;user-select:none;">Orçamento</h2>
+                <p class="subtitulo" id="subtituloApp">B&A Vision</p>
+            </div>
+            <img class="logo-empresa" id="logoTopo" src="ba-vision-assinatura.png" alt="B&A Vision">
         </div>
-        <img class="logo-empresa" id="logoTopo" src="ba-vision-assinatura.png" alt="B&A Vision">
+        <button class="topo-icon-btn" onclick="abrirKits()" title="Kits">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+            </svg>
+        </button>
     </div>
 
     <!-- TIPO -->
@@ -1256,16 +1289,6 @@ body {
 
 <!-- BOTÕES FIXOS -->
 <div class="fab-area">
-    <button class="fab fab-ghost" onclick="abrirHistorico()" title="Histórico" style="flex:0 0 50px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
-        </svg>
-    </button>
-    <button class="fab fab-ghost" onclick="abrirKits()" title="Kits" style="flex:0 0 50px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-        </svg>
-    </button>
     <button class="fab fab-azul" onclick="abrirPagamentos()">💳 Pagamento</button>
     <button class="fab fab-ghost" onclick="limparOrcamento()" title="Novo orçamento" style="flex:0 0 50px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
