@@ -630,6 +630,8 @@ body {
 .hist-btn-ag       { background: var(--warn);    color: var(--warn-text); }
 .hist-btn-ap       { background: var(--ok);      color: var(--ok-text); }
 .hist-btn-rec      { background: var(--danger);  color: var(--danger-text); }
+.hist-btn-pdf      { background: var(--blue);    color: #fff; }
+.hist-btn-contrato { background: #7c3aed;        color: #fff; }
 .hist-btn-excluir  { background: transparent;    color: var(--muted); border: 1px solid var(--border2); margin-left: auto; }
 .hist-vazio {
     text-align: center; color: var(--muted);
@@ -3278,11 +3280,13 @@ function renderHistorico() {
                 <div class="hist-total">${e.total}</div>
             </div>
             <div class="hist-acoes">
-                <button class="hist-btn hist-btn-reabrir"  onclick="reabrirHistorico(${e.id})">Reabrir</button>
-                <button class="hist-btn hist-btn-duplicar" onclick="duplicarHistorico(${e.id})">Duplicar</button>
+                <button class="hist-btn hist-btn-reabrir"   onclick="reabrirHistorico(${e.id})">Reabrir</button>
+                <button class="hist-btn hist-btn-duplicar"  onclick="duplicarHistorico(${e.id})">Duplicar</button>
+                <button class="hist-btn hist-btn-pdf"       onclick="gerarPDFHistorico(${e.id})">📄 PDF</button>
+                <button class="hist-btn hist-btn-contrato"  onclick="gerarContrato(${e.id})">📋 Contrato</button>
                 <button class="hist-btn hist-btn-ap"  onclick="setStatusHistorico(${e.id},'aprovada')" title="Marcar aprovada">✓ Aprovada</button>
                 <button class="hist-btn hist-btn-rec" onclick="setStatusHistorico(${e.id},'recusada')" title="Marcar recusada">✗ Recusada</button>
-                <button class="hist-btn hist-btn-excluir" onclick="excluirHistorico(${e.id})">Excluir</button>
+                <button class="hist-btn hist-btn-excluir"   onclick="excluirHistorico(${e.id})">Excluir</button>
             </div>
         </div>`;
     }).join('');
@@ -3308,6 +3312,212 @@ function fecharHistorico() {
 document.getElementById('histOverlay').addEventListener('click', function(e) {
     if (e.target === this) fecharHistorico();
 });
+
+// ── GERAR PDF / CONTRATO A PARTIR DO HISTÓRICO ──
+function _dadosDoHistorico(id) {
+    const entry = _carregarHistorico().find(e => e.id === id);
+    if (!entry) return null;
+    const est  = entry.estado || {};
+    const ci   = est.clienteInfo || {};
+    const socio = entry.marca === 'ba';
+    const fmtR = v => 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    const cor    = socio ? '#059669' : '#0055b3';
+    const corL   = socio ? '#d1f5e8' : '#e8eef8';
+    const corR   = socio ? '#f0fbf7' : '#f7f9ff';
+    const corBg  = socio ? '#f0fbf7' : '#f0f5ff';
+
+    const data      = ci.data || new Date().toISOString().slice(0,10);
+    const validade  = ci.validade || 15;
+    const baseMs    = new Date(data + 'T12:00:00').getTime();
+    const addDias   = d => new Date(baseMs + d * 86400000).toLocaleDateString('pt-BR');
+    const dataFmt   = addDias(0);
+    const dataVenc  = addDias(Number(validade));
+
+    // parcelas
+    const pagModo   = est.pagModo   || 'avista';
+    const subAvista = est.subAvista || '5050';
+    const nPix      = est.nPix      || 2;
+    const nBoleto   = est.nBoleto   || 2;
+    const nCartao   = est.nCartao   || 2;
+    const totalNum  = parseFloat((entry.total || '').replace(/[^\d,]/g,'').replace(',','.')) || 0;
+    const descPct   = est.desconto  || 0;
+    const totalFinal = totalNum;
+
+    let parcelas = [];
+    if (pagModo === 'avista') {
+        if (subAvista === '5050') {
+            parcelas = [{ label:'50% — Aprovação', recebe: totalFinal * 0.5 }, { label:'50% — Conclusão', recebe: totalFinal * 0.5 }];
+        } else {
+            const n = Number(nPix);
+            for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Pix)', recebe: totalFinal / n });
+        }
+    } else if (pagModo === 'boleto') {
+        const n = Number(nBoleto);
+        const t = totalFinal * 1.05;
+        for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Boleto)', recebe: t / n });
+    } else {
+        const n = Number(nCartao);
+        const t = totalFinal * 1.10;
+        for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Cartão)', recebe: t / n });
+    }
+
+    const modoLabel  = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[pagModo];
+    const formaLabel = pagModo === 'avista'
+        ? (subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : nPix + '× Pix')
+        : pagModo === 'boleto' ? (nBoleto + '× mensais') : (nCartao + '× no cartão');
+
+    const TH  = 'background:' + cor + ';color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
+    const TDL = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;';
+    const TDC = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:center;';
+    const TDR = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;text-align:right;';
+
+    const rowsParc = parcelas.map((p, i) => {
+        const venc = addDias(Number(validade) + i * 30);
+        return '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
+            '<td style="' + TDL + '">' + p.label + '</td>' +
+            '<td style="' + TDC + '">' + venc + '</td>' +
+            '<td style="' + TDR + 'font-weight:700;color:' + cor + ';">' + fmtR(p.recebe) + '</td></tr>';
+    }).join('');
+
+    // materiais
+    const THs  = 'background:' + cor + ';color:#fff;padding:5px 8px;font-size:9px;font-weight:700;text-align:left;';
+    const TDLs = 'padding:4px 8px;font-size:9px;color:#333;border-bottom:1px solid #eee;';
+    const TDCs = 'padding:4px 8px;font-size:9px;color:#333;border-bottom:1px solid #eee;text-align:center;';
+    const todosItens = [
+        ...(est.produtos || []).filter(p => p.codigo).map(p => ({ descricao: p.codigo, qtd: p.qtd })),
+        ...(est.infra    || []).filter(i => i.nome ).map(i => ({ descricao: i.nome,   qtd: i.qtd }))
+    ];
+    const relacaoMateriais = todosItens.length ? `
+        <p style="font-size:13px;font-weight:700;color:${cor};border-bottom:2px solid ${cor};padding-bottom:4px;margin:0 0 8px;page-break-after:avoid;">Especificação de Materiais e Equipamentos</p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+        <tr><th style="${THs}width:36px;text-align:center;">Item</th><th style="${THs}">Descrição</th><th style="${THs}text-align:center;width:44px;">Qtd</th></tr>` +
+        todosItens.map((it, i) => `<tr style="background:${i%2 ? corR : '#fff'}">
+            <td style="${TDCs}color:#888;">${i+1}</td>
+            <td style="${TDLs}">${it.descricao}</td>
+            <td style="${TDCs}">${it.qtd}</td></tr>`).join('') +
+        `</table>` : '';
+
+    const qtdCameras = todosItens.filter(it => /câmera|camera/i.test(it.descricao)).reduce((s,it) => s + Number(it.qtd), 0);
+
+    const responsavel   = socio ? 'Bruno &amp; Adriano — B&A Vision' : 'Adriano — CPZ Digital';
+    const cnpj          = socio ? '62.456.202/0001-08' : '58.589.970/0001-54';
+    const razaoSocial   = socio ? 'B&A Vision Segurança' : 'CPZ Digital';
+    const contatoTel    = socio ? '(21) 99664-6927' : '(21) 96745-5648';
+    const contatoEmail  = socio ? 'ba.visionseguranca@gmail.com' : 'contato@cpzdigital.com.br';
+    const garantia      = ci.garantia || '6 meses';
+    const prazo         = (ci.prazo || '2') + ' dias úteis';
+    const obs           = ci.obs || '';
+    const endereco      = ci.endereco || '';
+    const numero        = entry.numero || ci.numero || '';
+
+    return {
+        socio, cor, corBg, corL, corR,
+        dataFmt, dataVenc, rowsParc, modoLabel, formaLabel,
+        relacaoMateriais, qtdCameras,
+        responsavel, cnpj, razaoSocial, contatoTel, contatoEmail,
+        garantia, prazo, obs, endereco, numero,
+        nome: ci.nome || entry.nome, tel: ci.tel || '', email: ci.email || '',
+        total: fmtR(totalFinal), validade,
+        descPct, nomeArqBase: (numero ? numero + '-' : '') + (ci.nome || entry.nome).replace(/\s+/g,'-').toLowerCase() + '-' + data,
+        footerLine: socio
+            ? 'B&A Vision  |  (21) 99664-6927  |  ba.visionseguranca@gmail.com  |  CNPJ: 62.456.202/0001-08'
+            : 'CPZ Digital  |  (21) 96745-5648  |  contato@cpzdigital.com.br  |  CNPJ: 58.589.970/0001-54',
+        fr: socio ? 5 : 0, fg: socio ? 150 : 85, fb: socio ? 105 : 179
+    };
+}
+
+function gerarPDFHistorico(id) {
+    const d = _dadosDoHistorico(id);
+    if (!d) { mostrarToast('Proposta não encontrada'); return; }
+    // Restaura clienteInfo temporariamente para aproveitar gerarPDF existente
+    const backup = { ..._clienteInfo };
+    const est = (_carregarHistorico().find(e => e.id === id)?.estado) || {};
+    _clienteInfo = { ...est.clienteInfo };
+    mostrarToast('Gerando PDF...');
+    gerarPDF();
+    _clienteInfo = backup;
+}
+
+function gerarContrato(id) {
+    const d = _dadosDoHistorico(id);
+    if (!d) { mostrarToast('Proposta não encontrada'); return; }
+    mostrarToast('Gerando contrato...');
+
+    const corR = d.corR, cor = d.cor;
+    const qtdCamerasRow = d.qtdCameras > 0
+        ? `<p style="font-size:12px;color:#333;margin:0 0 14px;padding:7px 12px;background:${d.corL};border-left:3px solid ${cor};">
+            <strong>Quantidade de câmeras previstas:</strong> ${d.qtdCameras} unidades</p>` : '';
+
+    const enderecoObraBloco = d.endereco
+        ? `<p style="font-size:12px;color:#444;margin:0 0 14px;"><strong>Local de instalação:</strong> ${d.endereco.replace(/</g,'&lt;')}</p>` : '';
+
+    const placeholders = {
+        '{{logo_src}}':         d.socio ? 'ba-vision-assinatura.png' : 'cpz-assinatura.png',
+        '{{logo_height}}':      d.socio ? '48' : '40',
+        '{{cor_pri}}':          cor,
+        '{{cor_bg}}':           d.corBg,
+        '{{dataFmt}}':          d.dataFmt,
+        '{{numero_contrato}}':  d.numero || 'S/N',
+        '{{razao_social}}':     d.razaoSocial,
+        '{{cnpj}}':             d.cnpj,
+        '{{contato_tel}}':      d.contatoTel,
+        '{{contato_email}}':    d.contatoEmail,
+        '{{responsavel}}':      d.responsavel,
+        '{{nome}}':             d.nome,
+        '{{tel}}':              d.tel,
+        '{{email_row_ct}}':     d.email ? `<p style="margin:2px 0 0;font-size:11px;color:#555;">E-mail: ${d.email}</p>` : '',
+        '{{endereco_row_ct}}':  d.endereco ? `<p style="margin:2px 0 0;font-size:11px;color:#555;">Local: ${d.endereco.replace(/</g,'&lt;')}</p>` : '',
+        '{{total}}':            d.total + (d.descPct > 0 ? ` <span style="font-size:12px;font-weight:400;opacity:0.7;">(desconto ${d.descPct}% aplicado)</span>` : ''),
+        '{{modoLabel}}':        d.modoLabel,
+        '{{formaLabel}}':       d.formaLabel,
+        '{{rows_parc}}':        d.rowsParc,
+        '{{prazo}}':            d.prazo,
+        '{{garantia}}':         d.garantia,
+        '{{garantia_texto}}':   d.garantia ? `A CONTRATADA oferece garantia de <strong>${d.garantia}</strong> para equipamentos e serviços, a contar da data de conclusão. ` : '',
+        '{{qtd_cameras_row}}':  qtdCamerasRow,
+        '{{endereco_obra_bloco}}': enderecoObraBloco,
+        '{{relacao_materiais}}': d.relacaoMateriais,
+        '{{obs_block}}':        d.obs ? `
+            <p style="font-size:13px;font-weight:700;color:${cor};border-bottom:2px solid ${cor};padding-bottom:4px;margin:0 0 8px;">Observações</p>
+            <p style="font-size:11px;color:#444;line-height:1.8;margin:0 0 14px;white-space:pre-wrap;">${d.obs.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>` : '',
+        '{{cidade_uf}}':        'Rio de Janeiro — RJ',
+        '{{validade}}':         String(d.validade),
+    };
+
+    const nomeArq = d.nomeArqBase + '-contrato.pdf';
+
+    fetch('template-contrato.html')
+        .then(r => r.text())
+        .then(tpl => {
+            let html = tpl;
+            Object.entries(placeholders).forEach(([k, v]) => { html = html.split(k).join(v); });
+            html2pdf().from(html).set({
+                margin:      [4, 4, 16, 4],
+                filename:    nomeArq,
+                image:       { type:'jpeg', quality:0.95 },
+                html2canvas: { scale:2, useCORS:true, windowWidth:756, scrollX:0, scrollY:0 },
+                jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
+            }).toPdf().get('pdf').then(pdf => {
+                const n = pdf.internal.getNumberOfPages();
+                const w = pdf.internal.pageSize.getWidth();
+                const h = pdf.internal.pageSize.getHeight();
+                for (let i = 1; i <= n; i++) {
+                    pdf.setPage(i);
+                    pdf.setDrawColor(d.fr, d.fg, d.fb);
+                    pdf.setLineWidth(0.4);
+                    pdf.line(4, h - 11, w - 4, h - 11);
+                    pdf.setFontSize(7);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(100, 100, 100);
+                    pdf.text(d.footerLine, w / 2, h - 7, { align: 'center' });
+                }
+                pdf.save(nomeArq);
+                mostrarToast('Contrato gerado!');
+            });
+        })
+        .catch(e => alert('Erro ao carregar template: ' + e.message));
+}
 
 // ── PIN DE ACESSO ──
 const _PIN = '1472'; // altere aqui para mudar o PIN
