@@ -924,11 +924,85 @@ body {
     text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px;
 }
 
+/* ── PIN ── */
+#pinOverlay {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #0a0a0f;
+    display: flex; align-items: center; justify-content: center;
+}
+#pinBox {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 32px 24px; width: 100%; max-width: 320px;
+}
+#pinMsg {
+    font-size: 14px; color: rgba(255,255,255,0.5);
+    margin: 0 0 24px; font-weight: 500; letter-spacing: 0.3px;
+}
+#pinDots {
+    display: flex; gap: 16px; margin-bottom: 32px;
+}
+#pinDots span {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.25);
+    background: transparent;
+    transition: background 0.15s, border-color 0.15s;
+}
+#pinDots span.filled {
+    background: #fff;
+    border-color: #fff;
+}
+#pinTeclado {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; width: 100%;
+}
+#pinTeclado button {
+    background: rgba(255,255,255,0.07);
+    border: none; border-radius: 14px;
+    color: #fff; font-size: 22px; font-weight: 600;
+    padding: 18px 0; cursor: pointer;
+    transition: background 0.12s, transform 0.08s;
+    font-family: inherit;
+}
+#pinTeclado button:active { background: rgba(255,255,255,0.18); transform: scale(0.94); }
+#pinBox.shake { animation: pinShake 0.4s ease; }
+@keyframes pinShake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-10px); }
+    40%      { transform: translateX(10px); }
+    60%      { transform: translateX(-7px); }
+    80%      { transform: translateX(7px); }
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
 </head>
 <body class="ba-vision">
+
+<!-- ── TELA DE PIN ── -->
+<div id="pinOverlay">
+    <div id="pinBox">
+        <img src="ba-vision-assinatura.png" id="pinLogo" style="height:44px;width:auto;margin-bottom:24px;display:block;margin-left:auto;margin-right:auto;">
+        <p id="pinMsg">Digite seu PIN</p>
+        <div id="pinDots">
+            <span></span><span></span><span></span><span></span>
+        </div>
+        <div id="pinTeclado">
+            <button onclick="pinDigit('1')">1</button>
+            <button onclick="pinDigit('2')">2</button>
+            <button onclick="pinDigit('3')">3</button>
+            <button onclick="pinDigit('4')">4</button>
+            <button onclick="pinDigit('5')">5</button>
+            <button onclick="pinDigit('6')">6</button>
+            <button onclick="pinDigit('7')">7</button>
+            <button onclick="pinDigit('8')">8</button>
+            <button onclick="pinDigit('9')">9</button>
+            <button onclick="pinLimpar()" id="pinBtnDel" style="font-size:18px;">⌫</button>
+            <button onclick="pinDigit('0')">0</button>
+            <button style="visibility:hidden;"></button>
+        </div>
+    </div>
+</div>
 
 <div class="container">
 
@@ -3222,6 +3296,59 @@ function fecharHistorico() {
 document.getElementById('histOverlay').addEventListener('click', function(e) {
     if (e.target === this) fecharHistorico();
 });
+
+// ── PIN DE ACESSO ──
+const _PIN = '1234'; // altere aqui para mudar o PIN
+let _pinDigitado = '';
+
+function _pinAtualizar() {
+    document.querySelectorAll('#pinDots span').forEach((s, i) => {
+        s.classList.toggle('filled', i < _pinDigitado.length);
+    });
+}
+
+function pinDigit(d) {
+    if (_pinDigitado.length >= 4) return;
+    _pinDigitado += d;
+    _pinAtualizar();
+    if (_pinDigitado.length === 4) {
+        if (_pinDigitado === _PIN) {
+            sessionStorage.setItem('cpz_pin_ok', '1');
+            document.getElementById('pinOverlay').style.transition = 'opacity 0.3s';
+            document.getElementById('pinOverlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('pinOverlay').remove(), 320);
+        } else {
+            const box = document.getElementById('pinBox');
+            box.classList.add('shake');
+            document.getElementById('pinMsg').textContent = 'PIN incorreto';
+            document.getElementById('pinMsg').style.color = '#f87171';
+            setTimeout(() => {
+                _pinDigitado = '';
+                _pinAtualizar();
+                box.classList.remove('shake');
+                document.getElementById('pinMsg').textContent = 'Digite seu PIN';
+                document.getElementById('pinMsg').style.color = '';
+            }, 600);
+        }
+    }
+}
+
+function pinLimpar() {
+    _pinDigitado = _pinDigitado.slice(0, -1);
+    _pinAtualizar();
+}
+
+// teclado físico
+document.addEventListener('keydown', e => {
+    if (!document.getElementById('pinOverlay')) return;
+    if (e.key >= '0' && e.key <= '9') pinDigit(e.key);
+    else if (e.key === 'Backspace') pinLimpar();
+});
+
+// desbloqueia sem PIN se já autenticou nesta sessão
+if (sessionStorage.getItem('cpz_pin_ok') === '1') {
+    document.getElementById('pinOverlay').remove();
+}
 
 init();
 
