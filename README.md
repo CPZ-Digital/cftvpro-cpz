@@ -1,9 +1,9 @@
-# CPZ Orçamento — Manual de Uso
-
-**Acesse o app:** https://adrianpz.github.io/orcamento-cpz
+# CFTVPro — Manual de Uso
 
 App web para gerar propostas comerciais de instalação de câmeras de segurança.  
 Funciona no celular e no computador, pode ser instalado como app e funciona offline.
+
+> **Link de acesso:** consulte o Adriano.
 
 ---
 
