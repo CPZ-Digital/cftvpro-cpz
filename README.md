@@ -21,22 +21,6 @@ Funciona no celular e no computador, pode ser instalado como app e funciona offl
 
 ---
 
-## Modos de operação
-
-O app funciona em dois modos — um para cada empresa.
-
-| | CPZ Digital | B&A Vision |
-|---|---|---|
-| **Cor** | Azul | Verde |
-| **Logo no PDF** | CPZ Digital | B&A Vision |
-| **CNPJ** | 58.589.970/0001-54 | 62.456.202/0001-08 |
-| **Responsável** | Adriano | Bruno & Adriano |
-
-**Como alternar:** toque **3 vezes rápidas** no título "Orçamento" no topo do app.  
-O app abre em **B&A Vision por padrão**.
-
----
-
 ## Passo a passo — Gerar um orçamento
 
 ### 1. Tipo de projeto
