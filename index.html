@@ -3478,10 +3478,14 @@ function gerarContrato(id) {
         '{{endereco_obra_bloco}}': enderecoObraBloco,
         '{{relacao_materiais}}': d.relacaoMateriais,
         '{{obs_block}}':        d.obs ? `
-            <p style="font-size:13px;font-weight:700;color:${cor};border-bottom:2px solid ${cor};padding-bottom:4px;margin:0 0 8px;">Observações</p>
+            <p style="font-size:12px;font-weight:700;color:${cor};border-bottom:1.5px solid ${cor};padding-bottom:3px;margin:0 0 7px;">Observações</p>
             <p style="font-size:11px;color:#444;line-height:1.8;margin:0 0 14px;white-space:pre-wrap;">${d.obs.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>` : '',
-        '{{cidade_uf}}':        'Rio de Janeiro — RJ',
-        '{{validade}}':         String(d.validade),
+        '{{tipo_contratante}}':    'pessoa física/jurídica',
+        '{{endereco_contratante}}': d.endereco || '<span style="border-bottom:1px solid #aaa;display:inline-block;min-width:200px;">&nbsp;</span>',
+        '{{representante_linha}}': ', neste ato representado por seu representante legal, ',
+        '{{responsavel_texto}}':   d.socio ? 'Bruno e Adriano' : 'Adriano',
+        '{{qtd_cameras_row}}':     d.qtdCameras > 0 ? ` Serão instaladas <strong>${d.qtdCameras} câmeras</strong> conforme especificado no Anexo I.` : '',
+        '{{validade}}':            String(d.validade),
     };
 
     const nomeArq = d.nomeArqBase + '-contrato.pdf';
