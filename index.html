@@ -3216,7 +3216,10 @@ function _mesAno(dataStr) {
 
 function renderHistorico() {
     const marcaAtiva = document.getElementById('usarSocio').checked ? 'ba' : 'cpz';
-    const listaAll   = _carregarHistorico().filter(e => (e.marca || 'cpz') === marcaAtiva);
+    const listaAll   = _carregarHistorico().filter(e => {
+        const m = e.marca || ((e.estado?.socio || (e.estado?.clienteInfo && e.estado.clienteInfo.numero?.startsWith('BA'))) ? 'ba' : 'cpz');
+        return m === marcaAtiva;
+    });
 
     // stats (da marca ativa)
     const total     = listaAll.length;
