@@ -2187,14 +2187,13 @@ function gerarPDF() {
         .then(tpl => {
             let html = tpl;
             Object.entries(placeholders).forEach(([k, v]) => { html = html.split(k).join(v); });
-            html = `<div style="margin:0;padding:0;width:720px;box-sizing:border-box;">${html}</div>`;
             const [fr,fg,fb] = socio ? [5,150,105] : [0,85,179];
             const footerLine = socio
                 ? 'B&A Vision  |  (21) 99664-6927  |  ba.visionseguranca@gmail.com  |  CNPJ: 62.456.202/0001-08  |  Responsáveis: Bruno & Adriano'
                 : 'CPZ Digital  |  (21) 96745-5648  |  contato@cpzdigital.com.br  |  CNPJ: 58.589.970/0001-54  |  Responsável: Adriano';
             mostrarToast('Gerando PDF...');
             html2pdf().from(html).set({
-                margin:      [8, 8, 18, 8],
+                margin:      0,
                 filename:    nomeArq,
                 image:       { type:'jpeg', quality:0.95 },
                 html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0,
@@ -3507,9 +3506,8 @@ function gerarContrato(id) {
         .then(tpl => {
             let html = tpl;
             Object.entries(placeholders).forEach(([k, v]) => { html = html.split(k).join(v); });
-            html = `<div style="margin:0;padding:0;width:720px;box-sizing:border-box;">${html}</div>`;
             html2pdf().from(html).set({
-                margin:      [8, 8, 18, 8],
+                margin:      0,
                 filename:    nomeArq,
                 image:       { type:'jpeg', quality:0.95 },
                 html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0,
