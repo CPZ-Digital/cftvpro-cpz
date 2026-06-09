@@ -1220,18 +1220,16 @@ body {
 <div class="pag-overlay" id="histOverlay">
     <div class="pag-modal">
         <div class="pag-header">
-            <span class="pag-titulo">Histórico de Propostas</span>
+            <span class="pag-titulo" id="histTitulo">Histórico de Propostas</span>
             <button class="pag-fechar" onclick="fecharHistorico()">✕</button>
         </div>
         <div id="histStats" class="hist-stats"></div>
         <input class="hist-busca" id="histBusca" placeholder="Buscar por nome…" oninput="renderHistorico()">
         <div class="hist-filtros">
-            <button class="hist-filtro ativo" data-f="todos"     onclick="setFiltroHist(this)">Todos</button>
-            <button class="hist-filtro"       data-f="ba"        onclick="setFiltroHist(this)">B&A Vision</button>
-            <button class="hist-filtro"       data-f="cpz"       onclick="setFiltroHist(this)">CPZ</button>
+            <button class="hist-filtro ativo" data-f="todos"      onclick="setFiltroHist(this)">Todos</button>
             <button class="hist-filtro"       data-f="aguardando" onclick="setFiltroHist(this)">Aguardando</button>
-            <button class="hist-filtro"       data-f="aprovada"  onclick="setFiltroHist(this)">Aprovadas</button>
-            <button class="hist-filtro"       data-f="recusada"  onclick="setFiltroHist(this)">Recusadas</button>
+            <button class="hist-filtro"       data-f="aprovada"   onclick="setFiltroHist(this)">Aprovadas</button>
+            <button class="hist-filtro"       data-f="recusada"   onclick="setFiltroHist(this)">Recusadas</button>
         </div>
         <div class="hist-backup-row">
             <button class="hist-backup-btn" onclick="exportarHistorico()">
@@ -3123,9 +3121,10 @@ function _mesAno(dataStr) {
 }
 
 function renderHistorico() {
-    const listaAll = _carregarHistorico();
+    const marcaAtiva = document.getElementById('usarSocio').checked ? 'ba' : 'cpz';
+    const listaAll   = _carregarHistorico().filter(e => (e.marca || 'cpz') === marcaAtiva);
 
-    // stats (sobre tudo)
+    // stats (da marca ativa)
     const total     = listaAll.length;
     const aprovadas = listaAll.filter(e => e.status === 'aprovada');
     const taxaAp    = total ? Math.round(aprovadas.length / total * 100) : 0;
@@ -3135,12 +3134,12 @@ function renderHistorico() {
         <div class="hist-stat"><div class="hist-stat-val">${aprovadas.length}</div><div class="hist-stat-lbl">Aprovadas</div></div>
     `;
 
-    // filtro de busca + pill
+    // filtro de busca + pill (status only — marca já filtrada acima)
     const busca = (document.getElementById('histBusca')?.value || '').toLowerCase();
     const f     = _filtroHist || 'todos';
     let lista   = listaAll.filter(e => {
         const passaBusca = !busca || e.nome.toLowerCase().includes(busca) || (e.numero || '').toLowerCase().includes(busca);
-        const passaPill  = f === 'todos' || f === e.marca || f === e.status;
+        const passaPill  = f === 'todos' || f === e.status;
         return passaBusca && passaPill;
     });
 
@@ -3157,7 +3156,7 @@ function renderHistorico() {
     const statusLabel = { aguardando: 'Aguardando', aprovada: 'Aprovada', recusada: 'Recusada' };
     const statusBadge = { aguardando: 'ag', aprovada: 'ap', recusada: 'rec' };
 
-    // relatório mensal
+    // relatório mensal (da marca ativa)
     const mesAtual = _mesAno(new Date().toLocaleDateString('pt-BR'));
     const deMes    = listaAll.filter(e => _mesAno(e.data) === mesAtual);
     const apMes    = deMes.filter(e => e.status === 'aprovada');
@@ -3180,14 +3179,13 @@ function renderHistorico() {
         const dias      = _diasAteVencer(e.dataVenc);
         const vencBadge = dias !== null && dias <= 3 && e.status === 'aguardando'
             ? `<span class="hist-badge hist-badge-exp">${dias < 0 ? 'Vencida' : dias === 0 ? 'Vence hoje' : 'Vence em ' + dias + 'd'}</span>` : '';
-        const marcaBadge  = `<span class="hist-badge hist-badge-${e.marca || 'cpz'}">${e.marca === 'ba' ? 'B&A Vision' : 'CPZ'}</span>`;
         const stBadge     = `<span class="hist-badge hist-badge-${statusBadge[e.status] || 'ag'}">${statusLabel[e.status] || 'Aguardando'}</span>`;
         const numeroBadge = e.numero ? `<span class="hist-badge" style="background:rgba(255,255,255,0.07);color:var(--muted);">${e.numero}</span>` : '';
         return `
         <div class="hist-card">
             <div class="hist-card-top">
                 <div class="hist-info">
-                    <div class="hist-badges">${numeroBadge}${marcaBadge}${stBadge}${vencBadge}</div>
+                    <div class="hist-badges">${numeroBadge}${stBadge}${vencBadge}</div>
                     <div class="hist-nome">${e.nome}</div>
                     <div class="hist-meta">${e.data}${e.dataVenc ? ' · vence ' + new Date(e.dataVenc+'T00:00:00').toLocaleDateString('pt-BR') : ''}</div>
                 </div>
@@ -3205,6 +3203,12 @@ function renderHistorico() {
 }
 
 function abrirHistorico() {
+    const socio = document.getElementById('usarSocio').checked;
+    document.getElementById('histTitulo').textContent = (socio ? 'B&A Vision' : 'CPZ Digital') + ' — Propostas';
+    // reseta pill para "Todos" ao abrir
+    _filtroHist = 'todos';
+    document.querySelectorAll('.hist-filtro').forEach(b => b.classList.toggle('ativo', b.dataset.f === 'todos'));
+    if (document.getElementById('histBusca')) document.getElementById('histBusca').value = '';
     renderHistorico();
     document.getElementById('histOverlay').classList.add('aberto');
     document.querySelector('.fab-area').style.display = 'none';
