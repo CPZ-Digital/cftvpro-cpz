@@ -3486,6 +3486,7 @@ function gerarContrato(id) {
         '{{responsavel_texto}}':   d.socio ? 'Bruno e Adriano' : 'Adriano',
         '{{qtd_cameras_row}}':     d.qtdCameras > 0 ? ` Serão instaladas <strong>${d.qtdCameras} câmeras</strong> conforme especificado no Anexo I.` : '',
         '{{validade}}':            String(d.validade),
+        '{{cidade_uf}}':           'Rio de Janeiro/RJ',
     };
 
     const nomeArq = d.nomeArqBase + '-contrato.pdf';
