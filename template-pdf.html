@@ -8,7 +8,7 @@
                 <img src="{{logo_src}}" height="{{logo_height}}" style="display:block;height:{{logo_height}}px;width:auto;" crossorigin="anonymous">
             </td>
             <td style="text-align:right;vertical-align:middle;">
-                <p style="margin:0;font-size:16px;font-weight:700;color:{{cor_pri}};">PROPOSTA DE SERVIÇO</p>
+                <p style="margin:0;font-size:16px;font-weight:700;color:{{cor_pri}};">PROPOSTA DE SERVIÇO <span style="font-size:13px;font-weight:400;opacity:0.7;">{{numero_proposta}}</span></p>
                 <p style="margin:5px 0 0;font-size:11px;color:#555;">Data: <strong>{{dataFmt}}</strong> &nbsp;|&nbsp; Válido até: <strong>{{dataVenc}}</strong></p>
             </td>
         </tr>
@@ -29,6 +29,7 @@
                     <td style="font-weight:700;">{{tel}}</td>
                 </tr>
                 {{email_row}}
+                {{endereco_row}}
             </table>
         </td></tr>
     </table>

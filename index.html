@@ -672,6 +672,43 @@ body {
     flex-shrink: 0;
 }
 
+/* ── KITS ── */
+.kit-card {
+    background: var(--surface2); border: 1.5px solid var(--border2);
+    border-radius: 14px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.kit-info { flex: 1; min-width: 0; }
+.kit-nome { font-size: 14px; font-weight: 700; color: var(--text); }
+.kit-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.kit-acoes { display: flex; gap: 6px; }
+.kit-btn {
+    border: none; border-radius: 8px; padding: 5px 11px;
+    font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: filter 0.15s;
+}
+.kit-btn:active { filter: brightness(0.85); }
+.kit-btn-usar    { background: var(--blue); color: #fff; }
+.kit-btn-excluir { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
+
+/* ── FILTRO HISTÓRICO ── */
+.hist-filtros {
+    display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.hist-filtro {
+    border: 1.5px solid var(--border2); border-radius: 99px;
+    background: var(--surface2); color: var(--muted);
+    font-size: 11px; font-weight: 700; padding: 4px 12px;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.hist-filtro.ativo { background: var(--blue); color: #fff; border-color: var(--blue); }
+.hist-busca {
+    width: 100%; background: var(--input-bg); border: 1.5px solid var(--border2);
+    border-radius: 10px; padding: 9px 12px; color: var(--input-color);
+    font-size: 13px; font-family: inherit; margin-bottom: 10px;
+}
+.hist-busca:focus { outline: none; border-color: var(--blue); }
+
 /* ── TOAST ── */
 .toast {
     position: fixed;
@@ -1087,6 +1124,10 @@ body {
                 <input class="exp-input" id="expEmail" type="email" placeholder="cliente@email.com" autocomplete="off">
             </div>
             <div class="exp-field">
+                <label class="exp-label">Endereço da obra <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+                <input class="exp-input" id="expEndereco" type="text" placeholder="Ex: Rua das Flores, 123 — Copacabana, RJ" autocomplete="off">
+            </div>
+            <div class="exp-field">
                 <label class="exp-label">Data do orçamento</label>
                 <input class="exp-input" id="expData" type="date">
             </div>
@@ -1141,9 +1182,14 @@ body {
 
 <!-- BOTÕES FIXOS -->
 <div class="fab-area">
-    <button class="fab fab-ghost" onclick="abrirHistorico()" title="Histórico de propostas" style="flex:0 0 50px;font-size:19px;">
+    <button class="fab fab-ghost" onclick="abrirHistorico()" title="Histórico" style="flex:0 0 50px;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
+        </svg>
+    </button>
+    <button class="fab fab-ghost" onclick="abrirKits()" title="Kits" style="flex:0 0 50px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
         </svg>
     </button>
     <button class="fab fab-azul" onclick="abrirPagamentos()">💳 Pagamento</button>
@@ -1155,6 +1201,21 @@ body {
     </button>
 </div>
 
+<!-- MODAL KITS -->
+<div class="pag-overlay" id="kitsOverlay">
+    <div class="pag-modal">
+        <div class="pag-header">
+            <span class="pag-titulo">Kits / Templates</span>
+            <button class="pag-fechar" onclick="fecharKits()">✕</button>
+        </div>
+        <div class="hist-salvar-row">
+            <input type="text" id="kitNome" placeholder="Nome do kit (ex: Kit 4 câmeras residencial)…">
+            <button class="hist-salvar-btn" onclick="salvarKit()">Salvar</button>
+        </div>
+        <div id="kitsLista"></div>
+    </div>
+</div>
+
 <!-- MODAL HISTÓRICO -->
 <div class="pag-overlay" id="histOverlay">
     <div class="pag-modal">
@@ -1163,6 +1224,15 @@ body {
             <button class="pag-fechar" onclick="fecharHistorico()">✕</button>
         </div>
         <div id="histStats" class="hist-stats"></div>
+        <input class="hist-busca" id="histBusca" placeholder="Buscar por nome…" oninput="renderHistorico()">
+        <div class="hist-filtros">
+            <button class="hist-filtro ativo" data-f="todos"     onclick="setFiltroHist(this)">Todos</button>
+            <button class="hist-filtro"       data-f="ba"        onclick="setFiltroHist(this)">B&A Vision</button>
+            <button class="hist-filtro"       data-f="cpz"       onclick="setFiltroHist(this)">CPZ</button>
+            <button class="hist-filtro"       data-f="aguardando" onclick="setFiltroHist(this)">Aguardando</button>
+            <button class="hist-filtro"       data-f="aprovada"  onclick="setFiltroHist(this)">Aprovadas</button>
+            <button class="hist-filtro"       data-f="recusada"  onclick="setFiltroHist(this)">Recusadas</button>
+        </div>
         <div class="hist-backup-row">
             <button class="hist-backup-btn" onclick="exportarHistorico()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1843,7 +1913,7 @@ function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
 
 // ── EXPORTAR ──
-let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses', obs:'' };
+let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses', obs:'', endereco:'', numero:'' };
 
 function abrirExportar() {
     const ci = _clienteInfo;
@@ -1853,7 +1923,8 @@ function abrirExportar() {
     if (ci.validade) document.getElementById('expValidade').value = ci.validade;
     if (ci.prazo)    document.getElementById('expPrazo').value    = ci.prazo;
     if (ci.garantia) document.getElementById('expGarantia').value = ci.garantia;
-    document.getElementById('expObs').value = ci.obs || '';
+    document.getElementById('expObs').value     = ci.obs      || '';
+    document.getElementById('expEndereco').value = ci.endereco || '';
     const inputData = document.getElementById('expData');
     if (ci.data) inputData.value = ci.data;
     else if (!inputData.value) inputData.value = new Date().toISOString().slice(0,10);
@@ -1873,9 +1944,12 @@ function confirmarExportar() {
     const prazo    = document.getElementById('expPrazo').value || '2';
     const garantia = document.getElementById('expGarantia').value;
     const obs      = document.getElementById('expObs').value.trim();
+    const endereco = document.getElementById('expEndereco').value.trim();
     if (!nome)  { document.getElementById('expNome').focus();  return; }
     if (!tel)   { document.getElementById('expTel').focus();   return; }
-    _clienteInfo = { nome, tel, email, data, validade, prazo, garantia, obs };
+    const socio  = document.getElementById('usarSocio').checked;
+    const numero = _clienteInfo.numero || _proximoNumero(socio ? 'ba' : 'cpz');
+    _clienteInfo = { nome, tel, email, data, validade, prazo, garantia, obs, endereco, numero };
     salvarEstado();
     salvarNoHistorico(nome);
     fecharExportar();
@@ -1883,7 +1957,7 @@ function confirmarExportar() {
 }
 
 function gerarPDF() {
-    const { nome, tel, email, data, validade, prazo = '2', garantia = '', obs = '' } = _clienteInfo;
+    const { nome, tel, email, data, validade, prazo = '2', garantia = '', obs = '', endereco = '', numero = '' } = _clienteInfo;
     const fmtR  = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
     const socio = document.getElementById('usarSocio').checked;
     const marca = socio ? 'B&A Vision' : 'CPZ Digital';
@@ -1990,6 +2064,8 @@ function gerarPDF() {
         '{{nome}}':              nome,
         '{{tel}}':               tel,
         '{{email_row}}':         email ? '<tr><td style="color:#888;">E-mail</td><td colspan="3" style="font-weight:700;">' + email + '</td></tr>' : '',
+        '{{endereco_row}}':      endereco ? '<tr><td style="color:#888;">Endereço</td><td colspan="3" style="font-weight:700;">' + endereco.replace(/</g,'&lt;') + '</td></tr>' : '',
+        '{{numero_proposta}}':   numero,
         '{{msg_institucional}}': msgInstitucional,
         '{{qtd_cameras_row}}':   qtdCamerasRow,
         '{{relacao_materiais}}': relacaoMateriais,
@@ -2015,7 +2091,7 @@ function gerarPDF() {
         `.replace(/\{\{cor_pri\}\}/g, socio ? '#059669' : '#0055b3') : '',
     };
 
-    const nomeArq = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0,10)) + '.pdf';
+    const nomeArq = (numero ? numero + '-' : '') + 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0,10)) + '.pdf';
 
     fetch('template-pdf.html')
         .then(r => r.text())
@@ -2068,10 +2144,15 @@ async function exportarXLS() {
     const data     = document.getElementById('expData').value;
     const validade = document.getElementById('expValidade').value;
     const prazo    = document.getElementById('expPrazo').value || '2';
+    const garantia = document.getElementById('expGarantia').value;
+    const obs      = document.getElementById('expObs').value.trim();
+    const endereco = document.getElementById('expEndereco').value.trim();
     if (!nome) { document.getElementById('expNome').focus(); return; }
     if (!tel)  { document.getElementById('expTel').focus();  return; }
 
-    _clienteInfo = { nome, tel, email, data, validade, prazo };
+    const socioXls = document.getElementById('usarSocio').checked;
+    const numero   = _clienteInfo.numero || _proximoNumero(socioXls ? 'ba' : 'cpz');
+    _clienteInfo = { nome, tel, email, data, validade, prazo, garantia, obs, endereco, numero };
     salvarEstado();
     salvarNoHistorico(nome);
     fecharExportar();
@@ -2440,7 +2521,7 @@ async function exportarXLS() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0, 10)) + '.xlsx';
+    a.download = (numero ? numero + '-' : '') + 'orcamento-' + nome.replace(/\s+/g, '-').toLowerCase() + '-' + (data || new Date().toISOString().slice(0, 10)) + '.xlsx';
     a.click();
     URL.revokeObjectURL(url);
     mostrarToast('Planilha exportada!');
@@ -2760,6 +2841,121 @@ async function init() {
     }
     calcular();
 }
+// ── NUMERAÇÃO DE PROPOSTAS ──
+function _proximoNumero(marca) {
+    const key  = 'cpz_num_' + marca;
+    const next = (parseInt(localStorage.getItem(key) || '0') + 1);
+    localStorage.setItem(key, next);
+    return (marca === 'ba' ? 'BA' : 'CPZ') + '-' + String(next).padStart(3, '0');
+}
+
+// ── KITS ──
+let _filtroHist = 'todos';
+
+function _carregarKits() {
+    try { return JSON.parse(localStorage.getItem('cpz_kits') || '[]'); } catch { return []; }
+}
+function _salvarKits(lista) { localStorage.setItem('cpz_kits', JSON.stringify(lista)); }
+
+function salvarKit() {
+    const nome = document.getElementById('kitNome').value.trim();
+    if (!nome) { document.getElementById('kitNome').focus(); return; }
+    const socio  = document.getElementById('usarSocio').checked;
+    const tipoEl = document.querySelector('input[name="tipo"]:checked');
+    const produtos = [], infra = [];
+    document.querySelectorAll('.item-produto').forEach(card => {
+        const busca   = card.querySelector('.item-busca-wrapper');
+        const precoEl = card.querySelector('.item-preco');
+        const pm      = precoEl.dataset.manual ? parseFloat(precoEl.dataset.valorUnit) : null;
+        produtos.push({ codigo: busca ? busca.getValor() : '', qtd: card.querySelector('.qtd-num').value, precoManual: isNaN(pm) ? null : pm });
+    });
+    document.querySelectorAll('.item-infra').forEach(card => {
+        const busca   = card.querySelector('.item-busca-wrapper');
+        const precoEl = card.querySelector('.item-preco');
+        const pm      = precoEl.dataset.manual ? parseFloat(precoEl.dataset.valorUnit) : null;
+        infra.push({ nome: busca ? busca.getValor() : '', qtd: card.querySelector('.qtd-num').value, precoManual: isNaN(pm) ? null : pm });
+    });
+    const kit = {
+        id:       Date.now(),
+        nome,
+        marca:    socio ? 'ba' : 'cpz',
+        tipo:     tipoEl ? tipoEl.value : 'analogica',
+        produtos,
+        infra,
+        total:    document.getElementById('resultadoValor').textContent,
+        data:     new Date().toLocaleDateString('pt-BR')
+    };
+    const lista = _carregarKits();
+    lista.unshift(kit);
+    _salvarKits(lista);
+    document.getElementById('kitNome').value = '';
+    renderKits();
+    mostrarToast('Kit salvo!');
+}
+
+function carregarKit(id) {
+    const kit = _carregarKits().find(k => k.id === id);
+    if (!kit) return;
+    if (!confirm(`Aplicar kit "${kit.nome}"? Os produtos atuais serão substituídos.`)) return;
+    document.getElementById('listaProdutos').innerHTML = '';
+    document.getElementById('listaInfra').innerHTML    = '';
+    if (kit.produtos?.length) kit.produtos.forEach(p => adicionarProduto(p.codigo, p.qtd, p.precoManual));
+    else adicionarProduto();
+    if (kit.infra?.length) kit.infra.forEach(i => adicionarInfra(i.nome, i.qtd, i.precoManual));
+    else adicionarInfra();
+    if (kit.tipo) {
+        document.querySelectorAll('input[name="tipo"]').forEach(cb => {
+            cb.checked = cb.value === kit.tipo;
+            cb.closest('.tipo-btn').classList.toggle('ativo', cb.value === kit.tipo);
+        });
+    }
+    calcular();
+    fecharKits();
+    mostrarToast('Kit aplicado!');
+}
+
+function excluirKit(id) {
+    if (!confirm('Excluir este kit?')) return;
+    _salvarKits(_carregarKits().filter(k => k.id !== id));
+    renderKits();
+}
+
+function renderKits() {
+    const lista = _carregarKits();
+    const el    = document.getElementById('kitsLista');
+    if (!lista.length) {
+        el.innerHTML = '<div class="hist-vazio">Nenhum kit salvo ainda.<br><small style="font-size:11px;">Monte um orçamento e salve como kit para reutilizar.</small></div>';
+        return;
+    }
+    el.innerHTML = lista.map(k => `
+        <div class="kit-card">
+            <div class="kit-info">
+                <div style="display:flex;gap:5px;margin-bottom:4px;">
+                    <span class="hist-badge hist-badge-${k.marca || 'cpz'}">${k.marca === 'ba' ? 'B&A Vision' : 'CPZ'}</span>
+                </div>
+                <div class="kit-nome">${k.nome}</div>
+                <div class="kit-meta">${k.produtos?.filter(p=>p.codigo).length || 0} produtos · ${k.infra?.filter(i=>i.nome).length || 0} infra · ${k.total} · ${k.data}</div>
+            </div>
+            <div class="kit-acoes">
+                <button class="kit-btn kit-btn-usar"    onclick="carregarKit(${k.id})">Usar</button>
+                <button class="kit-btn kit-btn-excluir" onclick="excluirKit(${k.id})">✕</button>
+            </div>
+        </div>`).join('');
+}
+
+function abrirKits() {
+    renderKits();
+    document.getElementById('kitsOverlay').classList.add('aberto');
+    document.querySelector('.fab-area').style.display = 'none';
+}
+function fecharKits() {
+    document.getElementById('kitsOverlay').classList.remove('aberto');
+    document.querySelector('.fab-area').style.display = '';
+}
+document.getElementById('kitsOverlay').addEventListener('click', function(e) {
+    if (e.target === this) fecharKits();
+});
+
 // ── CARD WHATSAPP ──
 let _wppTimer = null;
 
@@ -2816,6 +3012,7 @@ function salvarNoHistorico(nomeLabel) {
     const entry = {
         id:       Date.now(),
         nome:     nomeLabel || ci.nome || 'Sem nome',
+        numero:   ci.numero || '',
         data:     new Date().toLocaleDateString('pt-BR'),
         dataVenc,
         total,
@@ -2912,43 +3109,85 @@ function _diasAteVencer(dataVenc) {
     return Math.round((venc - hoje) / 86400000);
 }
 
-function renderHistorico() {
-    const lista = _carregarHistorico();
+function setFiltroHist(btn) {
+    document.querySelectorAll('.hist-filtro').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+    _filtroHist = btn.dataset.f;
+    renderHistorico();
+}
 
-    // stats
-    const total    = lista.length;
-    const aprovadas = lista.filter(e => e.status === 'aprovada');
-    const taxaAp   = total ? Math.round(aprovadas.length / total * 100) : 0;
-    const valorTotal = aprovadas.reduce((s, e) => {
-        const n = parseFloat((e.total || '').replace(/[^\d,]/g,'').replace(',','.'));
-        return s + (isNaN(n) ? 0 : n);
-    }, 0);
+function _mesAno(dataStr) {
+    // dataStr is localeDateString pt-BR: "09/06/2026"
+    const parts = dataStr ? dataStr.split('/') : [];
+    return parts.length === 3 ? parts[2] + '-' + parts[1] : null;
+}
+
+function renderHistorico() {
+    const listaAll = _carregarHistorico();
+
+    // stats (sobre tudo)
+    const total     = listaAll.length;
+    const aprovadas = listaAll.filter(e => e.status === 'aprovada');
+    const taxaAp    = total ? Math.round(aprovadas.length / total * 100) : 0;
     document.getElementById('histStats').innerHTML = `
         <div class="hist-stat"><div class="hist-stat-val">${total}</div><div class="hist-stat-lbl">Propostas</div></div>
         <div class="hist-stat"><div class="hist-stat-val">${taxaAp}%</div><div class="hist-stat-lbl">Aprovação</div></div>
         <div class="hist-stat"><div class="hist-stat-val">${aprovadas.length}</div><div class="hist-stat-lbl">Aprovadas</div></div>
     `;
 
+    // filtro de busca + pill
+    const busca = (document.getElementById('histBusca')?.value || '').toLowerCase();
+    const f     = _filtroHist || 'todos';
+    let lista   = listaAll.filter(e => {
+        const passaBusca = !busca || e.nome.toLowerCase().includes(busca) || (e.numero || '').toLowerCase().includes(busca);
+        const passaPill  = f === 'todos' || f === e.marca || f === e.status;
+        return passaBusca && passaPill;
+    });
+
     const el = document.getElementById('histLista');
-    if (!lista.length) {
+    if (!listaAll.length) {
         el.innerHTML = '<div class="hist-vazio">Nenhuma proposta salva ainda.</div>';
+        return;
+    }
+    if (!lista.length) {
+        el.innerHTML = '<div class="hist-vazio">Nenhuma proposta encontrada.</div>';
         return;
     }
 
     const statusLabel = { aguardando: 'Aguardando', aprovada: 'Aprovada', recusada: 'Recusada' };
     const statusBadge = { aguardando: 'ag', aprovada: 'ap', recusada: 'rec' };
 
-    el.innerHTML = lista.map(e => {
+    // relatório mensal
+    const mesAtual = _mesAno(new Date().toLocaleDateString('pt-BR'));
+    const deMes    = listaAll.filter(e => _mesAno(e.data) === mesAtual);
+    const apMes    = deMes.filter(e => e.status === 'aprovada');
+    const fmtV     = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const somarTotal = arr => arr.reduce((s, e) => {
+        const n = parseFloat((e.total || '').replace(/[^\d,]/g,'').replace(',','.'));
+        return s + (isNaN(n) ? 0 : n);
+    }, 0);
+    const relatorioHTML = deMes.length ? `
+        <div style="background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:10px 14px;margin-bottom:12px;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Mês atual</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <div><div style="font-size:16px;font-weight:800;">${deMes.length}</div><div style="font-size:10px;color:var(--muted);">Propostas</div></div>
+                <div><div style="font-size:16px;font-weight:800;">${apMes.length}</div><div style="font-size:10px;color:var(--muted);">Aprovadas</div></div>
+                <div><div style="font-size:16px;font-weight:800;color:var(--blue);">${fmtV(somarTotal(apMes))}</div><div style="font-size:10px;color:var(--muted);">Faturado</div></div>
+            </div>
+        </div>` : '';
+
+    el.innerHTML = relatorioHTML + lista.map(e => {
         const dias      = _diasAteVencer(e.dataVenc);
         const vencBadge = dias !== null && dias <= 3 && e.status === 'aguardando'
             ? `<span class="hist-badge hist-badge-exp">${dias < 0 ? 'Vencida' : dias === 0 ? 'Vence hoje' : 'Vence em ' + dias + 'd'}</span>` : '';
-        const marcaBadge = `<span class="hist-badge hist-badge-${e.marca || 'cpz'}">${e.marca === 'ba' ? 'B&A Vision' : 'CPZ'}</span>`;
-        const stBadge    = `<span class="hist-badge hist-badge-${statusBadge[e.status] || 'ag'}">${statusLabel[e.status] || 'Aguardando'}</span>`;
+        const marcaBadge  = `<span class="hist-badge hist-badge-${e.marca || 'cpz'}">${e.marca === 'ba' ? 'B&A Vision' : 'CPZ'}</span>`;
+        const stBadge     = `<span class="hist-badge hist-badge-${statusBadge[e.status] || 'ag'}">${statusLabel[e.status] || 'Aguardando'}</span>`;
+        const numeroBadge = e.numero ? `<span class="hist-badge" style="background:rgba(255,255,255,0.07);color:var(--muted);">${e.numero}</span>` : '';
         return `
         <div class="hist-card">
             <div class="hist-card-top">
                 <div class="hist-info">
-                    <div class="hist-badges">${marcaBadge}${stBadge}${vencBadge}</div>
+                    <div class="hist-badges">${numeroBadge}${marcaBadge}${stBadge}${vencBadge}</div>
                     <div class="hist-nome">${e.nome}</div>
                     <div class="hist-meta">${e.data}${e.dataVenc ? ' · vence ' + new Date(e.dataVenc+'T00:00:00').toLocaleDateString('pt-BR') : ''}</div>
                 </div>
