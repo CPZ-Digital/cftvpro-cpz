@@ -2197,7 +2197,8 @@ function gerarPDF() {
                 margin:      [8, 8, 18, 8],
                 filename:    nomeArq,
                 image:       { type:'jpeg', quality:0.95 },
-                html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0 },
+                html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0,
+                    onclone: doc => { doc.body.style.cssText = 'margin:0!important;padding:0!important;'; } },
                 jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
             }).toPdf().get('pdf').then(async pdf => {
                 const n = pdf.internal.getNumberOfPages();
@@ -3511,7 +3512,8 @@ function gerarContrato(id) {
                 margin:      [8, 8, 18, 8],
                 filename:    nomeArq,
                 image:       { type:'jpeg', quality:0.95 },
-                html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0 },
+                html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0,
+                    onclone: doc => { doc.body.style.cssText = 'margin:0!important;padding:0!important;'; } },
                 jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
             }).toPdf().get('pdf').then(pdf => {
                 const n = pdf.internal.getNumberOfPages();
