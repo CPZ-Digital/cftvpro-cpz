@@ -124,21 +124,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
     margin-bottom: 12px;
     background: var(--surface);
-    padding: 10px 12px;
+    padding: 14px 18px;
     border-radius: 18px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow-card);
-}
-.topo-centro {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex: 1;
-    gap: 10px;
-    min-width: 0;
 }
 .topo-texto h2 {
     margin: 0;
@@ -160,7 +152,6 @@ body {
     border-radius: 6px;
     background: #fff;
     padding: 4px 8px;
-    flex-shrink: 0;
 }
 .topo-icon-btn {
     flex-shrink: 0;
@@ -1029,23 +1020,11 @@ body {
 
     <!-- TOPO -->
     <div class="topo">
-        <button class="topo-icon-btn" onclick="abrirHistorico()" title="Histórico">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
-            </svg>
-        </button>
-        <div class="topo-centro">
-            <div class="topo-texto">
-                <h2 id="tituloApp" style="cursor:default;user-select:none;">Orçamento</h2>
-                <p class="subtitulo" id="subtituloApp">B&A Vision</p>
-            </div>
-            <img class="logo-empresa" id="logoTopo" src="ba-vision-assinatura.png" alt="B&A Vision">
+        <div class="topo-texto">
+            <h2 id="tituloApp" style="cursor:default;user-select:none;">Orçamento</h2>
+            <p class="subtitulo" id="subtituloApp">B&A Vision</p>
         </div>
-        <button class="topo-icon-btn" onclick="abrirKits()" title="Kits">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-            </svg>
-        </button>
+        <img class="logo-empresa" id="logoTopo" src="ba-vision-assinatura.png" alt="B&A Vision">
     </div>
 
     <!-- TIPO -->
@@ -1283,8 +1262,18 @@ body {
 </div>
 
 <!-- ASSINATURA -->
-<div style="display:flex;align-items:center;justify-content:center;padding:20px 16px 8px;">
+<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:20px 16px 8px;">
+    <button class="topo-icon-btn" onclick="abrirHistorico()" title="Histórico">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
+        </svg>
+    </button>
     <img src="cpz-assinatura.png" alt="CPZ" style="width:130px;height:auto;background:white;border-radius:8px;padding:4px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <button class="topo-icon-btn" onclick="abrirKits()" title="Kits">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+        </svg>
+    </button>
 </div>
 
 <!-- BOTÕES FIXOS -->
