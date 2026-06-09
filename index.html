@@ -2033,8 +2033,11 @@ function confirmarExportar() {
     const endereco = document.getElementById('expEndereco').value.trim();
     if (!nome)  { document.getElementById('expNome').focus();  return; }
     if (!tel)   { document.getElementById('expTel').focus();   return; }
-    const socio  = document.getElementById('usarSocio').checked;
-    const numero = _clienteInfo.numero || _proximoNumero(socio ? 'ba' : 'cpz');
+    const socio   = document.getElementById('usarSocio').checked;
+    const prefix  = socio ? 'BA' : 'CPZ';
+    const numero  = (_clienteInfo.numero && _clienteInfo.numero.startsWith(prefix))
+        ? _clienteInfo.numero
+        : _proximoNumero(socio ? 'ba' : 'cpz');
     _clienteInfo = { nome, tel, email, data, validade, prazo, garantia, obs, endereco, numero };
     salvarEstado();
     salvarNoHistorico(nome);
@@ -2236,8 +2239,11 @@ async function exportarXLS() {
     if (!nome) { document.getElementById('expNome').focus(); return; }
     if (!tel)  { document.getElementById('expTel').focus();  return; }
 
-    const socioXls = document.getElementById('usarSocio').checked;
-    const numero   = _clienteInfo.numero || _proximoNumero(socioXls ? 'ba' : 'cpz');
+    const socioXls  = document.getElementById('usarSocio').checked;
+    const prefixXls = socioXls ? 'BA' : 'CPZ';
+    const numero    = (_clienteInfo.numero && _clienteInfo.numero.startsWith(prefixXls))
+        ? _clienteInfo.numero
+        : _proximoNumero(socioXls ? 'ba' : 'cpz');
     _clienteInfo = { nome, tel, email, data, validade, prazo, garantia, obs, endereco, numero };
     salvarEstado();
     salvarNoHistorico(nome);
