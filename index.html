@@ -2187,16 +2187,17 @@ function gerarPDF() {
         .then(tpl => {
             let html = tpl;
             Object.entries(placeholders).forEach(([k, v]) => { html = html.split(k).join(v); });
+            html = '<style>html,body{margin:0!important;padding:0!important;}</style>' + html;
             const [fr,fg,fb] = socio ? [5,150,105] : [0,85,179];
             const footerLine = socio
                 ? 'B&A Vision  |  (21) 99664-6927  |  ba.visionseguranca@gmail.com  |  CNPJ: 62.456.202/0001-08  |  Responsáveis: Bruno & Adriano'
                 : 'CPZ Digital  |  (21) 96745-5648  |  contato@cpzdigital.com.br  |  CNPJ: 58.589.970/0001-54  |  Responsável: Adriano';
             mostrarToast('Gerando PDF...');
             html2pdf().from(html).set({
-                margin:      [8, 8, 18, 8],
+                margin:      { top:8, right:8, bottom:18, left:8 },
                 filename:    nomeArq,
                 image:       { type:'jpeg', quality:0.95 },
-                html2canvas: { scale:2, useCORS:true, windowWidth:740, scrollX:0, scrollY:0, x:0, y:0 },
+                html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0 },
                 jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
             }).toPdf().get('pdf').then(async pdf => {
                 const n = pdf.internal.getNumberOfPages();
@@ -3505,11 +3506,12 @@ function gerarContrato(id) {
         .then(tpl => {
             let html = tpl;
             Object.entries(placeholders).forEach(([k, v]) => { html = html.split(k).join(v); });
+            html = '<style>html,body{margin:0!important;padding:0!important;}</style>' + html;
             html2pdf().from(html).set({
-                margin:      [8, 8, 18, 8],
+                margin:      { top:8, right:8, bottom:18, left:8 },
                 filename:    nomeArq,
                 image:       { type:'jpeg', quality:0.95 },
-                html2canvas: { scale:2, useCORS:true, windowWidth:740, scrollX:0, scrollY:0, x:0, y:0 },
+                html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0 },
                 jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
             }).toPdf().get('pdf').then(pdf => {
                 const n = pdf.internal.getNumberOfPages();
