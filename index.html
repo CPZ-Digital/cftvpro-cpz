@@ -2670,9 +2670,9 @@ function simularViabilidade(modo, n) {
             const total  = valorFinal;
             const parc   = total / n;
             const adPerc = diarias / n;
-            const matPer = n > 1 ? totalProd / (n - 1) : 0;
+            const matPer = n > 1 ? totalProd / (n - 1) : totalProd;
             for (let i = 1; i <= n; i++)
-                caixas.push(caixaParc(parc, i >= 2 ? matPer : 0,
+                caixas.push(caixaParc(parc, (n === 1 || i >= 2) ? matPer : 0,
                     i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
                     i === 1 ? diarista : 0, adPerc));
         }
@@ -2680,9 +2680,9 @@ function simularViabilidade(modo, n) {
         const total  = r50(valorFinal * 1.05);
         const parc   = total / n;
         const adPerc = diarias / n;
-        const matPer = n > 1 ? totalProd / (n - 1) : 0;
+        const matPer = n > 1 ? totalProd / (n - 1) : totalProd;
         for (let i = 1; i <= n; i++)
-            caixas.push(caixaParc(parc, i >= 2 ? matPer : 0,
+            caixas.push(caixaParc(parc, (n === 1 || i >= 2) ? matPer : 0,
                 i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
                 i === 1 ? diarista : 0, adPerc));
     } else if (modo === 'cartao') {
@@ -2743,13 +2743,13 @@ function calcInstallments() {
                 mkParc('Final (50%)', meia, totalProd,  0,          0,    diarista,  diarias)
             ]};
         }
-        // N× Pix — material nas parcelas 2-N
-        return gerarParcelas(total, _nPix, 2);
+        // N× Pix — material nas parcelas 2-N (ou 1 se 1x)
+        return gerarParcelas(total, _nPix, _nPix === 1 ? 1 : 2);
     }
 
     if (_pagModo === 'boleto') {
         const total = r50(valorFinal * 1.05);
-        return gerarParcelas(total, _nBoleto, 2);
+        return gerarParcelas(total, _nBoleto, _nBoleto === 1 ? 1 : 2);
     }
 
     if (_pagModo === 'cartao') {
@@ -2803,9 +2803,9 @@ function renderPagamento() {
         }
         return false;
     };
-    if (_pagModo === 'avista' && _subAvista === '4pix') corrigirN([2,3,4,5,6], _nPix, 'setNPix', 'avista');
-    if (_pagModo === 'boleto')                          corrigirN([2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto');
-    if (_pagModo === 'cartao')                          corrigirN([2,3,4,5,6], _nCartao, 'setNCartao', 'cartao');
+    if (_pagModo === 'avista' && _subAvista === '4pix') corrigirN([1,2,3,4,5,6], _nPix, 'setNPix', 'avista');
+    if (_pagModo === 'boleto')                          corrigirN([1,2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto');
+    if (_pagModo === 'cartao')                          corrigirN([1,2,3,4,5,6], _nCartao, 'setNCartao', 'cartao');
 
     const mkOpts = (opts, nAtual, setter, modo) =>
         opts.map(n => {
@@ -2831,7 +2831,7 @@ function renderPagamento() {
             html += `<div class="pag-boleto-ctrl">
                 <span class="pag-boleto-label">Parcelas:</span>
                 <div class="pag-boleto-sel">
-                    ${mkOpts([2,3,4,5,6], _nPix, 'setNPix', 'avista')}
+                    ${mkOpts([1,2,3,4,5,6], _nPix, 'setNPix', 'avista')}
                 </div>
             </div>
             ${avisoInviavel('avista', _nPix)}`;
@@ -2842,7 +2842,7 @@ function renderPagamento() {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                ${mkOpts([2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto')}
+                ${mkOpts([1,2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto')}
             </div>
         </div>
         ${avisoInviavel('boleto', _nBoleto)}`;
@@ -2852,7 +2852,7 @@ function renderPagamento() {
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
-                ${mkOpts([2,3,4,5,6], _nCartao, 'setNCartao', 'cartao')}
+                ${mkOpts([1,2,3,4,5,6], _nCartao, 'setNCartao', 'cartao')}
             </div>
         </div>
         ${avisoInviavel('cartao', _nCartao)}`;
