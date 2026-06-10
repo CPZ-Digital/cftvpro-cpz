@@ -986,6 +986,34 @@ body {
     60%      { transform: translateX(-7px); }
     80%      { transform: translateX(7px); }
 }
+#pinBioBtn {
+    margin-top: 24px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    color: rgba(255,255,255,0.8);
+    font-size: 15px;
+    padding: 14px 28px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-family: inherit;
+    transition: background 0.12s;
+}
+#pinBioBtn:active { background: rgba(255,255,255,0.15); }
+#pinSaveBio {
+    margin-top: 18px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    display: none;
+    text-align: center;
+    line-height: 1.6;
+}
 
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -1015,6 +1043,8 @@ body {
             <button onclick="pinDigit('0')">0</button>
             <button style="visibility:hidden;"></button>
         </div>
+        <button id="pinBioBtn" onclick="_bioAutenticar()">&#x1F91A; Usar biometria</button>
+        <button id="pinSaveBio" onclick="_bioRegistrar()"></button>
     </div>
 </div>
 
@@ -3535,13 +3565,24 @@ function gerarContrato(id) {
 }
 
 // ── PIN DE ACESSO ──
-const _PIN = '1472'; // altere aqui para mudar o PIN
+const _PIN = '1472';
 let _pinDigitado = '';
+let _pinUnlockTimer = null;
 
 function _pinAtualizar() {
     document.querySelectorAll('#pinDots span').forEach((s, i) => {
         s.classList.toggle('filled', i < _pinDigitado.length);
     });
+}
+
+function _pinUnlock() {
+    clearTimeout(_pinUnlockTimer);
+    sessionStorage.setItem('cpz_pin_ok', '1');
+    const ov = document.getElementById('pinOverlay');
+    if (!ov) return;
+    ov.style.transition = 'opacity 0.3s';
+    ov.style.opacity = '0';
+    setTimeout(() => ov.remove(), 320);
 }
 
 function pinDigit(d) {
@@ -3550,10 +3591,19 @@ function pinDigit(d) {
     _pinAtualizar();
     if (_pinDigitado.length === 4) {
         if (_pinDigitado === _PIN) {
-            sessionStorage.setItem('cpz_pin_ok', '1');
-            document.getElementById('pinOverlay').style.transition = 'opacity 0.3s';
-            document.getElementById('pinOverlay').style.opacity = '0';
-            setTimeout(() => document.getElementById('pinOverlay').remove(), 320);
+            _bioSuportado().then(ok => {
+                if (ok && !localStorage.getItem('cpz_bio_cred')) {
+                    const msg = document.getElementById('pinMsg');
+                    msg.textContent = 'PIN correto!';
+                    msg.style.color = '#4ade80';
+                    const btn = document.getElementById('pinSaveBio');
+                    btn.textContent = '🔐 Salvar biometria para próxima vez\n(ou aguarde 3s)';
+                    btn.style.display = 'block';
+                    _pinUnlockTimer = setTimeout(_pinUnlock, 3000);
+                } else {
+                    _pinUnlock();
+                }
+            });
         } else {
             const box = document.getElementById('pinBox');
             box.classList.add('shake');
@@ -3575,6 +3625,53 @@ function pinLimpar() {
     _pinAtualizar();
 }
 
+// ── BIOMETRIA (WebAuthn) ──
+async function _bioSuportado() {
+    try {
+        return !!(window.PublicKeyCredential &&
+            await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+    } catch { return false; }
+}
+
+async function _bioAutenticar() {
+    const credIdStr = localStorage.getItem('cpz_bio_cred');
+    if (!credIdStr) return;
+    try {
+        const credId = Uint8Array.from(atob(credIdStr), c => c.charCodeAt(0));
+        await navigator.credentials.get({
+            publicKey: {
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                allowCredentials: [{ id: credId, type: 'public-key' }],
+                userVerification: 'required',
+                timeout: 60000
+            }
+        });
+        _pinUnlock();
+    } catch (e) { /* cancelado — mostra PIN normalmente */ }
+}
+
+async function _bioRegistrar() {
+    clearTimeout(_pinUnlockTimer);
+    try {
+        const cred = await navigator.credentials.create({
+            publicKey: {
+                challenge: crypto.getRandomValues(new Uint8Array(32)),
+                rp: { name: 'CFTVPro', id: location.hostname },
+                user: { id: crypto.getRandomValues(new Uint8Array(16)), name: 'cpz-user', displayName: 'CFTVPro' },
+                pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
+                authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+                timeout: 60000
+            }
+        });
+        localStorage.setItem('cpz_bio_cred', btoa(String.fromCharCode(...new Uint8Array(cred.rawId))));
+        const btn = document.getElementById('pinSaveBio');
+        if (btn) { btn.textContent = '✓ Biometria salva!'; btn.style.color = '#4ade80'; }
+        setTimeout(_pinUnlock, 800);
+    } catch (e) {
+        _pinUnlock(); // se cancelou, só abre normalmente
+    }
+}
+
 // teclado físico
 document.addEventListener('keydown', e => {
     if (!document.getElementById('pinOverlay')) return;
@@ -3585,6 +3682,16 @@ document.addEventListener('keydown', e => {
 // desbloqueia sem PIN se já autenticou nesta sessão
 if (sessionStorage.getItem('cpz_pin_ok') === '1') {
     document.getElementById('pinOverlay').remove();
+} else {
+    // verifica suporte e mostra botão de biometria se já registrou
+    _bioSuportado().then(ok => {
+        if (!ok) return;
+        if (localStorage.getItem('cpz_bio_cred')) {
+            const btn = document.getElementById('pinBioBtn');
+            if (btn) btn.style.display = 'flex';
+            _bioAutenticar(); // tenta automaticamente
+        }
+    });
 }
 
 init();
