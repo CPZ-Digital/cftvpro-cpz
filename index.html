@@ -927,6 +927,14 @@ body {
     font-size: 11px; color: var(--muted);
     margin: 4px 0 8px 2px;
 }
+.pag-entrada-ok {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    background: var(--blue); color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+}
 
 .pag-parc {
     background: var(--item-bg); border: 1px solid var(--border2);
@@ -2900,14 +2908,18 @@ function renderPagamento() {
         ? `<div class="pag-aviso-inviavel">⚠ Projeto inviável em ${n}× — o caixa acumulado fica negativo neste parcelamento.</div>`
         : '';
 
-    const inputEntrada = (resto, N) => `
+    const inputEntrada = (resto, N) => {
+        const uid = `entInp_${_pagModo}`;
+        return `
         <div class="pag-boleto-ctrl pag-entrada-ctrl">
             <span class="pag-boleto-label">Entrada:</span>
-            <input type="number" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
+            <input id="${uid}" type="number" inputmode="numeric" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
                 value="${_entrada > 0 ? _entrada : ''}"
-                onblur="setEntrada(this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+                onkeydown="if(event.key==='Enter'){setEntrada(document.getElementById('${uid}').value);}">
+            <button class="pag-entrada-ok" onclick="setEntrada(document.getElementById('${uid}').value)">OK</button>
         </div>
         ${entradaAtiva ? `<div class="pag-entrada-resto">Resto: ${fmt(resto)} ÷ ${N}× = ${fmt(resto / N)}/parcela</div>` : ''}`;
+    };
 
     if (_pagModo === 'avista') {
         html += `<div class="pag-boleto-ctrl">
