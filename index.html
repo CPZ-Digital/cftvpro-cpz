@@ -132,6 +132,28 @@ body {
     border: 1px solid var(--border);
     box-shadow: var(--shadow-card);
 }
+.followup-banner {
+    background: #fff8e1; border: 1.5px solid #f59e0b;
+    border-radius: 14px; padding: 12px 14px;
+    margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.followup-banner-titulo {
+    font-size: 13px; font-weight: 700; color: #92400e;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.followup-banner-lista { display: flex; flex-direction: column; gap: 4px; }
+.followup-banner-item {
+    font-size: 12px; color: #78350f;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.followup-banner-dias { font-size: 11px; color: #b45309; font-weight: 600; }
+.followup-banner-actions { display: flex; gap: 8px; margin-top: 2px; }
+.followup-btn {
+    font-size: 12px; font-weight: 600; padding: 6px 12px;
+    border-radius: 8px; border: none; cursor: pointer; font-family: inherit;
+}
+.followup-btn-hist  { background: #f59e0b; color: #fff; }
+.followup-btn-fechar { background: transparent; color: #92400e; text-decoration: underline; }
 .topo-texto h2 {
     margin: 0;
     font-size: 21px;
@@ -1073,6 +1095,8 @@ body {
         </div>
         <img class="logo-empresa" id="logoTopo" src="ba-vision-assinatura.png" alt="B&A Vision">
     </div>
+
+    <div id="followupBanner" style="display:none;"></div>
 
     <!-- TIPO -->
     <div class="card">
@@ -3025,6 +3049,48 @@ function renderPagamento() {
     document.getElementById('pagConteudo').innerHTML = html;
 }
 
+// ── FOLLOW-UP ──
+function verificarFollowups() {
+    const DIAS = 3;
+    const agora = Date.now();
+    const pendentes = _carregarHistorico().filter(e => {
+        if (e.status !== 'aguardando') return false;
+        const diasDecorridos = (agora - e.id) / (1000 * 60 * 60 * 24);
+        return diasDecorridos >= DIAS;
+    }).map(e => ({
+        id:   e.id,
+        nome: e.nome,
+        dias: Math.floor((agora - e.id) / (1000 * 60 * 60 * 24))
+    }));
+
+    const banner = document.getElementById('followupBanner');
+    if (!pendentes.length) { banner.style.display = 'none'; return; }
+
+    banner.style.display = '';
+    banner.innerHTML = `
+        <div class="followup-banner">
+            <div class="followup-banner-titulo">
+                <span>⏰ Follow-up pendente (${pendentes.length})</span>
+            </div>
+            <div class="followup-banner-lista">
+                ${pendentes.slice(0, 4).map(p => `
+                <div class="followup-banner-item">
+                    <span>${p.nome}</span>
+                    <span class="followup-banner-dias">${p.dias}d sem resposta</span>
+                </div>`).join('')}
+                ${pendentes.length > 4 ? `<div class="followup-banner-dias">+ ${pendentes.length - 4} outras...</div>` : ''}
+            </div>
+            <div class="followup-banner-actions">
+                <button class="followup-btn followup-btn-hist" onclick="abrirHistorico();fecharFollowup()">Ver no histórico</button>
+                <button class="followup-btn followup-btn-fechar" onclick="fecharFollowup()">Fechar</button>
+            </div>
+        </div>`;
+}
+
+function fecharFollowup() {
+    document.getElementById('followupBanner').style.display = 'none';
+}
+
 // ── INIT ──
 async function init() {
     await carregarBanco();
@@ -3033,6 +3099,7 @@ async function init() {
         adicionarInfra();
     }
     calcular();
+    verificarFollowups();
 }
 // ── NUMERAÇÃO DE PROPOSTAS ──
 function _proximoNumero(marca) {
@@ -3239,7 +3306,11 @@ function reabrirHistorico(id) {
     if (!entry) return;
     const temItens = document.querySelectorAll('.item-produto, .item-infra').length > 2;
     if (temItens && !confirm(`Substituir orçamento atual por "${entry.nome}"?`)) return;
-    localStorage.setItem('cpz_estado', JSON.stringify(entry.estado));
+    const estado = { ...entry.estado };
+    // atualiza data para hoje ao reabrir
+    const hoje = new Date().toISOString().slice(0, 10);
+    if (estado.clienteInfo) estado.clienteInfo = { ...estado.clienteInfo, data: hoje };
+    localStorage.setItem('cpz_estado', JSON.stringify(estado));
     fecharHistorico();
     location.reload();
 }
