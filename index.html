@@ -2936,7 +2936,7 @@ function renderPagamento() {
                 <span class="pag-boleto-label">Entrada:</span>
                 <input type="number" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
                     value="${_entrada > 0 ? _entrada : ''}"
-                    oninput="setEntrada(this.value)">
+                    onblur="setEntrada(this.value)" onkeydown="if(event.key==='Enter')this.blur()">
             </div>
             ${entradaAtiva && _nPix > 1 ? `<div class="pag-entrada-resto">Resto: ${fmt(restoP)} ÷ ${_nPix}× = ${fmt(restoP / _nPix)}/parcela</div>` : ''}` : ''}`;
         }
@@ -2955,7 +2955,7 @@ function renderPagamento() {
             <span class="pag-boleto-label">Entrada:</span>
             <input type="number" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
                 value="${_entrada > 0 ? _entrada : ''}"
-                oninput="setEntrada(this.value)">
+                onblur="setEntrada(this.value)" onkeydown="if(event.key==='Enter')this.blur()">
         </div>
         ${entradaAtiva ? `<div class="pag-entrada-resto">Resto: ${fmt(restoB)} ÷ ${_nBoleto}× = ${fmt(restoB / _nBoleto)}/parcela</div>` : ''}` : ''}`;
     }
@@ -2973,7 +2973,7 @@ function renderPagamento() {
             <span class="pag-boleto-label">Entrada:</span>
             <input type="number" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
                 value="${_entrada > 0 ? _entrada : ''}"
-                oninput="setEntrada(this.value)">
+                onblur="setEntrada(this.value)" onkeydown="if(event.key==='Enter')this.blur()">
         </div>
         ${entradaAtiva ? `<div class="pag-entrada-resto">Resto: ${fmt(restoC)} ÷ ${_nCartao}× = ${fmt(restoC / _nCartao)}/parcela</div>` : ''}` : ''}`;
     }
