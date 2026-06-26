@@ -2895,15 +2895,19 @@ function renderPagamento() {
         }
         return false;
     };
-    if (_pagModo === 'avista' && _subAvista === '4pix') corrigirN([1,2,3,4,5,6], _nPix, 'setNPix', 'avista');
-    if (_pagModo === 'boleto')                          corrigirN([1,2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto');
-    if (_pagModo === 'cartao')                          corrigirN([1,2,3,4,5,6], _nCartao, 'setNCartao', 'cartao');
+    // corrigirN não deve rodar quando há entrada ativa — interfere no campo enquanto o usuário digita
+    if (_entrada <= 0) {
+        if (_pagModo === 'avista' && _subAvista === '4pix') corrigirN([1,2,3,4,5,6], _nPix, 'setNPix', 'avista');
+        if (_pagModo === 'boleto')                          corrigirN([1,2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto');
+        if (_pagModo === 'cartao')                          corrigirN([1,2,3,4,5,6], _nCartao, 'setNCartao', 'cartao');
+    }
 
     const mkOpts = (opts, nAtual, setter, modo) =>
         opts.map(n => {
             const viavel = simularViabilidade(modo, n);
             const cls = `pag-boleto-opt ${n === nAtual ? 'ativo' : ''} ${!viavel ? 'inviavel' : ''}`;
-            const click = viavel ? `onclick="${setter}(${n})"` : '';
+            // quando há entrada o usuário precisa poder mudar o N mesmo com viabilidade negativa
+            const click = (viavel || _entrada > 0) ? `onclick="${setter}(${n})"` : '';
             return `<button class="${cls}" ${click} ${!viavel ? 'title="Caixa fica negativo neste parcelamento"' : ''}>${n}×</button>`;
         }).join('');
 
