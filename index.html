@@ -890,6 +890,21 @@ body {
     background: var(--danger); border-radius: 8px;
     padding: 7px 11px; margin-top: 6px; line-height: 1.5;
 }
+.pag-entrada-ctrl { margin-top: 2px; }
+.pag-entrada-input {
+    flex: 1; min-width: 0;
+    padding: 7px 10px;
+    background: var(--item-bg);
+    border: 1.5px solid var(--border2);
+    border-radius: 8px;
+    font-size: 14px; font-weight: 700;
+    color: var(--text); font-family: inherit;
+}
+.pag-entrada-input:focus { outline: none; border-color: var(--blue); }
+.pag-entrada-resto {
+    font-size: 11px; color: var(--muted);
+    margin: 4px 0 8px 2px;
+}
 
 .pag-parc {
     background: var(--item-bg); border: 1px solid var(--border2);
@@ -1902,7 +1917,7 @@ function salvarEstado() {
         diasTrabalho:document.getElementById("diasTrabalho").value,
         diasDiarista:document.getElementById("diasDiarista").value,
         pagModo:_pagModo, subAvista:_subAvista,
-        nPix:_nPix, nBoleto:_nBoleto, nCartao:_nCartao,
+        nPix:_nPix, nBoleto:_nBoleto, nCartao:_nCartao, entrada:_entrada,
         clienteInfo:{ ..._clienteInfo },
         desconto:   _descontoPct,
         custoMedio: Number(document.getElementById('custoMedioPct').value) || 60,
@@ -1942,9 +1957,10 @@ function restaurarEstado() {
         if (e.diasDiarista) document.getElementById("diasDiarista").value=e.diasDiarista;
         if (e.pagModo)   _pagModo   = e.pagModo;
         if (e.subAvista) _subAvista = e.subAvista;
-        if (e.nPix)      _nPix      = e.nPix;
-        if (e.nBoleto)   _nBoleto   = e.nBoleto;
-        if (e.nCartao)   _nCartao   = e.nCartao;
+        if (e.nPix)           _nPix      = e.nPix;
+        if (e.nBoleto)        _nBoleto   = e.nBoleto;
+        if (e.nCartao)        _nCartao   = e.nCartao;
+        if (e.entrada != null) _entrada  = e.entrada;
         if (e.clienteInfo) {
             _clienteInfo = { ..._clienteInfo, ...e.clienteInfo };
             const ci = _clienteInfo;
@@ -1980,7 +1996,7 @@ function limparOrcamento() {
     document.getElementById("logoTopo").src="ba-vision-assinatura.png";
     document.getElementById("diasTrabalho").value=1;
     document.getElementById("diasDiarista").value=1;
-    _pagModo='avista'; _subAvista='5050'; _nPix=4; _nBoleto=4; _nCartao=4;
+    _pagModo='avista'; _subAvista='5050'; _nPix=4; _nBoleto=4; _nCartao=4; _entrada=0;
     _clienteInfo={ nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses', obs:'' };
     _descontoPct=0;
     document.getElementById('descontoPct').value=0;
@@ -1997,6 +2013,7 @@ let _subAvista = '5050';    // '5050'  | '4pix'
 let _nPix      = 4;         // 2-6
 let _nBoleto   = 4;         // 2-6
 let _nCartao   = 4;         // 2-6
+let _entrada   = 0;         // entrada/sinal para parcelados
 
 function abrirPagamentos() {
     renderPagamento();
@@ -2027,6 +2044,7 @@ function setSubAvista(sub) { _subAvista = sub; renderPagamento(); }
 function setNPix(n)        { _nPix      = n;   renderPagamento(); }
 function setNBoleto(n)     { _nBoleto   = n;   renderPagamento(); }
 function setNCartao(n)     { _nCartao   = n;   renderPagamento(); }
+function setEntrada(v)     { _entrada   = Math.max(0, parseFloat(String(v).replace(',','.')) || 0); renderPagamento(); }
 
 // ── EXPORTAR ──
 let _clienteInfo = { nome:'', tel:'', email:'', data:'', validade:15, prazo:'2', garantia:'6 meses', obs:'', endereco:'', numero:'' };
@@ -2133,9 +2151,13 @@ function gerarPDF() {
 
     const inst       = calcInstallments();
     const modoLabel  = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[_pagModo];
+    const _eAtivaPDF = _entrada > 0 && _entrada < inst.total;
     const formaLabel = _pagModo === 'avista'
-        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : _nPix + '× Pix')
-        : _pagModo === 'boleto' ? (_nBoleto + '× mensais') : (_nCartao + '× no cartão');
+        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão'
+           : (_eAtivaPDF && _nPix > 1 ? `Entrada + ${_nPix}× Pix` : _nPix + '× Pix'))
+        : _pagModo === 'boleto'
+            ? (_eAtivaPDF && _nBoleto > 1 ? `Entrada + ${_nBoleto}× mensais` : _nBoleto + '× mensais')
+            : (_eAtivaPDF && _nCartao > 1 ? `Entrada + ${_nCartao}× no cartão` : _nCartao + '× no cartão');
 
     const rowsParc = inst.parcelas.map((p, i) => {
         const venc = addDias(Number(validade) + i * 30);
@@ -2146,14 +2168,14 @@ function gerarPDF() {
     }).join('');
 
     const todosItens = [
-        ...itensProd.map(it => ({ descricao: it.descricao, qtd: it.qtd })),
-        ...itensInf.map(it => ({ descricao: it.descricao, qtd: it.qtd }))
+        ...itensProd.map(it => ({ descricao: it.descricao, qtd: it.qtd, isInfra: false })),
+        ...itensInf.map(it => ({ descricao: it.descricao, qtd: it.qtd, isInfra: true }))
     ];
     const THs  = 'background:' + cor + ';color:#fff;padding:5px 8px;font-size:9px;font-weight:700;text-align:left;';
     const TDLs = 'padding:4px 8px;font-size:9px;color:#333;border-bottom:1px solid #eee;';
     const TDCs = 'padding:4px 8px;font-size:9px;color:#333;border-bottom:1px solid #eee;text-align:center;';
     const relacaoMateriais = todosItens.length
-        ? '<div style="page-break-inside:avoid;">' +
+        ? '<div style="page-break-before:always;break-before:page;">' +
           '<p style="font-size:13px;font-weight:700;color:' + cor + ';border-bottom:2px solid ' + cor + ';padding-bottom:4px;margin:0 0 8px;page-break-after:avoid;">Relação de Materiais e Equipamentos</p>' +
           '<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">' +
           '<tr>' +
@@ -2166,8 +2188,8 @@ function gerarPDF() {
               '<tr style="background:' + (i%2 ? corR : '#fff') + '">' +
               '<td style="' + TDCs + 'color:#888;">' + (i+1) + '</td>' +
               '<td style="' + TDLs + '">' + it.descricao + '</td>' +
-              '<td style="' + TDCs + '">' + it.qtd + '</td>' +
-              '<td style="' + TDLs + 'color:#888;">un</td>' +
+              '<td style="' + TDCs + 'color:#bbb;">' + (it.isInfra ? '—' : it.qtd) + '</td>' +
+              '<td style="' + TDLs + 'color:#888;">' + (it.isInfra ? '' : 'un') + '</td>' +
               '</tr>').join('') +
           '</table>' +
           '<p style="font-size:9px;color:#999;font-style:italic;margin:3px 0 18px;">* Poderão ocorrer ajustes de marca ou modelo, sempre garantindo equivalência técnica.</p>' +
@@ -2228,7 +2250,8 @@ function gerarPDF() {
                 image:       { type:'jpeg', quality:0.95 },
                 html2canvas: { scale:2, useCORS:true, windowWidth:720, scrollX:0, scrollY:0,
                     onclone: doc => { doc.body.style.cssText = 'margin:0!important;padding:0!important;'; } },
-                jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' }
+                jsPDF:       { unit:'mm', format:'a4', orientation:'portrait' },
+                pagebreak:   { mode: ['css', 'legacy'] }
             }).toPdf().get('pdf').then(async pdf => {
                 const n = pdf.internal.getNumberOfPages();
                 const w = pdf.internal.pageSize.getWidth();
@@ -2332,9 +2355,13 @@ async function exportarXLS() {
 
     const inst = calcInstallments();
     const modoLabel  = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[_pagModo];
+    const _eAtivaXLS = _entrada > 0 && _entrada < inst.total;
     const formaLabel = _pagModo === 'avista'
-        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : _nPix + '× Pix')
-        : _pagModo === 'boleto' ? (_nBoleto + '× mensais') : (_nCartao + '× no cartão');
+        ? (_subAvista === '5050' ? '50% na aprovação + 50% na conclusão'
+           : (_eAtivaXLS && _nPix > 1 ? `Entrada + ${_nPix}× Pix` : _nPix + '× Pix'))
+        : _pagModo === 'boleto'
+            ? (_eAtivaXLS && _nBoleto > 1 ? `Entrada + ${_nBoleto}× mensais` : _nBoleto + '× mensais')
+            : (_eAtivaXLS && _nCartao > 1 ? `Entrada + ${_nCartao}× no cartão` : _nCartao + '× no cartão');
 
     const totalProdVal = itensProd.reduce((s, it) => s + it.total, 0);
     const totalInfVal  = itensInf.reduce((s, it) => s + it.total, 0);
@@ -2668,6 +2695,37 @@ function simularViabilidade(modo, n) {
             ];
         } else {
             const total  = valorFinal;
+            const entradaValida = _entrada > 0 && _entrada < total && n > 1;
+            if (entradaValida) {
+                const resto  = total - _entrada;
+                const parc   = resto / n;
+                const adPerc = diarias / n;
+                const matPer = totalProd / n;
+                caixas.push(caixaParc(_entrada, 0, totalInfra, desl, diarista, 0));
+                for (let i = 1; i <= n; i++)
+                    caixas.push(caixaParc(parc, matPer, 0, 0, 0, adPerc));
+            } else {
+                const parc   = total / n;
+                const adPerc = diarias / n;
+                const matPer = n > 1 ? totalProd / (n - 1) : totalProd;
+                for (let i = 1; i <= n; i++)
+                    caixas.push(caixaParc(parc, (n === 1 || i >= 2) ? matPer : 0,
+                        i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
+                        i === 1 ? diarista : 0, adPerc));
+            }
+        }
+    } else if (modo === 'boleto') {
+        const total  = r50(valorFinal * 1.05);
+        const entradaValida = _entrada > 0 && _entrada < total && n > 1;
+        if (entradaValida) {
+            const resto  = total - _entrada;
+            const parc   = resto / n;
+            const adPerc = diarias / n;
+            const matPer = totalProd / n;
+            caixas.push(caixaParc(_entrada, 0, totalInfra, desl, diarista, 0));
+            for (let i = 1; i <= n; i++)
+                caixas.push(caixaParc(parc, matPer, 0, 0, 0, adPerc));
+        } else {
             const parc   = total / n;
             const adPerc = diarias / n;
             const matPer = n > 1 ? totalProd / (n - 1) : totalProd;
@@ -2676,24 +2734,26 @@ function simularViabilidade(modo, n) {
                     i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
                     i === 1 ? diarista : 0, adPerc));
         }
-    } else if (modo === 'boleto') {
-        const total  = r50(valorFinal * 1.05);
-        const parc   = total / n;
-        const adPerc = diarias / n;
-        const matPer = n > 1 ? totalProd / (n - 1) : totalProd;
-        for (let i = 1; i <= n; i++)
-            caixas.push(caixaParc(parc, (n === 1 || i >= 2) ? matPer : 0,
-                i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
-                i === 1 ? diarista : 0, adPerc));
     } else if (modo === 'cartao') {
         const total  = r50(valorFinal * 1.10);
-        const parc   = total / n;
-        const adPerc = diarias / n;
-        const matPer = totalProd / n;
-        for (let i = 1; i <= n; i++)
-            caixas.push(caixaParc(parc, matPer,
-                i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
-                i === 1 ? diarista : 0, adPerc));
+        const entradaValida = _entrada > 0 && _entrada < total && n > 1;
+        if (entradaValida) {
+            const resto  = total - _entrada;
+            const parc   = resto / n;
+            const adPerc = diarias / n;
+            const matPer = totalProd / n;
+            caixas.push(caixaParc(_entrada, 0, totalInfra, desl, diarista, 0));
+            for (let i = 1; i <= n; i++)
+                caixas.push(caixaParc(parc, matPer, 0, 0, 0, adPerc));
+        } else {
+            const parc   = total / n;
+            const adPerc = diarias / n;
+            const matPer = totalProd / n;
+            for (let i = 1; i <= n; i++)
+                caixas.push(caixaParc(parc, matPer,
+                    i === 1 ? totalInfra : 0, i === 1 ? desl : 0,
+                    i === 1 ? diarista : 0, adPerc));
+        }
     }
 
     let acum = 0;
@@ -2743,19 +2803,49 @@ function calcInstallments() {
                 mkParc('Final (50%)', meia, totalProd,  0,          0,    diarista,  diarias)
             ]};
         }
-        // N× Pix — material nas parcelas 2-N (ou 1 se 1x)
+        // N× Pix com entrada opcional
+        if (_entrada > 0 && _entrada < total && _nPix > 1) {
+            const resto  = total - _entrada;
+            const parc   = resto / _nPix;
+            const adPerc = diarias / _nPix;
+            const matPer = totalProd / _nPix;
+            const result = [mkParc('Entrada (Pix)', _entrada, 0, totalInfra, desl, diarista, 0)];
+            for (let i = 1; i <= _nPix; i++)
+                result.push(mkParc(`${i}ª parcela`, parc, matPer, 0, 0, 0, adPerc));
+            return { total, parcelas: result };
+        }
         return gerarParcelas(total, _nPix, _nPix === 1 ? 1 : 2);
     }
 
     if (_pagModo === 'boleto') {
         const total = r50(valorFinal * 1.05);
+        if (_entrada > 0 && _entrada < total && _nBoleto > 1) {
+            const resto  = total - _entrada;
+            const parc   = resto / _nBoleto;
+            const adPerc = diarias / _nBoleto;
+            const matPer = totalProd / _nBoleto;
+            const result = [mkParc('Entrada', _entrada, 0, totalInfra, desl, diarista, 0)];
+            for (let i = 1; i <= _nBoleto; i++)
+                result.push(mkParc(`${i}ª parcela`, parc, matPer, 0, 0, 0, adPerc));
+            return { total, parcelas: result };
+        }
         return gerarParcelas(total, _nBoleto, _nBoleto === 1 ? 1 : 2);
     }
 
     if (_pagModo === 'cartao') {
-        // Cartão +10% | material distribuído em todas as N parcelas
         const N      = _nCartao;
         const total  = r50(valorFinal * 1.10);
+        if (_entrada > 0 && _entrada < total && N > 1) {
+            const resto  = total - _entrada;
+            const parc   = resto / N;
+            const adPerc = diarias / N;
+            const matPer = totalProd / N;
+            const result = [mkParc('Entrada', _entrada, 0, totalInfra, desl, diarista, 0)];
+            for (let i = 1; i <= N; i++)
+                result.push(mkParc(`${i}ª parcela`, parc, matPer, 0, 0, 0, adPerc));
+            return { total, parcelas: result };
+        }
+        // Cartão sem entrada — material distribuído em todas as N parcelas
         const parc   = total / N;
         const adPerc = diarias / N;
         const matPer = totalProd / N;
@@ -2781,10 +2871,12 @@ function renderPagamento() {
     const cor       = v => v >= 0 ? 'verde' : 'vermelho';
     let html = '';
 
+    const entradaAtiva = _entrada > 0 && _entrada < data.total;
     const totalDesc = {
-        avista: _subAvista === '5050' ? 'Pix — 50% + 50%' : `Pix — ${_nPix}×`,
-        boleto: `Boleto — ${_nBoleto}×`,
-        cartao: `Cartão — ${_nCartao}×`
+        avista: _subAvista === '5050' ? 'Pix — 50% + 50%'
+              : (entradaAtiva && _nPix > 1 ? `Pix — Entrada + ${_nPix}×` : `Pix — ${_nPix}×`),
+        boleto: entradaAtiva && _nBoleto > 1 ? `Boleto — Entrada + ${_nBoleto}×` : `Boleto — ${_nBoleto}×`,
+        cartao: entradaAtiva && _nCartao > 1 ? `Cartão — Entrada + ${_nCartao}×` : `Cartão — ${_nCartao}×`
     }[_pagModo];
 
     html += `<div class="pag-total-card">
@@ -2828,34 +2920,58 @@ function renderPagamento() {
             </div>
         </div>`;
         if (_subAvista === '4pix') {
+            const restoP = _nPix > 1 && entradaAtiva ? data.total - _entrada : 0;
             html += `<div class="pag-boleto-ctrl">
                 <span class="pag-boleto-label">Parcelas:</span>
                 <div class="pag-boleto-sel">
                     ${mkOpts([1,2,3,4,5,6], _nPix, 'setNPix', 'avista')}
                 </div>
             </div>
-            ${avisoInviavel('avista', _nPix)}`;
+            ${avisoInviavel('avista', _nPix)}
+            ${_nPix > 1 ? `<div class="pag-boleto-ctrl pag-entrada-ctrl">
+                <span class="pag-boleto-label">Entrada:</span>
+                <input type="number" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
+                    value="${_entrada > 0 ? _entrada : ''}"
+                    oninput="setEntrada(this.value)">
+            </div>
+            ${entradaAtiva && _nPix > 1 ? `<div class="pag-entrada-resto">Resto: ${fmt(restoP)} ÷ ${_nPix}× = ${fmt(restoP / _nPix)}/parcela</div>` : ''}` : ''}`;
         }
     }
 
     if (_pagModo === 'boleto') {
+        const restoB = _nBoleto > 1 && entradaAtiva ? data.total - _entrada : 0;
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
                 ${mkOpts([1,2,3,4,5,6], _nBoleto, 'setNBoleto', 'boleto')}
             </div>
         </div>
-        ${avisoInviavel('boleto', _nBoleto)}`;
+        ${avisoInviavel('boleto', _nBoleto)}
+        ${_nBoleto > 1 ? `<div class="pag-boleto-ctrl pag-entrada-ctrl">
+            <span class="pag-boleto-label">Entrada:</span>
+            <input type="number" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
+                value="${_entrada > 0 ? _entrada : ''}"
+                oninput="setEntrada(this.value)">
+        </div>
+        ${entradaAtiva ? `<div class="pag-entrada-resto">Resto: ${fmt(restoB)} ÷ ${_nBoleto}× = ${fmt(restoB / _nBoleto)}/parcela</div>` : ''}` : ''}`;
     }
 
     if (_pagModo === 'cartao') {
+        const restoC = _nCartao > 1 && entradaAtiva ? data.total - _entrada : 0;
         html += `<div class="pag-boleto-ctrl">
             <span class="pag-boleto-label">Parcelas:</span>
             <div class="pag-boleto-sel">
                 ${mkOpts([1,2,3,4,5,6], _nCartao, 'setNCartao', 'cartao')}
             </div>
         </div>
-        ${avisoInviavel('cartao', _nCartao)}`;
+        ${avisoInviavel('cartao', _nCartao)}
+        ${_nCartao > 1 ? `<div class="pag-boleto-ctrl pag-entrada-ctrl">
+            <span class="pag-boleto-label">Entrada:</span>
+            <input type="number" class="pag-entrada-input" placeholder="R$ 0,00" min="0"
+                value="${_entrada > 0 ? _entrada : ''}"
+                oninput="setEntrada(this.value)">
+        </div>
+        ${entradaAtiva ? `<div class="pag-entrada-resto">Resto: ${fmt(restoC)} ÷ ${_nCartao}× = ${fmt(restoC / _nCartao)}/parcela</div>` : ''}` : ''}`;
     }
 
     let acum = 0;
@@ -3379,6 +3495,7 @@ function _dadosDoHistorico(id) {
     const nPix      = est.nPix      || 2;
     const nBoleto   = est.nBoleto   || 2;
     const nCartao   = est.nCartao   || 2;
+    const entrada   = est.entrada   || 0;
     const totalNum  = parseFloat((entry.total || '').replace(/[^\d,]/g,'').replace(',','.')) || 0;
     const descPct   = est.desconto  || 0;
     const totalFinal = totalNum;
@@ -3389,22 +3506,44 @@ function _dadosDoHistorico(id) {
             parcelas = [{ label:'50% — Aprovação', recebe: totalFinal * 0.5 }, { label:'50% — Conclusão', recebe: totalFinal * 0.5 }];
         } else {
             const n = Number(nPix);
-            for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Pix)', recebe: totalFinal / n });
+            if (entrada > 0 && entrada < totalFinal && n > 1) {
+                parcelas.push({ label: 'Entrada (Pix)', recebe: entrada });
+                const resto = totalFinal - entrada;
+                for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Pix)', recebe: resto / n });
+            } else {
+                for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Pix)', recebe: totalFinal / n });
+            }
         }
     } else if (pagModo === 'boleto') {
         const n = Number(nBoleto);
-        const t = totalFinal * 1.05;
-        for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Boleto)', recebe: t / n });
+        const t = Math.round(totalFinal * 1.05 / 50) * 50;
+        if (entrada > 0 && entrada < t && n > 1) {
+            parcelas.push({ label: 'Entrada', recebe: entrada });
+            const resto = t - entrada;
+            for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Boleto)', recebe: resto / n });
+        } else {
+            for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Boleto)', recebe: t / n });
+        }
     } else {
         const n = Number(nCartao);
-        const t = totalFinal * 1.10;
-        for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Cartão)', recebe: t / n });
+        const t = Math.round(totalFinal * 1.10 / 50) * 50;
+        if (entrada > 0 && entrada < t && n > 1) {
+            parcelas.push({ label: 'Entrada', recebe: entrada });
+            const resto = t - entrada;
+            for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Cartão)', recebe: resto / n });
+        } else {
+            for (let i = 1; i <= n; i++) parcelas.push({ label: i + 'ª parcela (Cartão)', recebe: t / n });
+        }
     }
 
+    const _eAtivaContr = entrada > 0 && entrada < totalFinal;
     const modoLabel  = { avista:'À Vista (Pix)', boleto:'Boleto Bancário', cartao:'Cartão de Crédito' }[pagModo];
     const formaLabel = pagModo === 'avista'
-        ? (subAvista === '5050' ? '50% na aprovação + 50% na conclusão' : nPix + '× Pix')
-        : pagModo === 'boleto' ? (nBoleto + '× mensais') : (nCartao + '× no cartão');
+        ? (subAvista === '5050' ? '50% na aprovação + 50% na conclusão'
+           : (_eAtivaContr && nPix > 1 ? `Entrada + ${nPix}× Pix` : nPix + '× Pix'))
+        : pagModo === 'boleto'
+            ? (_eAtivaContr && nBoleto > 1 ? `Entrada + ${nBoleto}× mensais` : nBoleto + '× mensais')
+            : (_eAtivaContr && nCartao > 1 ? `Entrada + ${nCartao}× no cartão` : nCartao + '× no cartão');
 
     const TH  = 'background:' + cor + ';color:#fff;padding:8px 12px;font-size:11px;font-weight:700;text-align:left;';
     const TDL = 'padding:8px 12px;font-size:12px;color:#333;border-bottom:1px solid #e8e8e8;';
