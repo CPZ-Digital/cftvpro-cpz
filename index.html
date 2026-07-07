@@ -1238,7 +1238,7 @@ body {
             <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
         </svg>
     </button>
-    <img src="cpz-assinatura.png" alt="CPZ" style="width:130px;height:auto;background:white;border-radius:8px;padding:4px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);color-scheme:light;">
+    <img id="logoRodape" src="cpz-assinatura.png" alt="CPZ" style="width:130px;height:auto;background:white;border-radius:8px;padding:4px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);color-scheme:light;">
     <button class="topo-icon-btn" onclick="abrirKits()" title="Kits">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
@@ -1926,6 +1926,7 @@ function toggleBAVision() {
     document.body.classList.toggle('ba-vision', ativo);
     document.getElementById("subtituloApp").textContent=ativo?"B&A Vision":"CPZ Digital";
     document.getElementById("logoTopo").src=ativo?"ba-vision-assinatura.png":"cpz-assinatura.png";
+    document.getElementById("logoRodape").src=ativo?"ba-vision-assinatura.png":"cpz-assinatura.png";
     mostrarToast(ativo?"B&A Vision ativada":"CPZ Digital ativada");
     calcular();
 }
@@ -1987,6 +1988,7 @@ function restaurarEstado() {
         document.body.classList.toggle('ba-vision', socio.checked);
         document.getElementById("subtituloApp").textContent=socio.checked?"B&A Vision":"CPZ Digital";
         document.getElementById("logoTopo").src=socio.checked?"ba-vision-assinatura.png":"cpz-assinatura.png";
+        document.getElementById("logoRodape").src=socio.checked?"ba-vision-assinatura.png":"cpz-assinatura.png";
         if (e.diasTrabalho) document.getElementById("diasTrabalho").value=e.diasTrabalho;
         if (e.diasDiarista) document.getElementById("diasDiarista").value=e.diasDiarista;
         if (e.pagModo) {
@@ -2032,6 +2034,7 @@ function limparOrcamento() {
     document.body.classList.add('ba-vision');
     document.getElementById("subtituloApp").textContent="B&A Vision";
     document.getElementById("logoTopo").src="ba-vision-assinatura.png";
+    document.getElementById("logoRodape").src="ba-vision-assinatura.png";
     document.getElementById("diasTrabalho").value=1;
     document.getElementById("diasDiarista").value=1;
     _pagModo='avista'; _subAvista='5050'; _nPix=4; _nBoleto=4; _nCartao=4; _entrada=0;
