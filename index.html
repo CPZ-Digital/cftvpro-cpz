@@ -1919,7 +1919,22 @@ function mostrarToast(msg) {
     _toastTimer=setTimeout(()=>t.classList.remove("visivel"),2500);
 }
 
+const BRAND_LOCK = location.hostname.includes('bavision') ? 'ba'
+                  : location.hostname.includes('cpz-digital') ? 'cpz'
+                  : null;
+
+function _aplicarBrandLock() {
+    if (!BRAND_LOCK) return;
+    const cb=document.getElementById("usarSocio");
+    cb.checked = BRAND_LOCK === 'ba';
+    document.body.classList.toggle('ba-vision', cb.checked);
+    document.getElementById("subtituloApp").textContent=cb.checked?"B&A Vision":"CPZ Digital";
+    document.getElementById("logoTopo").src=cb.checked?"ba-vision-assinatura.png":"cpz-assinatura.png";
+    document.getElementById("logoRodape").src=cb.checked?"ba-vision-assinatura.png":"cpz-assinatura.png";
+}
+
 function toggleBAVision() {
+    if (BRAND_LOCK) return;
     const cb=document.getElementById("usarSocio");
     cb.checked=!cb.checked;
     const ativo=cb.checked;
@@ -2018,6 +2033,7 @@ function restaurarEstado() {
         else adicionarProduto();
         if (e.infra&&e.infra.length) e.infra.forEach(i=>adicionarInfra(i.nome,i.qtd,i.precoManual));
         else adicionarInfra();
+        _aplicarBrandLock();
         return true;
     } catch(err) { console.error(err); return false; }
 }
@@ -2035,6 +2051,7 @@ function limparOrcamento() {
     document.getElementById("subtituloApp").textContent="B&A Vision";
     document.getElementById("logoTopo").src="ba-vision-assinatura.png";
     document.getElementById("logoRodape").src="ba-vision-assinatura.png";
+    _aplicarBrandLock();
     document.getElementById("diasTrabalho").value=1;
     document.getElementById("diasDiarista").value=1;
     _pagModo='avista'; _subAvista='5050'; _nPix=4; _nBoleto=4; _nCartao=4; _entrada=0;
@@ -3113,6 +3130,7 @@ async function init() {
     if (!restaurarEstado()) {
         adicionarProduto();
         adicionarInfra();
+        _aplicarBrandLock();
     }
     calcular();
     verificarFollowups();
@@ -3368,8 +3386,9 @@ function importarHistorico(input) {
     const reader = new FileReader();
     reader.onload = e => {
         try {
-            const lista = JSON.parse(e.target.result);
+            let lista = JSON.parse(e.target.result);
             if (!Array.isArray(lista)) throw new Error();
+            if (BRAND_LOCK) lista = lista.filter(x => (x.marca || 'cpz') === BRAND_LOCK);
             const atual = _carregarHistorico();
             const idsExistentes = new Set(atual.map(x => x.id));
             const novas = lista.filter(x => !idsExistentes.has(x.id));
