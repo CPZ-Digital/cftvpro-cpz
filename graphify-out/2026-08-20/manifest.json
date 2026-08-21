@@ -1,0 +1,52 @@
+{
+  "manifest.json": {
+    "mtime": 1782432996.5965946,
+    "ast_hash": "b5d91a878afae688fe4b2a286ceba6c9",
+    "semantic_hash": "b5d91a878afae688fe4b2a286ceba6c9"
+  },
+  "sw.js": {
+    "mtime": 1783389814.2050333,
+    "ast_hash": "24c9fadcfbb5dd5dfdada7d8ba14d103",
+    "semantic_hash": "24c9fadcfbb5dd5dfdada7d8ba14d103"
+  },
+  "README.md": {
+    "mtime": 1782432996.5925484,
+    "ast_hash": "823dc4dd267ff9e86657b8a004d9f43c",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1787244874.8676755,
+    "ast_hash": "98bbb3c8c8fad5b4af7bd3ce4ee7bbec",
+    "semantic_hash": ""
+  },
+  "template-contrato.html": {
+    "mtime": 1782432996.5975971,
+    "ast_hash": "5ab2ed26085290f968698c18b4a14981",
+    "semantic_hash": ""
+  },
+  "template-pdf.html": {
+    "mtime": 1782432996.5975971,
+    "ast_hash": "6b722bc6dac326e08264be91046d8245",
+    "semantic_hash": ""
+  },
+  "ba-vision-assinatura.png": {
+    "mtime": 1782432996.5925484,
+    "ast_hash": "231cc22476e0611b5976a62786e64036",
+    "semantic_hash": ""
+  },
+  "cpz-assinatura.png": {
+    "mtime": 1783389798.0382235,
+    "ast_hash": "48df35cde11730bbf41c2cbcb590e255",
+    "semantic_hash": ""
+  },
+  "cpz-icon.png": {
+    "mtime": 1782432996.5945945,
+    "ast_hash": "0722b9abba36c3d456c0b92521e18629",
+    "semantic_hash": ""
+  },
+  "cpz-logo.png": {
+    "mtime": 1782432996.595595,
+    "ast_hash": "b4da08752676dea91678f4d52918e816",
+    "semantic_hash": ""
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "manifest.json": {
+    "mtime": 1782432996.5965946,
+    "ast_hash": "b5d91a878afae688fe4b2a286ceba6c9",
+    "semantic_hash": "b5d91a878afae688fe4b2a286ceba6c9"
+  },
+  "sw.js": {
+    "mtime": 1783389814.2050333,
+    "ast_hash": "24c9fadcfbb5dd5dfdada7d8ba14d103",
+    "semantic_hash": "24c9fadcfbb5dd5dfdada7d8ba14d103"
+  }
+}
