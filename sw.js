@@ -1,9 +1,10 @@
-const CACHE = 'cpz-v51';
+const CACHE = 'cpz-v52';
 const ASSETS = [
   './index.html',
   './template-pdf.html',
   './template-contrato.html',
   './template-nota-servico.html',
+  './qrcode.min.js',
   './cpz-assinatura-v4.png',
   './ba-vision-assinatura-v3.png',
   './cpz-icon.png',
