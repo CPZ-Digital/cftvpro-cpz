@@ -2056,7 +2056,7 @@ function calcular() {
         document.getElementById("rServico").textContent=fmt(despesas-totalInfra);
     } else {
         // ponytail: fórmula CPZ validada com 2 jobs reais (facil=6cam/R$6.600, dificil=50cam/R$68.000) em 2026-08-29
-        const camAdicional={facil:450,medio:500,dificil:550};
+        const camAdicional={facil:400,medio:475,dificil:550};
         const adicional=qtdCameras*(camAdicional[nivel||"facil"]);
         diarias=diasT*300;
         diarista=diasD*150;
@@ -4584,7 +4584,7 @@ if (sessionStorage.getItem('cpz_pin_ok') === '1') {
 init();
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js?v=66');
+  navigator.serviceWorker.register('./sw.js?v=67');
 }
 
 </script>
