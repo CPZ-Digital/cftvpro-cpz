@@ -1,4 +1,4 @@
-const CACHE = 'cpz-v72';
+const CACHE = 'cpz-v73';
 const ASSETS = [
   './index.html',
   './template-pdf.html',
